@@ -1,4 +1,5 @@
 import curses
+import time
 from core import Colors, TokensDE
 
 class PasscodeBox:
@@ -105,3 +106,41 @@ class Messagebox:
 
         # im Parent erzeugen
         self.win = self.parent_window.win.derwin(self.messagebox_height,self.messagebox_width,self.y,self.x)
+
+    @property
+    def width(self):
+        return self.messagebox_width
+
+    @property
+    def height(self):
+        return self.messagebox_height
+
+    def refresh(self):
+        self.win.refresh()
+
+    def draw(self):
+        self.win.bkgd(' ', curses.color_pair(self.color))
+        self.win.box()
+        self.write(self.text,y=1,x=2,delay=0.02,color=self.color,bold=True)
+        self.refresh()
+        time.sleep(self.duration)
+
+    def write(self, text, y=1, x=2, delay=0.0, color=Colors.TEXT, bold=False):
+        curses.flushinp()
+
+        max_width = self.width - x - 1
+
+        if len(text) > max_width:
+            if max_width > 3:
+                text = text[:max_width - 3] + "..."
+            else:
+                text = text[:max_width]
+
+        for char in text:
+            if bold:
+                self.win.addstr(y,x,char,curses.color_pair(color) | curses.A_BOLD)
+            else:
+                self.win.addstr(y,x,char,curses.color_pair(color))
+            x += 1
+            self.refresh()
+            time.sleep(delay)

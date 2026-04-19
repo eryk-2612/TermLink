@@ -1,5 +1,4 @@
 import curses
-import pygame
 from core import *
 from controllers import *
 from models import *
@@ -60,15 +59,15 @@ def main(stdscr):
     controller_list = []
     for model in terminals:
         if isinstance(model, ChatModel):
-            view = ChatView()
+            view = ChatView(stdscr)
             state = ChatState()
             controller_list.append(ChatController(stdscr, model, view, state))
         elif isinstance(model, ExplorerModel):
-            view = ExplorerView()
+            view = ExplorerView(stdscr)
             state = ExplorerState()
             controller_list.append(ExplorerController(stdscr, model, view, state))
         else:
-            view = TerminalView()
+            view = TerminalView(stdscr)
             state = TerminalState()
             controller_list.append(TerminalController(stdscr, model, view, state))
 
