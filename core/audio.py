@@ -16,5 +16,8 @@ def toggle_audio(audio = None, toggle = True):
         return False
 
 def get_audio_length(audio):
+    if not pygame.mixer.get_init():
+        pygame.mixer.init()
+
     sound = pygame.mixer.Sound(audio)
     return sound.get_length()

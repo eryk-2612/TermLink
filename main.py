@@ -1,4 +1,5 @@
 import curses
+import pygame
 from core import *
 from controllers import *
 from models import *

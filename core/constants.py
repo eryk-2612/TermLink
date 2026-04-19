@@ -1,5 +1,5 @@
 
-class FILES:
+class Files:
     AUDIO_PATH = "data/audio/"
 
 class Colors:
