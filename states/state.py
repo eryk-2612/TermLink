@@ -1,13 +1,13 @@
-from dataclasses import dataclass
-from core import Screens, Events, Focus
+from dataclasses import dataclass, field
 from models import CategoryModel, EntryModel
 
 @dataclass
 class TerminalState:
-    running: bool = True
-    screen: str = Screens.SIGNIN
-    event: str = Events.INIT
+    running: bool = None
+    screen: str = None
+    event: str = None
     focus: str = None
+    entered_code: str = ""
 
 @dataclass
 class ChatState(TerminalState):

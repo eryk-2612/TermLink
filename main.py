@@ -2,7 +2,7 @@ import curses
 from core import *
 from controllers import *
 from models import *
-from states.state import ChatState, ExplorerState, TerminalState
+from states.state import *
 from views import *
 
 def init_colors():
@@ -45,6 +45,8 @@ def init_menu(height, width, terminals):
             selected = menu[current_idx]
             if selected == TokensDE.LEAVE:
                 return None
+            win.reload()
+            del win
             return selected
 
 def main(stdscr):
@@ -76,6 +78,7 @@ def main(stdscr):
         selected_controller = init_menu(height, width, controller_list)
 
         if selected_controller:
+            stdscr.refresh()
             selected_controller.run()
         else:
             break

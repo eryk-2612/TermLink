@@ -1,12 +1,13 @@
-from core import Colors
+from core import Colors, Others
 import curses
 import time
 import textwrap
 
 class Window:
-    def __init__(self, height, width, begin_y, begin_x):
+    def __init__(self, height, width, begin_y, begin_x, timeout=Others.TIMEOUT):
         # Neues curses.window-Objekt erstellen
         self.win = curses.newwin(height, width, begin_y, begin_x)
+        self.win.timeout(timeout)
         self.win.keypad(True)
 
         self._win_height, self._win_width = self.win.getmaxyx()

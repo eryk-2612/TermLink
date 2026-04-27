@@ -1,5 +1,5 @@
 from .terminal_model import TerminalModel
-from core import Files, TokensDE, EntryTypes, get_audio_length
+from core import Others, TokensDE, EntryTypes, get_audio_length
 
 class ExplorerModel(TerminalModel):
     def __init__(self, name, unlock_code=None, categories=None):
@@ -43,7 +43,7 @@ class EntryModel:
         self._audio_start_time = 0
 
         if audio:
-            self._audio_length = get_audio_length(Files.AUDIO_PATH + audio)
+            self._audio_length = get_audio_length(Others.AUDIO_PATH + audio)
 
     @property
     def is_playing(self):

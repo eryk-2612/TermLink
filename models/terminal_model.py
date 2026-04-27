@@ -13,7 +13,7 @@ class TerminalModel:
         self._name = value
 
     @property
-    def lock(self):
+    def locked(self):
         return self._lock
 
     def unlock(self):

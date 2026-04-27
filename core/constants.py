@@ -1,6 +1,8 @@
 
-class Files:
+class Others:
     AUDIO_PATH = "data/audio/"
+    TIMEOUT = 300
+    COPYRIGHT  = "(C) Terminal Systems"
 
 class Colors:
     DEFAULT = 1
@@ -26,6 +28,9 @@ class Focus:
     ENTRIES     = "entries"
     CATEGORIES  = "categories"
     LOCK        = "lock"
+    CHAT        = "chat"
+    SIGNIN      = "signin"
+    BOOT        = "boot"
 
 class Screens:
     SIGNIN      = "signin"
@@ -38,15 +43,22 @@ class Events:
     OPEN_CATEGORY   = "open_category"
     CLOSE_CATEGORY  = "close_category"
     SCROLL          = "scroll"
-    RETRY_LOCK      = "retry_lock"
-    CANCEL_LOCK     = "cancel_lock"
+    TERM_LOCKED     = "term_locked"
+    CON_LOCKED      = "con_locked"
+    TERM_LOCK_SUC   = "term_unlocked"
+    TERM_LOCK_FAIL  = "term_unlocked_fail"
+    CON_LOCK_SUC    = "con_unlocked"
+    CON_LOCK_FAIL   = "con_unlocked_fail"
+    LOCK_TYPE       = "lock_type"
+    LOCK_CHECK      = "lock_check"
+    CANCEL          = "cancel"
     SWITCH          = "switch"
     GET_RESPONSE    = "response"
     SEND_REQUEST    = "request"
     AUDIO           = "audio"
     BOOT            = "boot"
     SIGNIN          = "signin"
-    INIT            = "init"
+    CONTINUE        = "continue"
 
 class TokensDE:
     MSG_SUCCESS     = "Zugriff gewährt"
@@ -60,7 +72,7 @@ class TokensDE:
     STATES          = ["An", "Aus"]
     CAPTIONS        = ["Anschalten", "Ausschalten"]
     PASSCODE        = "Zugangscode"
-    SIGNINDE        = [
+    SIGNIN          = [
         r"                                              ",
         r"  ▗▄▖ ▗▖  ▗▖▗▖  ▗▖▗▄▄▄▖▗▖   ▗▄▄▄  ▗▄▄▄▖▗▖  ▗▖ ",
         r" ▐▌ ▐▌▐▛▚▖▐▌▐▛▚▞▜▌▐▌   ▐▌   ▐▌  █ ▐▌   ▐▛▚▖▐▌ ",
