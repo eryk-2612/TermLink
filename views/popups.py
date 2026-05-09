@@ -25,7 +25,9 @@ class PasscodeBox:
         self.input_win = self.win.derwin(self.box_height - 1, self.box_width, 1, 0)
 
     def draw(self):
-        self.title_win.addstr(0, 1, self.title.upper(), curses.color_pair(Colors.DEFAULT) | curses.A_BOLD)
+        title = self.title.upper()
+        title_x = (self.box_width - len(title)) // 2
+        self.title_win.addstr( 0, title_x, title, curses.color_pair(Colors.DEFAULT) | curses.A_BOLD)
         self.type("")
         self.input_win.box()
 

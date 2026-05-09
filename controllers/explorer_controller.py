@@ -11,7 +11,7 @@ class ExplorerController(TerminalController):
     def init_state(self):
         super().init_state()
 
-        self.state.screen = Screens.TERMINAL # DEBUG ONLY
+        # self.state.screen = Screens.TERMINAL # DEBUG ONLY
 
     def handle_input(self):
         super().handle_input()

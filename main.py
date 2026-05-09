@@ -18,7 +18,7 @@ def init_menu(height, width, terminals):
     win = Window(height, width, 0, 0)
     current_idx = 0
     menu = terminals + [TokensDE.LEAVE]
-
+    
     while True:
         # Alle Einträge zentriert zeichnen
         for idx, item in enumerate(menu):
