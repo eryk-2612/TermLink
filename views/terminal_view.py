@@ -3,7 +3,6 @@ from .window import Window
 from .popups import Messagebox, PasscodeBox
 from core import Colors, Focus, Screens
 
-
 class TerminalView:
     def __init__(self, stdscr):
         self._stdscr = stdscr

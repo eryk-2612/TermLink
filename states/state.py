@@ -15,6 +15,7 @@ class TerminalState:
     focus: str = None
     entered_code: str = ""
     msgbox: MessageboxState = None
+    boot_completed: bool = False
 
 @dataclass
 class ChatState(TerminalState):
@@ -24,8 +25,8 @@ class ChatState(TerminalState):
 
 @dataclass
 class ExplorerState(TerminalState):
-    selected_category: CategoryModel = None
-    selected_entry: EntryModel = None
+    selected_category: int = 0
+    selected_entry: int = 0
     open_category: CategoryModel = None
     open_entry: EntryModel = None
     index: int = 0

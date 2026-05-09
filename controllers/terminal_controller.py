@@ -4,6 +4,7 @@ import curses
 
 class TerminalController:
     def __init__(self, stdscr, model, view, state):
+        self.key = None
         self.model = model
         self._stdscr = stdscr
         self.view = view
@@ -39,12 +40,12 @@ class TerminalController:
 
     def handle_input(self):
         window = self.get_window()
-        key = self.get_input(window)
-        if key in [10, 13]:
+        self.key = self.get_input(window)
+        if self.key in [10, 13]:
             self.enter_pressed()
-        elif key in range(ord('0'), ord('9') + 1):
-            self.number_pressed(key)
-        elif key in [curses.KEY_BACKSPACE, 127, 8]:
+        elif self.key in range(ord('0'), ord('9') + 1):
+            self.number_pressed(self.key)
+        elif self.key in [curses.KEY_BACKSPACE, 127, 8]:
             self.backspace_pressed()
 
     def enter_pressed(self):
@@ -120,3 +121,4 @@ class TerminalController:
                     if msgbox.show:
                         self.view.draw_messagebox(msgbox.message.upper(), msgbox.color, self.get_window(True))
                     self.view.draw_startup_animation(self.view.get_window(), Logo.DEFAULT)
+                    self.state.boot_completed = True

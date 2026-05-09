@@ -3,6 +3,7 @@ class Others:
     AUDIO_PATH = "data/audio/"
     TIMEOUT = 300
     COPYRIGHT  = "(C) Terminal Systems"
+    SCREEN_PADDING = 1
 
 class Colors:
     # DEFAULT = 1
@@ -42,16 +43,16 @@ class Screens:
     CHAT        = "chat"
 
 class Events:
-    CLOSE_ENTRY     = "close_entry"
-    OPEN_ENTRY      = "open_entry"
-    OPEN_CATEGORY   = "open_category"
-    CLOSE_CATEGORY  = "close_category"
-    SCROLL          = "scroll"
-    CANCEL          = "cancel"
-    SWITCH          = "switch"
-    GET_RESPONSE    = "response"
-    SEND_REQUEST    = "request"
-    AUDIO           = "audio"
+    CLOSE_ENTRY         = "close_entry"
+    OPEN_ENTRY          = "open_entry"
+    OPEN_CATEGORY       = "open_category"
+    CLOSE_CATEGORY      = "close_category"
+    SCROLL              = "scroll"
+    CANCEL              = "cancel"
+    SWITCH              = "switch"
+    GET_RESPONSE        = "response"
+    SEND_REQUEST        = "request"
+    AUDIO               = "audio"
 
 class TokensDE:
     MSG_SUCCESS     = "Zugriff gewährt"
