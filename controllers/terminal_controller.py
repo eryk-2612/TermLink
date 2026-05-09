@@ -96,7 +96,6 @@ class TerminalController:
         event = self.state.event
         focus = self.state.focus
         entered_code = self.state.entered_code
-
         if screen == Screens.BOOT:
             if self.model.locked:
                 self.state.focus = Focus.LOCK
