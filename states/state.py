@@ -1,5 +1,11 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from models import CategoryModel, EntryModel
+
+@dataclass
+class MessageboxState:
+    show: bool = False
+    message: str = ""
+    color: int = 0
 
 @dataclass
 class TerminalState:
@@ -8,6 +14,7 @@ class TerminalState:
     event: str = None
     focus: str = None
     entered_code: str = ""
+    msgbox: MessageboxState = None
 
 @dataclass
 class ChatState(TerminalState):
