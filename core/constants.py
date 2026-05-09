@@ -5,10 +5,16 @@ class Others:
     COPYRIGHT  = "(C) Terminal Systems"
 
 class Colors:
-    DEFAULT = 1
-    INVERTED = 2
-    WARNING = 3
-    SELECTED = 4
+    # DEFAULT = 1
+    # INVERTED = 2
+    # WARNING = 3
+    # SELECTED = 4
+    # TEXT = 5
+    # OPEN = 6
+    DEFAULT = 5
+    INVERTED = 6
+    WARNING = 6
+    SELECTED = 6
     TEXT = 5
     OPEN = 6
 
@@ -28,14 +34,12 @@ class Focus:
     ENTRIES     = "entries"
     CATEGORIES  = "categories"
     LOCK        = "lock"
-    CHAT        = "chat"
-    SIGNIN      = "signin"
-    BOOT        = "boot"
 
 class Screens:
     SIGNIN      = "signin"
     BOOT        = "boot"
     TERMINAL    = "terminal"
+    CHAT        = "chat"
 
 class Events:
     CLOSE_ENTRY     = "close_entry"
@@ -43,22 +47,11 @@ class Events:
     OPEN_CATEGORY   = "open_category"
     CLOSE_CATEGORY  = "close_category"
     SCROLL          = "scroll"
-    TERM_LOCKED     = "term_locked"
-    CON_LOCKED      = "con_locked"
-    TERM_LOCK_SUC   = "term_unlocked"
-    TERM_LOCK_FAIL  = "term_unlocked_fail"
-    CON_LOCK_SUC    = "con_unlocked"
-    CON_LOCK_FAIL   = "con_unlocked_fail"
-    LOCK_TYPE       = "lock_type"
-    LOCK_CHECK      = "lock_check"
     CANCEL          = "cancel"
     SWITCH          = "switch"
     GET_RESPONSE    = "response"
     SEND_REQUEST    = "request"
     AUDIO           = "audio"
-    BOOT            = "boot"
-    SIGNIN          = "signin"
-    CONTINUE        = "continue"
 
 class TokensDE:
     MSG_SUCCESS     = "Zugriff gewährt"
