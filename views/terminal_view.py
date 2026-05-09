@@ -1,9 +1,8 @@
 import time
-from unittest import case
-
 from .window import Window
 from .popups import Messagebox, PasscodeBox
-from core import Colors, Focus
+from core import Colors, Focus, Screens
+
 
 class TerminalView:
     def __init__(self, stdscr):
@@ -15,15 +14,15 @@ class TerminalView:
         self._passcodebox = None
         self._signin = None
 
-    def get_window(self, focus=None):
-        # window auf focus ausser wenn leer dann fullscreen, achtung bus in controller und upadte state anpassen!
-        match focus:
-            case Focus.LOCK:
+    def get_window(self, state=None):
+        if state is not None:
+            if state.focus == Focus.LOCK:
                 return self._passcodebox
-            case Focus.SIGNIN:
+            if state.screen == Screens.SIGNIN:
                 return self._signin
-            case Focus.BOOT:
+            if state.screen == Screens.BOOT:
                 return self.__get_fullscreen()
+
         return self.__get_fullscreen()
 
     def __get_fullscreen(self):
@@ -93,26 +92,34 @@ class TerminalView:
         parent_window.reload()
         del startup
 
-    def draw_signin(self, parent_window, image="", undraw=False):
+    def draw_signin(self, parent_window, image=""):
         image_height = len(image)
         image_width = max(len(line) for line in image)
         start_y = self._screen_height // 2 - image_height // 2
         start_x = self._screen_width // 2 - image_width // 2
 
-        if not self._signin:
+        if self._signin is None:
             self._signin = Window(self._screen_height, self._screen_width, 0, 0)
 
         for i, line in enumerate(image):
-            if undraw:
-                self._signin.write_simple(" " * len(line), y=start_y + i, x=start_x, color=Colors.DEFAULT, bold=True)
-            else:
-                self._signin.write_simple(line, y=start_y + i, x=start_x, color=Colors.SELECTED, bold=True)
-
+            self._signin.write_simple(line, y=start_y + i, x=start_x, color=Colors.SELECTED, bold=True)
             self._signin.refresh()
             time.sleep(0.1)
 
-        if undraw:
+    def undraw_signin(self, parent_window, image=""):
+        if self._signin:
+            image_height = len(image)
+            image_width = max(len(line) for line in image)
+            start_y = self._screen_height // 2 - image_height // 2
+            start_x = self._screen_width // 2 - image_width // 2
+
+            for i, line in enumerate(image):
+                self._signin.write_simple(" " * len(line), y=start_y + i, x=start_x, color=Colors.DEFAULT, bold=True)
+                self._signin.refresh()
+                time.sleep(0.1)
+
             parent_window.reload()
             del self._signin
             self._signin = None
+
 
