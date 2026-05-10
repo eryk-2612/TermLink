@@ -59,7 +59,11 @@ class Window:
             if length > space_width:
                 length -= space_width
                 continue
-            self.win.hline(i + y, x, ' ', space_width - length - padding)
+
+            try:
+                self.win.hline(i + y, x, ' ', space_width - length - padding)
+            except curses.error:
+                pass # I know this is silly but it works
             x = padding
 
     @property
@@ -127,8 +131,8 @@ class Window:
         max_width = self.width - x - 1  # Platz bis zum Rand
 
         if len(text) > max_width:
-            if max_width > 3:
-                text = text[:max_width - 3] + "..."
+            if max_width > 4:
+                text = text[:max_width - 4] + "..."
             else:
                 text = text[:max_width]  # falls extrem wenig Platz
 
