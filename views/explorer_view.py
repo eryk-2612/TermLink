@@ -1,5 +1,3 @@
-from idlelib import sidebar
-
 from views.terminal_view import TerminalView
 import time
 from .window import Window
@@ -22,6 +20,9 @@ class ExplorerView(TerminalView):
 
     def get_visible_categories_count(self):
         return self._visible_categories_count
+
+    def get_visible_entries_count(self):
+        return self._visible_entries_count
 
     def draw_header(self, title=""):
         if not self._header:
