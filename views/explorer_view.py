@@ -96,15 +96,29 @@ class ExplorerView(TerminalView):
             self.draw_category(title,y, box_height, box_width, i, bgcolor, txtcolor)
             y += box_height
 
-    def draw_sidebar_scrollbar(self, sidebar_win, height, total_categories, visible_categories, scroll_offset, y ,x):
+    def draw_sidebar_scrollbar(self, sidebar_win, height, total_categories, visible_categories, scroll_offset, y, x):
         if not self._sidebar_scrollbar:
             self._sidebar_scrollbar = Window(height, 1, y, x, parent_window=sidebar_win)
 
-        arrow_up = "▲"
-        arrow_down = "▼"
+        arrow_up = " "
+        arrow_down = " "
 
-        self._sidebar_scrollbar.write_simple(arrow_up, y, 0)
-        self._sidebar_scrollbar.write_simple(arrow_down, height - 1, 0)
+        up_y = 1
+        down_y = height - 2
+
+        # Prüfe, ob Scrollen nach oben/unten möglich ist
+        can_scroll_up = scroll_offset > 0
+        can_scroll_down = scroll_offset + visible_categories < total_categories
+
+        if can_scroll_up:
+            arrow_up = "▲"
+
+        if can_scroll_down:
+            arrow_down = "▼"
+
+        self._sidebar_scrollbar.write_simple(arrow_up, up_y, 0)
+        self._sidebar_scrollbar.write_simple(arrow_down, down_y, 0)
+
 
         self._sidebar_scrollbar.refresh()
 

@@ -27,6 +27,8 @@ class ExplorerController(TerminalController):
         entered_code = self.state.entered_code
 
         if screen == Screens.TERMINAL:
+            if focus == Focus.CATEGORIES:
+                self.set_focus(Focus.ENTRIES)
             if focus == Focus.ENTRIES:
                pass
 
@@ -71,7 +73,7 @@ class ExplorerController(TerminalController):
             self.state.screen = Screens.TERMINAL
         if screen == Screens.TERMINAL:
             if focus is None:
-                self.state.focus = Focus.CATEGORIES
+                self.set_focus(Focus.CATEGORIES)
             if self.state.focus == Focus.CATEGORIES:
                 self.state.selected_category = self.state.index
                 self.open_category(self.model.categories[self.state.index])

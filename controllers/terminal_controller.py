@@ -21,6 +21,9 @@ class TerminalController:
         else:
             return self.view.get_window(self.state)
 
+    def set_focus(self, focus):
+        self.state.focus = focus
+
     def init_state(self):
         self.state.running = True
         self.state.screen = Screens.SIGNIN
@@ -86,7 +89,7 @@ class TerminalController:
             self.state.msgbox = MessageboxState(True, TokensDE.MSG_SUCCESS, Colors.SELECTED)
             self.model.unlock()
             self.state.entered_code = ""
-            self.state.focus = None
+            self.set_focus(None)
         else:
             self.state.msgbox = MessageboxState(True, TokensDE.MSG_FAIL, Colors.SELECTED)
             self.state.entered_code = ""
@@ -106,7 +109,7 @@ class TerminalController:
         entered_code = self.state.entered_code
         if screen == Screens.BOOT:
             if self.model.locked:
-                self.state.focus = Focus.LOCK
+                self.set_focus(Focus.LOCK)
 
     def draw_view(self):
         screen = self.state.screen
