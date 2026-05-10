@@ -42,8 +42,8 @@ class TerminalView:
             self._footer.write_animate(text, y=0, x=x, color=Colors.DEFAULT)
             self._footer.refresh()
 
-    def draw_lock(self, code, parent_window):
-        self._passcodebox = PasscodeBox(parent_window, len(code))
+    def draw_lock(self, code, entered_code, parent_window):
+        self._passcodebox = PasscodeBox(parent_window, len(code), entered_code)
         self._passcodebox.draw()
 
     def draw_messagebox(self, text, color, parent_window):
@@ -82,7 +82,7 @@ class TerminalView:
         bar_x = win_width // 2 - logo_width // 2
 
         for i in range(bar_length + 1):
-            startup.write_simple(" " * i, bar_y, bar_x, Colors.INVERTED)
+            startup.write_simple(" " * i, bar_y, bar_x, Colors.SELECTED)
             startup.write_simple(" " * (bar_length - i), bar_y, bar_x + i, Colors.DEFAULT)
             startup.refresh()
             time.sleep(0.02)

@@ -1,3 +1,5 @@
+from unittest.mock import DEFAULT
+
 from core import Colors, Others
 import curses
 import time
@@ -5,6 +7,12 @@ import textwrap
 
 class Window:
     def __init__(self, height, width, begin_y, begin_x, timeout=Others.TIMEOUT, wid=None, parent_window=None):
+        self.wid = wid
+        self._background = Colors.DEFAULT
+        self.boxed = False
+        self._log = []
+        self._start_x = begin_x
+        self._start_y = begin_y
 
         if parent_window is None:
             self.win = curses.newwin(height, width, begin_y, begin_x)
@@ -13,15 +21,7 @@ class Window:
 
         self.win.timeout(timeout)
         self.win.keypad(True)
-
-        self.wid = wid
-
         self._win_height, self._win_width = self.win.getmaxyx()
-        self._background = Colors.DEFAULT
-        self.boxed = False
-        self._log = []
-        self._start_x = begin_x
-        self._start_y = begin_y
 
     def refresh(self):  # Fenster aktualisieren
         self.win.refresh()
@@ -34,6 +34,32 @@ class Window:
         if self.boxed:
             self.draw_box()
         self.refresh()
+
+    def empty(self, text_length):
+        # this code clears the box from old texts but keeps desired text intact - should work with line breaking text
+
+        if self.boxed:
+            padding = 1
+        else:
+            padding = 0
+
+        x = padding
+        y = padding
+
+        space_width = self.width - padding * 2
+        space_height = self.height  - padding * 2
+
+        length = text_length
+
+        if length < space_width:
+            x = padding * 2 + length
+
+        for i in range(space_height):
+            if length > space_width:
+                length -= space_width
+                continue
+            self.win.hline(i + y, x, ' ', space_width - length - padding)
+            x = padding
 
     @property
     def log(self):
@@ -86,9 +112,7 @@ class Window:
     @background.setter
     def background(self, color):
         self._background = color
-        # Setze die Hintergrundfarbe für das gesamte Fenster
         self.win.bkgd(' ', curses.color_pair(self.background))
-        self.refresh()
 
     def move(self, y, x):
         self.win.mvwin(y, x)
@@ -96,7 +120,7 @@ class Window:
     def resize(self, h, w):
         self.win.resize(h, w)
 
-    def write_animate(self, text, y=1, x=2, delay=0.0, color=Colors.TEXT, bold=False):
+    def write_animate(self, text, y=1, x=2, delay=0.0, color=Colors.DEFAULT, bold=False):
         curses.flushinp()
 
         max_width = self.width - x - 1  # Platz bis zum Rand
@@ -116,14 +140,14 @@ class Window:
             self.refresh()
             time.sleep(delay)
 
-    def write_simple(self, text, y=1, x=2, color=Colors.TEXT, bold=False):
+    def write_simple(self, text, y=1, x=2, color=Colors.DEFAULT, bold=False):
         if bold:
             self.win.addstr(y, x, text, curses.color_pair(color) | curses.A_BOLD)
         else:
             self.win.addstr(y, x, text, curses.color_pair(color))
         self.refresh()
 
-    def write_new_line(self, text, delay=0.0, color=Colors.TEXT, bold=False):
+    def write_new_line(self, text, delay=0.0, color=Colors.DEFAULT, bold=False):
         if text == "":
             self.log.append("")  # Log erweitern
             self.write_animate("", y=len(self.log))  # in der letzten Zeile schreiben

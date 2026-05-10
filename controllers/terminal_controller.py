@@ -4,7 +4,6 @@ import curses
 
 class TerminalController:
     def __init__(self, stdscr, model, view, state):
-        self.key = None
         self.model = model
         self._stdscr = stdscr
         self.view = view
@@ -40,15 +39,16 @@ class TerminalController:
 
     def handle_input(self):
         window = self.get_window()
-        self.key = self.get_input(window)
-        if self.key in [10, 13]:
+        key = self.get_input(window)
+        if key in [10, 13]:
             self.enter_pressed()
-        elif self.key in range(ord('0'), ord('9') + 1):
-            self.number_pressed(self.key)
-        elif self.key in range(ord('a'), ord('z') + 1) or self.key in range(ord('A'), ord('Z') + 1):
-            self.char_pressed(self.key)
-        elif self.key in [curses.KEY_BACKSPACE, 127, 8]:
+        elif key in range(ord('0'), ord('9') + 1):
+            self.number_pressed(key)
+        elif key in range(ord('a'), ord('z') + 1) or key in range(ord('A'), ord('Z') + 1):
+            self.char_pressed(key)
+        elif key in [curses.KEY_BACKSPACE, 127, 8]:
             self.backspace_pressed()
+        return key
 
     def enter_pressed(self):
         screen = self.state.screen
@@ -88,9 +88,8 @@ class TerminalController:
             self.state.entered_code = ""
             self.state.focus = None
         else:
-            self.state.msgbox = MessageboxState(True, TokensDE.MSG_FAIL, Colors.WARNING)
+            self.state.msgbox = MessageboxState(True, TokensDE.MSG_FAIL, Colors.SELECTED)
             self.state.entered_code = ""
-        self.state.focus_window = self.view.get_window()
 
     def enter_code(self, entered_code, key):
         if len(entered_code) < len(self.model.unlock_code):
@@ -121,8 +120,7 @@ class TerminalController:
                 self.view.undraw_signin(parent_window=self.view.get_window(), image=TokensDE.SIGNIN)
                 self.view.draw_footer(Others.COPYRIGHT)
                 if focus == Focus.LOCK:
-                    self.view.draw_lock(self.model.unlock_code, self.view.get_window())
-                    self.get_window().type(self.state.entered_code)
+                    self.view.draw_lock(self.model.unlock_code, self.state.entered_code, self.view.get_window())
                     if msgbox.show:
                         self.view.draw_messagebox(msgbox.message.upper(), msgbox.color, self.get_window(True))
                 else:

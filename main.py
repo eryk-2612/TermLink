@@ -7,12 +7,8 @@ from views import *
 
 def init_colors():
     curses.start_color()
-    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK) # Standard
-    curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_GREEN) # Invertiert
-    curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_RED)   # Warnung
-    curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_GREEN) # Selected
-    curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK) # Text
-    curses.init_pair(6, curses.COLOR_BLACK, curses.COLOR_WHITE) # Open
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK) # Default
+    curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_WHITE) # Selected
 
 def init_menu(height, width, terminals):
     win = Window(height, width, 0, 0)
@@ -33,7 +29,7 @@ def init_menu(height, width, terminals):
             if idx == current_idx:
                 win.write_simple(text, y, x, Colors.SELECTED, True)
             else:
-                win.write_simple(text, y, x, Colors.TEXT, False)
+                win.write_simple(text, y, x, Colors.DEFAULT, False)
 
         # Eingabe abfragen
         key = win.win.getch()

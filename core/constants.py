@@ -4,20 +4,11 @@ class Others:
     TIMEOUT = 300
     COPYRIGHT  = "(C) Terminal Systems"
     SCREEN_PADDING = 1
+    CODE_PLACEHOLDER = "_"
 
 class Colors:
-    # DEFAULT = 1
-    # INVERTED = 2
-    # WARNING = 3
-    # SELECTED = 4
-    # TEXT = 5
-    # OPEN = 6
-    DEFAULT = 5
-    INVERTED = 6
-    WARNING = 6
-    SELECTED = 6
-    TEXT = 5
-    OPEN = 6
+    DEFAULT     = 1
+    SELECTED    = 2
 
 class TermTypes:
     CHAT        = "chat"
@@ -49,10 +40,10 @@ class Events:
     CLOSE_CATEGORY      = "close_category"
     SCROLL              = "scroll"
     CANCEL              = "cancel"
-    SWITCH              = "switch"
+    TOGGLE_SWITCH       = "switch"
+    TOGGLE_AUDIO        = "audio"
     GET_RESPONSE        = "response"
     SEND_REQUEST        = "request"
-    AUDIO               = "audio"
 
 class TokensDE:
     MSG_SUCCESS     = "Zugriff gewährt"

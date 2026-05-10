@@ -1,11 +1,12 @@
 import curses
 import time
-from core import Colors, TokensDE
+from core import Colors, TokensDE, Others
 
 class PasscodeBox:
-    def __init__(self, parent_window, code_length=5, title=TokensDE.PASSCODE, color=Colors.DEFAULT):
+    def __init__(self, parent_window, code_length=5, entered_code="", title=TokensDE.PASSCODE, color=Colors.DEFAULT):
         self.parent_window = parent_window
         self.code_length = code_length
+        self.entered_code = entered_code
         self.title = title
         self.color = color
 
@@ -28,7 +29,8 @@ class PasscodeBox:
         title = self.title.upper()
         title_x = (self.box_width - len(title)) // 2
         self.title_win.addstr( 0, title_x, title, curses.color_pair(Colors.DEFAULT) | curses.A_BOLD)
-        self.type("")
+        self.type(self.entered_code)
+        self.input_win.refresh()
         self.input_win.box()
 
         self.win.bkgd(' ', curses.color_pair(self.color))
@@ -42,22 +44,20 @@ class PasscodeBox:
         self.title_win.refresh()
         self.input_win.refresh()
 
-    def write(self, text, y=1, x=2, color=Colors.TEXT):
+    def write(self, text, y=1, x=2, color=Colors.DEFAULT):
         self.input_win.addstr(y, x, text, curses.color_pair(color) | curses.A_BOLD)
         self.input_win.refresh()
 
     def type(self, entered_code):
         start_x = 2
-
         for i in range(self.code_length):
             x_pos = start_x + i * 2
-            char = entered_code[i] if i < len(entered_code) else "_"
-            self.write(char, y=1, x=x_pos, color=Colors.TEXT)
-
+            char = entered_code[i] if i < len(entered_code) else Others.CODE_PLACEHOLDER
+            self.write(char, y=1, x=x_pos, color=Colors.DEFAULT)
         self.win.refresh()
 
 class Messagebox:
-    def __init__(self, parent_window, text, color=Colors.DEFAULT, duration=1):
+    def __init__(self, parent_window, text, color=Colors.DEFAULT, duration=1.5):
         self.parent_window = parent_window
         self.text = text
         self.duration = duration
@@ -83,7 +83,7 @@ class Messagebox:
         self.win.refresh()
         time.sleep(self.duration)
 
-    def write(self, text, y=1, x=2, delay=0.0, color=Colors.TEXT, bold=False):
+    def write(self, text, y=1, x=2, delay=0.0, color=Colors.DEFAULT, bold=False):
         curses.flushinp()
         for char in text:
             if bold:
