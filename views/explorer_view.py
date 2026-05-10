@@ -1,3 +1,5 @@
+from idlelib import sidebar
+
 from views.terminal_view import TerminalView
 import time
 from .window import Window
@@ -12,6 +14,7 @@ class ExplorerView(TerminalView):
         self._sidebar = None
         self._entry_list = None
         self._content = None
+        self._sidebar_scrollbar = None
         self._categories = []
         self._entries = []
         self._visible_categories_count = 0
@@ -27,20 +30,20 @@ class ExplorerView(TerminalView):
             self._header.write_simple(title.upper(), y=0, x=1, color=Colors.SELECTED, bold=True)
             self._header.refresh()
 
-    def draw_sidebar(self, categories, state):
+    def draw_sidebar(self, categories, selected_category, category_scroll_offset):
         if not self._sidebar:
             height = (self._screen_height - self._header.height - self._footer.height - 2)
-            width = self._screen_width // 4
+            width = self._screen_width // 5 + Others.SCROLLBAR_PADDING
             self._sidebar = Window(height, width, self._header.start_y + 2, 1)
-        self.draw_all_categories(categories, state)
+        self.draw_all_categories(categories, selected_category, category_scroll_offset)
 
-    def draw_all_categories(self, categories, state):
-        max_box_height = 8
+    def draw_all_categories(self, categories, selected_category, category_scroll_offset):
+        max_box_height = 6
         min_box_height = 6
         minimum_categories = 4
         maximum_categories = 4
 
-        box_width = self._sidebar.width
+        box_width = self._sidebar.width - Others.SCROLLBAR_PADDING
         available_height = self._sidebar.height - 1
 
         max_possible_length = available_height // min_box_height
@@ -60,11 +63,13 @@ class ExplorerView(TerminalView):
 
         self._sidebar.write_simple(TokensDE.FOLDER.upper(), y - 1, 0)
 
-        scroll_offset = state.category_scroll_offset
+        scroll_offset = category_scroll_offset
         total_categories = len(categories)
 
         max_scroll = max(0, total_categories - length)
         scroll_offset = min(scroll_offset, max_scroll)
+
+        self.draw_sidebar_scrollbar(self._sidebar, total_height, total_categories, length, scroll_offset, y, self._sidebar.width - 1)
 
         while len(self._categories) < length:
             self._categories.append(None)
@@ -81,7 +86,7 @@ class ExplorerView(TerminalView):
                 txtcolor = Colors.DEFAULT
             else:
                 title = categories[actual_index].title
-                if state.selected_category == actual_index:
+                if selected_category == actual_index:
                     bgcolor = Colors.SELECTED
                     txtcolor = Colors.SELECTED
                 else:
@@ -90,6 +95,18 @@ class ExplorerView(TerminalView):
 
             self.draw_category(title,y, box_height, box_width, i, bgcolor, txtcolor)
             y += box_height
+
+    def draw_sidebar_scrollbar(self, sidebar_win, height, total_categories, visible_categories, scroll_offset, y ,x):
+        if not self._sidebar_scrollbar:
+            self._sidebar_scrollbar = Window(height, 1, y, x, parent_window=sidebar_win)
+
+        arrow_up = "▲"
+        arrow_down = "▼"
+
+        self._sidebar_scrollbar.write_simple(arrow_up, y, 0)
+        self._sidebar_scrollbar.write_simple(arrow_down, height - 1, 0)
+
+        self._sidebar_scrollbar.refresh()
 
     def draw_category(self, title,y, box_height, box_width, wid, bgcolor, txtcolor):
         while len(self._categories) <= wid:
@@ -107,17 +124,16 @@ class ExplorerView(TerminalView):
         win.write_animate(title.upper(), 1, 2, 0, txtcolor, True)
         win.refresh()
 
-    def draw_entry_list(self, entries, state):
+    def draw_entry_list(self, entries, selected_entry, entry_scroll_offset, infocus):
         if not self._entry_list:
-            padding = 1
-            sidebar_spacing = 3 + padding
+            sidebar_spacing = Others.SCROLLBAR_PADDING
             height = self._screen_height // 4
             width = (self._screen_width - Others.SCREEN_PADDING) - self._sidebar.width - sidebar_spacing
             x = self._sidebar.width + sidebar_spacing
             self._entry_list = Window(height, width, self._header.start_y + 1, x)
-        self.draw_all_entries(entries, state)
+        self.draw_all_entries(entries, selected_entry, entry_scroll_offset, infocus)
 
-    def draw_all_entries(self, entries, state):
+    def draw_all_entries(self, entries, selected_entry, entry_scroll_offset, infocus):
         max_box_height = 3
         min_box_height = 3
         minimum_entries = 2
@@ -143,7 +159,7 @@ class ExplorerView(TerminalView):
 
         self._entry_list.write_simple(TokensDE.FILES.upper(), y - 1, 0)
 
-        scroll_offset = state.entry_scroll_offset
+        scroll_offset = entry_scroll_offset
         total_entries = len(entries)
 
         max_scroll = max(0, total_entries - length)
@@ -163,8 +179,8 @@ class ExplorerView(TerminalView):
                 bgcolor = Colors.DEFAULT
                 txtcolor = Colors.DEFAULT
             else:
-                title = "entries[actual_index].title"
-                if state.selected_entry == actual_index:
+                title = entries[actual_index].title
+                if selected_entry == actual_index and infocus:
                     bgcolor = Colors.SELECTED
                     txtcolor = Colors.SELECTED
                 else:

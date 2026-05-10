@@ -13,6 +13,7 @@ class Window:
         self._log = []
         self._start_x = begin_x
         self._start_y = begin_y
+        self.parent_window = parent_window
 
         if parent_window is None:
             self.win = curses.newwin(height, width, begin_y, begin_x)

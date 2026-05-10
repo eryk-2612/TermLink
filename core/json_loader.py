@@ -30,9 +30,6 @@ class JsonLoader:
 
         if termtype == TermTypes.EXPLORER:
             categories = [self.load_category(c) for c in terminal.get("categories", [])]
-            # #Quit-Kategorie hinzufügen - WOANDERS HIN
-            # quit_category = Category(TokensDE.LEAVE, quit=True)
-            # categories.append(quit_category)
             return ExplorerModel(name=terminal.get("title", TokensDE.TERM_UNNAMED), categories=categories, unlock_code=terminal.get("unlock_code"))
         elif termtype == TermTypes.CHAT:
             return ChatModel(name=terminal.get("title", TokensDE.TERM_UNNAMED), unlock_code=terminal.get("unlock_code"))

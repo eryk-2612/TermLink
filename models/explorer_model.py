@@ -67,7 +67,10 @@ class EntryModel:
 
     @property
     def title(self):
-        return self._title
+        if self._title:
+            return self._title
+        else :
+            return TokensDE.ERROR
 
     @title.setter
     def title(self, value):

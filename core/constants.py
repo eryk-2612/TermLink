@@ -4,6 +4,7 @@ class Others:
     TIMEOUT = 300
     COPYRIGHT  = "(C) Terminal Systems"
     SCREEN_PADDING = 1
+    SCROLLBAR_PADDING = 2
     CODE_PLACEHOLDER = "_"
 
 class Colors:
