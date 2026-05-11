@@ -44,7 +44,7 @@ class ExplorerView(TerminalView):
         max_box_height = 5
         min_box_height = 5
         minimum_categories = 4
-        maximum_categories = 4  # 0 = unlimited
+        maximum_categories = 0  # 0 = unlimited
 
         box_width = self._sidebar.width - Others.SCROLLBAR_PADDING
         available_height = self._sidebar.height - 1
@@ -151,7 +151,7 @@ class ExplorerView(TerminalView):
             if not self._entry_list:
                 sidebar_spacing = Others.SCROLLBAR_PADDING
                 height = self._screen_height // 3
-                width = (self._screen_width - Others.SCREEN_PADDING) - self._sidebar.width - sidebar_spacing
+                width = ((self._screen_width - Others.SCREEN_PADDING) - self._sidebar.width - sidebar_spacing) //  3 * 2
                 x = self._sidebar.width + sidebar_spacing
                 self._entry_list = Window(height, width, self._header.start_y + 1, x)
             self.draw_all_entries(entries, selected_entry, entry_scroll_offset, infocus)
@@ -159,7 +159,7 @@ class ExplorerView(TerminalView):
     def draw_all_entries(self, entries, selected_entry, entry_scroll_offset, infocus):
         box_height = 3
         minimum_entries = 1
-        maximum_entries = 3  # 0 = unlimited
+        maximum_entries = 2  # 0 = unlimited
         y = 2
 
         box_width = self._entry_list.width - Others.SCROLLBAR_PADDING

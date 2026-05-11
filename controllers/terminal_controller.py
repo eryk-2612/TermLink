@@ -21,8 +21,11 @@ class TerminalController:
         else:
             return self.view.get_window(self.state)
 
-    def set_focus(self, focus):
+    def switch_focus(self, focus):
         self.state.focus = focus
+
+    def trigger_event(self, event):
+        self.state.event = event
 
     def init_state(self):
         self.state.running = True
@@ -34,11 +37,10 @@ class TerminalController:
         self.init_state()
         while self.state.running:
             self.handle_input()
+            self.handle_event()
             self.update_state()
             self.draw_view()
-
-            self.state.msgbox = None
-            self.state.event = None
+            self.reset_state()
 
     def handle_input(self):
         window = self.get_window()
@@ -58,10 +60,10 @@ class TerminalController:
         focus = self.state.focus
         entered_code = self.state.entered_code
         if screen == Screens.SIGNIN:
-            self.continue_boot()
+            self.trigger_event(Events.SIGNIN)
         if screen == Screens.BOOT and focus == Focus.LOCK:
             if len(entered_code) == len(self.model.unlock_code):
-                self.unlock_terminal(entered_code)
+                self.trigger_event(Events.ATTEMPT_UNLOCK)
 
     def number_pressed(self, key):
         focus = self.state.focus
@@ -81,6 +83,19 @@ class TerminalController:
         if focus == Focus.LOCK:
             self.undo_enter_code(entered_code)
 
+    def handle_event(self):
+        screen = self.state.screen
+        event = self.state.event
+        focus = self.state.focus
+
+        if screen == Screens.SIGNIN:
+            if event == Events.SIGNIN:
+                self.continue_boot()
+        if screen == Screens.BOOT:
+            if focus == Focus.LOCK:
+                if event == Events.ATTEMPT_UNLOCK:
+                    self.unlock_terminal(self.state.entered_code)
+
     def continue_boot(self):
         self.state.screen = Screens.BOOT
 
@@ -89,7 +104,7 @@ class TerminalController:
             self.state.msgbox = MessageboxState(True, TokensDE.MSG_SUCCESS, Colors.SELECTED)
             self.model.unlock()
             self.state.entered_code = ""
-            self.set_focus(None)
+            self.switch_focus(None)
         else:
             self.state.msgbox = MessageboxState(True, TokensDE.MSG_FAIL, Colors.SELECTED)
             self.state.entered_code = ""
@@ -104,30 +119,30 @@ class TerminalController:
 
     def update_state(self):
         screen = self.state.screen
-        event = self.state.event
-        focus = self.state.focus
-        entered_code = self.state.entered_code
         if screen == Screens.BOOT:
             if self.model.locked:
-                self.set_focus(Focus.LOCK)
+                self.switch_focus(Focus.LOCK)
 
     def draw_view(self):
         screen = self.state.screen
         focus = self.state.focus
-        event = self.state.event
         msgbox = self.state.msgbox or MessageboxState(False, "", 0)
         match screen:
             case Screens.SIGNIN:
-                self.view.draw_signin(parent_window=self.view.get_window(), image=TokensDE.SIGNIN)
+                self.view.draw_signin(self.get_window(True), TokensDE.SIGNIN)
             case Screens.BOOT:
-                self.view.undraw_signin(parent_window=self.view.get_window(), image=TokensDE.SIGNIN)
+                self.view.undraw_signin(self.get_window(True), TokensDE.SIGNIN)
                 self.view.draw_footer(Others.COPYRIGHT)
                 if focus == Focus.LOCK:
-                    self.view.draw_lock(self.model.unlock_code, self.state.entered_code, self.view.get_window())
+                    self.view.draw_lock(self.model.unlock_code, self.state.entered_code, self.get_window(True))
                     if msgbox.show:
                         self.view.draw_messagebox(msgbox.message.upper(), msgbox.color, self.get_window(True))
                 else:
                     if msgbox.show:
                         self.view.draw_messagebox(msgbox.message.upper(), msgbox.color, self.get_window(True))
-                    self.view.draw_startup_animation(self.view.get_window(), Logo.DEFAULT)
+                    self.view.draw_startup_animation(self.get_window(True), Logo.DEFAULT)
                     self.state.boot_completed = True
+
+    def reset_state(self):
+        self.state.msgbox = None
+        self.state.event = None

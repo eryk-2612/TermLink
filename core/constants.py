@@ -45,6 +45,8 @@ class Events:
     TOGGLE_AUDIO        = "audio"
     GET_RESPONSE        = "response"
     SEND_REQUEST        = "request"
+    ATTEMPT_UNLOCK      = "try_unlock"
+    SIGNIN              = "signin"
 
 class TokensDE:
     MSG_SUCCESS     = "Zugriff gewährt"

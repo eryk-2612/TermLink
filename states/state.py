@@ -34,3 +34,4 @@ class ExplorerState(TerminalState):
     switch_selected: int = 0
     category_scroll_offset: int = 0
     entry_scroll_offset: int = 0
+    content_scroll_offset: int = 0
