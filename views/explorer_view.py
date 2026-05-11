@@ -1,3 +1,5 @@
+import curses
+
 from views.terminal_view import TerminalView
 import time
 from .window import Window
@@ -31,46 +33,53 @@ class ExplorerView(TerminalView):
             self._header.write_simple(title.upper(), y=0, x=1, color=Colors.SELECTED, bold=True)
             self._header.refresh()
 
-    def draw_sidebar(self, categories, selected_category, category_scroll_offset):
+    def draw_sidebar(self, categories, selected_category, category_scroll_offset, infocus):
         if not self._sidebar:
             height = (self._screen_height - self._header.height - self._footer.height - 2)
-            width = self._screen_width // 5 + Others.SCROLLBAR_PADDING
+            width = self._screen_width // 4 + Others.SCROLLBAR_PADDING
             self._sidebar = Window(height, width, self._header.start_y + 2, 1)
-        self.draw_all_categories(categories, selected_category, category_scroll_offset)
+        self.draw_all_categories(categories, selected_category, category_scroll_offset, infocus)
 
-    def draw_all_categories(self, categories, selected_category, category_scroll_offset):
-        max_box_height = 6
-        min_box_height = 6
-        minimum_categories = 1 # technically ignored
-        maximum_categories = 4
+    def draw_all_categories(self, categories, selected_category, category_scroll_offset, infocus):
+        max_box_height = 5
+        min_box_height = 5
+        minimum_categories = 4
+        maximum_categories = 4  # 0 = unlimited
 
         box_width = self._sidebar.width - Others.SCROLLBAR_PADDING
         available_height = self._sidebar.height - 1
+        total_categories = len(categories)
+        max_fit_by_min_height = available_height // min_box_height
 
-        max_possible_length = available_height // min_box_height
-        length = max(minimum_categories, max_possible_length)
+        if maximum_categories > 0:
+            max_fit_by_min_height = min(max_fit_by_min_height, maximum_categories)
 
+        length = max(minimum_categories, max_fit_by_min_height)
+        length = min(length, available_height // min_box_height)
+
+        if maximum_categories > 0:
+            length = min(length, maximum_categories)
+
+        length = max(1, length)
         box_height = available_height // length
         box_height = max(min_box_height, min(box_height, max_box_height))
+        possible_length = available_height // box_height
 
-        length = available_height // box_height
-        if length > maximum_categories:
-            length = maximum_categories
+        if maximum_categories > 0:
+            possible_length = min(possible_length, maximum_categories)
 
+        length = max(minimum_categories, possible_length)
         self._visible_categories_count = length
-
         total_height = length * box_height
         y = max(0, self._sidebar.height - total_height)
 
         self._sidebar.write_simple(TokensDE.FOLDER.upper(), y - 1, 0)
 
         scroll_offset = category_scroll_offset
-        total_categories = len(categories)
-
         max_scroll = max(0, total_categories - length)
         scroll_offset = min(scroll_offset, max_scroll)
 
-        self.draw_sidebar_scrollbar(self._sidebar, total_height, total_categories, length, scroll_offset, y, self._sidebar.width - 1)
+        self.draw_sidebar_scrollbar(self._sidebar, total_height, total_categories, length, scroll_offset, y, self._sidebar.width - 1, infocus)
 
         while len(self._categories) < length:
             self._categories.append(None)
@@ -81,12 +90,14 @@ class ExplorerView(TerminalView):
 
             actual_index = scroll_offset + i
 
+            # Fake Kategorie
             if actual_index >= total_categories:
                 title = ""
                 bgcolor = Colors.DEFAULT
                 txtcolor = Colors.DEFAULT
             else:
                 title = categories[actual_index].title
+
                 if selected_category == actual_index:
                     bgcolor = Colors.SELECTED
                     txtcolor = Colors.SELECTED
@@ -94,10 +105,11 @@ class ExplorerView(TerminalView):
                     bgcolor = Colors.DEFAULT
                     txtcolor = Colors.DEFAULT
 
-            self.draw_category(title,y, box_height, box_width, i, bgcolor, txtcolor)
+            self.draw_category(title, y, box_height, box_width, i, bgcolor, txtcolor)
+
             y += box_height
 
-    def draw_sidebar_scrollbar(self, sidebar_win, height, total_categories, visible_categories, scroll_offset, y, x):
+    def draw_sidebar_scrollbar(self, sidebar_win, height, total_categories, visible_categories, scroll_offset, y, x, infocus):
         if not self._sidebar_scrollbar:
             self._sidebar_scrollbar = Window(height, 1, y, x, parent_window=sidebar_win)
         arrow_up = "△"
@@ -110,7 +122,7 @@ class ExplorerView(TerminalView):
             arrow_up = "▲"
         if can_scroll_down:
             arrow_down = "▼"
-        if not can_scroll_up and not can_scroll_down:
+        if not can_scroll_up and not can_scroll_down or not infocus:
             arrow_up = " "
             arrow_down = " "
         self._sidebar_scrollbar.write_simple(arrow_up, up_y, 0)
@@ -138,26 +150,31 @@ class ExplorerView(TerminalView):
             entries = category.entries
             if not self._entry_list:
                 sidebar_spacing = Others.SCROLLBAR_PADDING
-                height = self._screen_height // 4
+                height = self._screen_height // 3
                 width = (self._screen_width - Others.SCREEN_PADDING) - self._sidebar.width - sidebar_spacing
                 x = self._sidebar.width + sidebar_spacing
                 self._entry_list = Window(height, width, self._header.start_y + 1, x)
             self.draw_all_entries(entries, selected_entry, entry_scroll_offset, infocus)
 
     def draw_all_entries(self, entries, selected_entry, entry_scroll_offset, infocus):
-        min_box_height = 3
-        minimum_entries = 1 # technically ignored
-        maximum_entries = 3
+        box_height = 3
+        minimum_entries = 1
+        maximum_entries = 3  # 0 = unlimited
         y = 2
 
         box_width = self._entry_list.width - Others.SCROLLBAR_PADDING
-        available_height = self._entry_list.height - 1
+        available_height = self._entry_list.height - y
         total_entries = len(entries)
+        possible_length = available_height // box_height
 
-        max_possible_length = available_height // min_box_height
-        length = min(maximum_entries, max(minimum_entries, max_possible_length))
-        box_height = min_box_height
+        if maximum_entries > 0:
+            possible_length = min(possible_length, maximum_entries)
+
+        length = max(minimum_entries, possible_length)
+        length = max(1, length)
+
         self._visible_entries_count = length
+
         total_height = length * box_height
 
         scroll_offset = entry_scroll_offset
@@ -165,13 +182,16 @@ class ExplorerView(TerminalView):
         scroll_offset = min(scroll_offset, max_scroll)
 
         self._entry_list.write_simple(TokensDE.FILES.upper(), y - 1, 0)
-        self.draw_entries_scrollbar(self._entry_list, total_height, total_entries, length, scroll_offset, y, self._entry_list.width - 1)
+
+        self.draw_entries_scrollbar(self._entry_list, total_height, total_entries, length, scroll_offset, y, self._entry_list.width - 1, infocus)
 
         while len(self._entries) < length:
             self._entries.append(None)
 
+        current_y = y
+
         for i in range(length):
-            if y + box_height > self._entry_list.height:
+            if current_y + box_height > self._entry_list.height:
                 break
 
             actual_index = scroll_offset + i
@@ -182,6 +202,7 @@ class ExplorerView(TerminalView):
                 txtcolor = Colors.DEFAULT
             else:
                 title = entries[actual_index].title
+
                 if selected_entry == actual_index and infocus:
                     bgcolor = Colors.SELECTED
                     txtcolor = Colors.SELECTED
@@ -189,28 +210,49 @@ class ExplorerView(TerminalView):
                     bgcolor = Colors.DEFAULT
                     txtcolor = Colors.DEFAULT
 
-            self.draw_entry(title,y, box_height, box_width, i, bgcolor, txtcolor)
-            y += box_height
+            self.draw_entry(title, current_y, box_height, box_width, i, bgcolor, txtcolor)
 
-    def draw_entries_scrollbar(self, entires_win, height, total_entries, visible_entries_count, scroll_offset, y, x):
-        if not self._entries_scrollbar:
-            self._entries_scrollbar = Window(height, 1, y, x, parent_window=entires_win)
-        arrow_up = "△"
-        arrow_down = "▽"
-        up_y = 1
-        down_y = height - 2
-        can_scroll_up = scroll_offset > 0
-        can_scroll_down = scroll_offset + visible_entries_count < total_entries
-        if can_scroll_up:
-            arrow_up = "▲"
-        if can_scroll_down:
-            arrow_down = "▼"
-        if not can_scroll_up and not can_scroll_down:
-            arrow_up = " "
-            arrow_down = " "
-        self._entries_scrollbar.write_simple(arrow_up, up_y, 0)
-        self._entries_scrollbar.write_simple(arrow_down, down_y, 0)
-        self._entries_scrollbar.refresh()
+            current_y += box_height
+
+    def draw_entries_scrollbar(self, entries_win, height, total_entries, visible_entries_count, scroll_offset, y, x, infocus):
+        try:
+            if not self._entries_scrollbar:
+                self._entries_scrollbar = Window(height, 1, y, x, parent_window=entries_win)
+
+            if self._entries_scrollbar.height != height:
+                self._entries_scrollbar.resize(height, 1)
+
+            up_y = 1
+            down_y = max(1, height - 2)
+
+            can_scroll_up = scroll_offset > 0
+            can_scroll_down = scroll_offset + visible_entries_count < total_entries
+
+            scroll_needed = total_entries > visible_entries_count
+
+            # Default = leerer Pfeil
+            arrow_up = "△"
+            arrow_down = "▽"
+
+            # Scroll in Richtung möglich
+            if can_scroll_up:
+                arrow_up = "▲"
+
+            if can_scroll_down:
+                arrow_down = "▼"
+
+            # Kein Scroll nötig ODER unfocused
+            if not scroll_needed or not infocus:
+                arrow_up = " "
+                arrow_down = " "
+
+            self._entries_scrollbar.write_simple(arrow_up, up_y, 0)
+            self._entries_scrollbar.write_simple(arrow_down, down_y, 0)
+
+            self._entries_scrollbar.refresh()
+
+        except curses.error:
+            pass
 
     def draw_entry(self, title, y, box_height, box_width, wid, bgcolor, txtcolor):
         while len(self._entries) <= wid:

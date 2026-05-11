@@ -5,6 +5,16 @@
 		"type": "explorer",
 		"categories": [
 			{
+				"title": "Oeffentlich",
+				"entries": [
+					{
+						"title": "Memo",
+						"type": "audio",
+						"audio": "test.mp3"
+					}
+				]
+			},
+			{
 				"title": "Persoenlich",
 				"entries": [
 					{
@@ -25,16 +35,6 @@
 						"lines": [
 							"[LOG 044 – Geheimer Bericht]\n\nSystemzeit: 01:12:47\nStatus: Verschlüsselt\nZugriffsebene: Geheim\n\nUnautorisierten Zugriff auf Sektor 7G festgestellt. Protokolldaten zeigen mehrere\nnicht autorisierte Anmeldeversuche aus unbekannten IP-Adressen. Alle betroffenen\nSystemmodule wurden sofort in Quarantäne versetzt.\n\nDie Sicherheitsprotokolle wurden angepasst: Zwei-Faktor-Authentifizierung nun\nobligatorisch für alle kritischen Zugriffe. Monitoring durch KI-Modul Alpha-3\nauf 24/7-Ebene aktiviert.\n\nWeitere Ermittlungen laufen. Verdächtige Aktivitäten wurden automatisch gemeldet\nund isoliert.\n\nAbschließende Bewertung:\nSystem bleibt stabil, jedoch erhöhte Wachsamkeit erforderlich. Weitergabe nur an\nautorisiertes Personal."						],
 						"unlock_code": "55555"
-					}
-				]
-			},
-			{
-				"title": "Oeffentlich",
-				"entries": [
-					{
-						"title": "Memo",
-						"type": "audio",
-						"audio": "test.mp3"
 					}
 				]
 			},
@@ -72,24 +72,6 @@
 						"lines": []
 					}
 				]
-			},
-			{
-				"title": "Externes Laufwerk"
-			}
-			,
-			{
-				"title": "Test 2"
-			}
-			,
-			{
-				"title": "Test 3"
-			}
-			,
-			{
-				"title": "Test 4"
-			},
-			{
-				"title": "Test 5"
 			}
 		]
 	}

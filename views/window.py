@@ -124,6 +124,8 @@ class Window:
 
     def resize(self, h, w):
         self.win.resize(h, w)
+        self._win_height = h
+        self._win_width = w
 
     def write_animate(self, text, y=1, x=2, delay=0.0, color=Colors.DEFAULT, bold=False):
         curses.flushinp()
