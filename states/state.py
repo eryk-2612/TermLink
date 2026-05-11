@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from models import CategoryModel, EntryModel
 
 @dataclass
@@ -11,7 +11,7 @@ class MessageboxState:
 class TerminalState:
     running: bool = None
     screen: str = None
-    event: str = None
+    event_queue: list = field(default_factory=list)
     focus: str = None
     entered_code: str = ""
     msgbox: MessageboxState = None

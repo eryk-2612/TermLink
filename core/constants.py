@@ -47,6 +47,7 @@ class Events:
     SEND_REQUEST        = "request"
     ATTEMPT_UNLOCK      = "try_unlock"
     SIGNIN              = "signin"
+    QUIT                = "quit"
 
 class TokensDE:
     MSG_SUCCESS     = "Zugriff gewährt"

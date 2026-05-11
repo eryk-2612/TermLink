@@ -1,6 +1,6 @@
 from .terminal_controller import TerminalController
 from states import MessageboxState
-from core import Events, Logo, TokensDE, Focus, Screens, Colors, Others
+from core import Events, Logo, TokensDE, Focus, Screens, Colors, Others, EntryTypes
 import curses
 
 class ExplorerController(TerminalController):
@@ -95,6 +95,8 @@ class ExplorerController(TerminalController):
                     self.trigger_event(Events.OPEN_CATEGORY)
 
     def escape_pressed(self):
+        super().escape_pressed()
+
         screen = self.state.screen
         focus = self.state.focus
 
@@ -102,21 +104,33 @@ class ExplorerController(TerminalController):
             if focus == Focus.ENTRIES:
                 self.trigger_event(Events.CLOSE_CATEGORY)
 
-    def handle_event(self):
-        super().handle_event()
+    def handle_events(self):
+        super().handle_events()
+        while self.state.event_queue:
+            event = self.state.event_queue[0]
+            if self._handle_single_event(event):
+                self.state.event_queue.pop(0)
+            else:
+                break
 
+    def _handle_single_event(self, event):
         screen = self.state.screen
-        event = self.state.event
+        focus = self.state.focus
 
         if screen == Screens.TERMINAL:
             if event == Events.OPEN_CATEGORY:
                 self.open_category(self.model.categories[self.state.c_index])
+                return True
             if event == Events.CLOSE_CATEGORY:
                 self.close_category()
+                return True
             if event == Events.OPEN_ENTRY:
                 self.open_entry(self.state.open_category.entries[self.state.e_index])
+                return True
             if event == Events.CLOSE_ENTRY:
                 self.close_entry()
+                return True
+        return False
 
     def preview_category(self, category):
         self.state.open_category = category
@@ -135,6 +149,8 @@ class ExplorerController(TerminalController):
     def open_entry(self, entry):
         #self.set_focus(Focus.CONTENT)
         self.state.open_entry = entry
+        if entry.type == EntryTypes.QUIT:
+            self.trigger_event(Events.QUIT)
 
     def close_entry(self):
         self.state.open_entry = None

@@ -25,19 +25,20 @@ class TerminalController:
         self.state.focus = focus
 
     def trigger_event(self, event):
-        self.state.event = event
+        self.state.event_queue.append(event)
 
     def init_state(self):
         self.state.running = True
         self.state.screen = Screens.SIGNIN
         self.state.event = None
         self.state.focus = None
+        self.state.boot_completed = False
 
     def run(self):
         self.init_state()
         while self.state.running:
             self.handle_input()
-            self.handle_event()
+            self.handle_events()
             self.update_state()
             self.draw_view()
             self.reset_state()
@@ -83,18 +84,38 @@ class TerminalController:
         if focus == Focus.LOCK:
             self.undo_enter_code(entered_code)
 
-    def handle_event(self):
+    def escape_pressed(self):
         screen = self.state.screen
-        event = self.state.event
+        if screen == Screens.SIGNIN or screen == Screens.BOOT:
+            self.trigger_event(Events.QUIT)
+
+    def handle_events(self):
+        while self.state.event_queue:
+            event = self.state.event_queue[0]
+            if self.handle_single_event(event):
+                self.state.event_queue.pop(0)
+            else:
+                break
+
+    def handle_single_event(self, event):
+        screen = self.state.screen
         focus = self.state.focus
 
-        if screen == Screens.SIGNIN:
-            if event == Events.SIGNIN:
-                self.continue_boot()
+        if event == Events.QUIT:
+            self.quit()
+            return True
+        if event == Events.SIGNIN:
+            self.continue_boot()
+            return True
         if screen == Screens.BOOT:
             if focus == Focus.LOCK:
                 if event == Events.ATTEMPT_UNLOCK:
                     self.unlock_terminal(self.state.entered_code)
+                    return True
+        return False
+
+    def quit(self):
+        self.state.running = False
 
     def continue_boot(self):
         self.state.screen = Screens.BOOT
@@ -145,4 +166,3 @@ class TerminalController:
 
     def reset_state(self):
         self.state.msgbox = None
-        self.state.event = None

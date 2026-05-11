@@ -48,28 +48,28 @@ def init_menu(height, width, terminals):
 def main(stdscr):
     curses.curs_set(0)  # Versteckt den curser
     stdscr.keypad(True) # Aktiviert das numpad
-    stdscr.timeout(300) # nach 300ms input skippen
+    #stdscr.timeout(300) # nach 300ms input skippen
     init_colors()       # Init Farben
 
     loader = JsonLoader()
     terminals = loader.load_all_terminals()
 
-    controller_list = []
-    for model in terminals:
-        if isinstance(model, ChatModel):
-            view = ChatView(stdscr)
-            state = ChatState()
-            controller_list.append(ChatController(stdscr, model, view, state))
-        elif isinstance(model, ExplorerModel):
-            view = ExplorerView(stdscr)
-            state = ExplorerState()
-            controller_list.append(ExplorerController(stdscr, model, view, state))
-        else:
-            view = TerminalView(stdscr)
-            state = TerminalState()
-            controller_list.append(TerminalController(stdscr, model, view, state))
-
     while True:
+        controller_list = []
+        for model in terminals:
+            if isinstance(model, ChatModel):
+                view = ChatView(stdscr)
+                state = ChatState()
+                controller_list.append(ChatController(stdscr, model, view, state))
+            elif isinstance(model, ExplorerModel):
+                view = ExplorerView(stdscr)
+                state = ExplorerState()
+                controller_list.append(ExplorerController(stdscr, model, view, state))
+            else:
+                view = TerminalView(stdscr)
+                state = TerminalState()
+                controller_list.append(TerminalController(stdscr, model, view, state))
+
         height, width = stdscr.getmaxyx()
         selected_controller = init_menu(height, width, controller_list)
 
