@@ -46,12 +46,11 @@ class TerminalView:
         self._passcodebox = PasscodeBox(parent_window, len(code), entered_code)
         self._passcodebox.draw()
 
-    def draw_messagebox(self, text, color, parent_window):
-        parent_window.reload()
-        messagebox = Messagebox(parent_window,text, color)
+    def create_messagebox(self, text, color, parent_window, duration=1.5):
+        return Messagebox(parent_window,text, color, duration)
+
+    def draw_messagebox(self, messagebox):
         messagebox.draw()
-        parent_window.reload()
-        del messagebox
 
     def draw_startup_animation(self, parent_window, logo):
         logo_height = len(logo)
@@ -60,24 +59,19 @@ class TerminalView:
 
         startup = Window(self._screen_height -1, self._screen_width, 0, 0)
 
-        # Fenstergröße: Logo + Ladebalken + bisschen Padding
         win_height = parent_window.height
         win_width = parent_window.width
 
-        # Gesamtblock (Logo + Ladebalken)
         total_height = logo_height + 2
 
-        # Zentriert
         start_y = win_height // 2 - total_height // 2
         start_x = win_width // 2 - logo_width // 2
 
-        # Logo zeichnen
         for i, line in enumerate(logo):
             startup.write_simple(line, y=start_y + i, x=start_x, color=Colors.DEFAULT, bold=True)
             startup.refresh()
             time.sleep(0.35)
 
-        # Ladebalken (unter dem Logo)
         bar_y = start_y + logo_height + 1
         bar_x = win_width // 2 - logo_width // 2
 
@@ -91,33 +85,36 @@ class TerminalView:
         parent_window.reload()
         del startup
 
-    def draw_signin(self, parent_window, image=""):
+    def draw_signin(self, parent, image=""):
         image_height = len(image)
         image_width = max(len(line) for line in image)
-        start_y = self._screen_height // 2 - image_height // 2
-        start_x = self._screen_width // 2 - image_width // 2
+
+        start_y = parent.height // 2 - image_height // 2
+        start_x = parent.width // 2 - image_width // 2
 
         if self._signin is None:
-            self._signin = Window(self._screen_height, self._screen_width, 0, 0)
+            self._signin = Window(self._screen_height -1, self._screen_width, 0, 0)
+            self._signin.background = Colors.DEFAULT
 
         for i, line in enumerate(image):
             self._signin.write_simple(line, y=start_y + i, x=start_x, color=Colors.SELECTED, bold=True)
             self._signin.refresh()
             time.sleep(0.1)
 
-    def undraw_signin(self, parent_window, image=""):
+    def undraw_signin(self, parent, image=""):
         if self._signin:
             image_height = len(image)
             image_width = max(len(line) for line in image)
-            start_y = self._screen_height // 2 - image_height // 2
-            start_x = self._screen_width // 2 - image_width // 2
+
+            start_y = parent.height // 2 - image_height // 2
+            start_x = parent.width // 2 - image_width // 2
 
             for i, line in enumerate(image):
                 self._signin.write_simple(" " * len(line), y=start_y + i, x=start_x, color=Colors.DEFAULT, bold=True)
                 self._signin.refresh()
                 time.sleep(0.1)
 
-            parent_window.reload()
+            parent.reload()
             del self._signin
             self._signin = None
 

@@ -1,5 +1,4 @@
 from .terminal_controller import TerminalController
-from states import MessageboxState
 from core import Events, Logo, TokensDE, Focus, Screens, Colors, Others, EntryTypes
 import curses
 
@@ -182,7 +181,6 @@ class ExplorerController(TerminalController):
 
         screen = self.state.screen
         focus = self.state.focus
-        msgbox = self.state.msgbox or MessageboxState(False, "", 0)
         open_category = self.state.open_category
 
         match screen:

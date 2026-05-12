@@ -1,11 +1,6 @@
 from dataclasses import dataclass, field
 from models import CategoryModel, EntryModel
-
-@dataclass
-class MessageboxState:
-    show: bool = False
-    message: str = ""
-    color: int = 0
+from views import Messagebox
 
 @dataclass
 class TerminalState:
@@ -14,7 +9,7 @@ class TerminalState:
     event_queue: list = field(default_factory=list)
     focus: str = None
     entered_code: str = ""
-    msgbox: MessageboxState = None
+    msgbox: Messagebox = None
     boot_completed: bool = False
 
 @dataclass

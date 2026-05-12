@@ -27,6 +27,7 @@ class Focus:
     ENTRIES     = "entries"
     CATEGORIES  = "categories"
     LOCK        = "lock"
+    MSG         = "message"
 
 class Screens:
     SIGNIN      = "signin"

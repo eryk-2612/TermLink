@@ -90,7 +90,6 @@ class ExplorerView(TerminalView):
 
             actual_index = scroll_offset + i
 
-            # Fake Kategorie
             if actual_index >= total_categories:
                 title = ""
                 bgcolor = Colors.DEFAULT
@@ -230,18 +229,15 @@ class ExplorerView(TerminalView):
 
             scroll_needed = total_entries > visible_entries_count
 
-            # Default = leerer Pfeil
             arrow_up = "△"
             arrow_down = "▽"
 
-            # Scroll in Richtung möglich
             if can_scroll_up:
                 arrow_up = "▲"
 
             if can_scroll_down:
                 arrow_down = "▼"
 
-            # Kein Scroll nötig ODER unfocused
             if not scroll_needed or not infocus:
                 arrow_up = " "
                 arrow_down = " "
@@ -269,3 +265,9 @@ class ExplorerView(TerminalView):
         win.empty(len(title))
         win.write_animate(title.upper(), 1, 2, 0, txtcolor, True)
         win.refresh()
+
+    def draw_content_window(self):
+        pass
+
+    def display_content(self):
+        pass

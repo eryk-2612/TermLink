@@ -1,4 +1,5 @@
-from states import MessageboxState
+from pygame.sprite import collide_rect
+
 from core import Events, Logo, TokensDE, Focus, Screens, Colors, Others
 import curses
 
@@ -41,7 +42,6 @@ class TerminalController:
             self.handle_events()
             self.update_state()
             self.draw_view()
-            self.reset_state()
 
     def handle_input(self):
         window = self.get_window()
@@ -122,13 +122,16 @@ class TerminalController:
 
     def unlock_terminal(self, entered_code):
         if entered_code == self.model.unlock_code:
-            self.state.msgbox = MessageboxState(True, TokensDE.MSG_SUCCESS, Colors.SELECTED)
+            self.prepare_messagebox(TokensDE.MSG_SUCCESS, Colors.SELECTED, self.get_window(True))
             self.model.unlock()
             self.state.entered_code = ""
-            self.switch_focus(None)
         else:
-            self.state.msgbox = MessageboxState(True, TokensDE.MSG_FAIL, Colors.SELECTED)
+            self.prepare_messagebox(TokensDE.MSG_FAIL, Colors.SELECTED, self.get_window(True))
             self.state.entered_code = ""
+
+    def prepare_messagebox(self, text, color, parent):
+        self.state.msgbox = self.view.create_messagebox(text.upper(), color, parent)
+        self.switch_focus(Focus.MSG)
 
     def enter_code(self, entered_code, key):
         if len(entered_code) < len(self.model.unlock_code):
@@ -140,14 +143,25 @@ class TerminalController:
 
     def update_state(self):
         screen = self.state.screen
+        focus = self.state.focus
+        msgbox = self.state.msgbox
+
         if screen == Screens.BOOT:
-            if self.model.locked:
+            if self.model.locked and focus != Focus.MSG:
                 self.switch_focus(Focus.LOCK)
+            if focus == Focus.MSG and msgbox:
+                if not msgbox.visible:
+                    msgbox.destroy()
+                    self.state.msgbox = None
+                    if self.model.locked:
+                        self.switch_focus(Focus.LOCK)
+                    else:
+                        self.switch_focus(None)
 
     def draw_view(self):
         screen = self.state.screen
         focus = self.state.focus
-        msgbox = self.state.msgbox or MessageboxState(False, "", 0)
+        msgbox = self.state.msgbox
         match screen:
             case Screens.SIGNIN:
                 self.view.draw_signin(self.get_window(True), TokensDE.SIGNIN)
@@ -156,13 +170,8 @@ class TerminalController:
                 self.view.draw_footer(Others.COPYRIGHT)
                 if focus == Focus.LOCK:
                     self.view.draw_lock(self.model.unlock_code, self.state.entered_code, self.get_window(True))
-                    if msgbox.show:
-                        self.view.draw_messagebox(msgbox.message.upper(), msgbox.color, self.get_window(True))
+                elif focus == Focus.MSG:
+                    self.view.draw_messagebox(msgbox)
                 else:
-                    if msgbox.show:
-                        self.view.draw_messagebox(msgbox.message.upper(), msgbox.color, self.get_window(True))
                     self.view.draw_startup_animation(self.get_window(True), Logo.DEFAULT)
                     self.state.boot_completed = True
-
-    def reset_state(self):
-        self.state.msgbox = None

@@ -58,9 +58,12 @@ class PasscodeBox:
 
 class Messagebox:
     def __init__(self, parent_window, text, color=Colors.DEFAULT, duration=1.5):
-        self.parent_window = parent_window
+        self.win = None
+        self._parent_window = parent_window
         self.text = text
         self.duration = duration
+        self.expires_at = time.time() + self.duration
+        self.drawn = False
         self.color = color
 
         self.messagebox_height = 3
@@ -69,19 +72,27 @@ class Messagebox:
         self.parent_height = self.parent_window.height
         self.parent_width = self.parent_window.width
 
-        # relativ im Parent zentriert
         self.y = self.parent_height // 2 - self.messagebox_height // 2
         self.x = self.parent_width // 2 - self.messagebox_width // 2
 
-        # im Parent erzeugen
-        self.win = self.parent_window.win.derwin(self.messagebox_height,self.messagebox_width,self.y,self.x)
+    @property
+    def parent_window(self):
+        return self._parent_window
+
+    @property
+    def visible(self):
+        return time.time() < self.expires_at
 
     def draw(self):
+        if self.drawn:
+            return
+        self.parent_window.reload()
+        self.win = self.parent_window.win.derwin(self.messagebox_height,self.messagebox_width,self.y,self.x)
         self.win.bkgd(' ', curses.color_pair(self.color))
         self.win.box()
         self.write(self.text,y=1,x=2,delay=0.02,color=self.color,bold=True)
         self.win.refresh()
-        time.sleep(self.duration)
+        self.drawn = True
 
     def write(self, text, y=1, x=2, delay=0.0, color=Colors.DEFAULT, bold=False):
         curses.flushinp()
@@ -93,3 +104,10 @@ class Messagebox:
             x += 1
             self.win.refresh()
             time.sleep(delay)
+
+    def destroy(self):
+        if self.win:
+            self.win.clear()
+            self.win.refresh()
+            self.parent_window.reload()
+            self.win = None
