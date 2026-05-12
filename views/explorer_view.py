@@ -28,23 +28,26 @@ class ExplorerView(TerminalView):
 
     def draw_header(self, title=""):
         if not self._header:
-            self._header = Window(1, self._screen_width - 2, 1, 1)
+            self._header = Window(1, self._screen_width, 0, 0)
             self._header.background = Colors.SELECTED
             self._header.write_simple(title.upper(), y=0, x=1, color=Colors.SELECTED, bold=True)
             self._header.refresh()
 
     def draw_sidebar(self, categories, selected_category, category_scroll_offset, infocus):
         if not self._sidebar:
-            height = (self._screen_height - self._header.height - self._footer.height - 2)
+            height = (self._screen_height - self._header.height - self._footer.height - Others.SCREEN_PADDING)
             width = self._screen_width // 4 + Others.SCROLLBAR_PADDING
             self._sidebar = Window(height, width, self._header.start_y + 2, 1)
         self.draw_all_categories(categories, selected_category, category_scroll_offset, infocus)
 
     def draw_all_categories(self, categories, selected_category, category_scroll_offset, infocus):
-        max_box_height = 5
+        max_box_height = 8
         min_box_height = 5
-        minimum_categories = 4
-        maximum_categories = 0  # 0 = unlimited
+        minimum_categories = Others.MINIMUM_CATEGORIES
+        if Others.MAXIMUM_CATEGORIES < 0:
+            maximum_categories = len(categories)
+        else:
+            maximum_categories = Others.MAXIMUM_CATEGORIES
 
         box_width = self._sidebar.width - Others.SCROLLBAR_PADDING
         available_height = self._sidebar.height - 1
@@ -145,20 +148,31 @@ class ExplorerView(TerminalView):
         win.refresh()
 
     def draw_entry_list(self, category, selected_entry, entry_scroll_offset, infocus):
+        box_height = 3
         if category:
             entries = category.entries
             if not self._entry_list:
                 sidebar_spacing = Others.SCROLLBAR_PADDING
-                height = self._screen_height // 3
+                height = self.calculate_entry_list_height(box_height, entries)
                 width = ((self._screen_width - Others.SCREEN_PADDING) - self._sidebar.width - sidebar_spacing) //  3 * 2
                 x = self._sidebar.width + sidebar_spacing
                 self._entry_list = Window(height, width, self._header.start_y + 1, x)
-            self.draw_all_entries(entries, selected_entry, entry_scroll_offset, infocus)
+            self.draw_all_entries(box_height, entries, selected_entry, entry_scroll_offset, infocus)
 
-    def draw_all_entries(self, entries, selected_entry, entry_scroll_offset, infocus):
-        box_height = 3
-        minimum_entries = 1
-        maximum_entries = 2  # 0 = unlimited
+    def calculate_entry_list_height(self, box_height, entries, minimum_entries=Others.MINIMUM_ENTRIES, maximum_entries=Others.MAXIMUM_ENTRIES, y_offset=2):
+        total_entries = len(entries)
+        if maximum_entries > 0:
+            possible_length = min(total_entries, maximum_entries)
+        else:
+            possible_length = total_entries
+        visible_entries = max(possible_length, minimum_entries)
+        visible_entries = max(visible_entries, 1)
+        required_height = visible_entries * box_height + y_offset
+        return required_height
+
+    def draw_all_entries(self, box_height, entries, selected_entry, entry_scroll_offset, infocus):
+        minimum_entries = Others.MINIMUM_ENTRIES
+        maximum_entries = Others.MAXIMUM_ENTRIES
         y = 2
 
         box_width = self._entry_list.width - Others.SCROLLBAR_PADDING
@@ -210,7 +224,6 @@ class ExplorerView(TerminalView):
                     txtcolor = Colors.DEFAULT
 
             self.draw_entry(title, current_y, box_height, box_width, i, bgcolor, txtcolor)
-
             current_y += box_height
 
     def draw_entries_scrollbar(self, entries_win, height, total_entries, visible_entries_count, scroll_offset, y, x, infocus):
@@ -267,7 +280,15 @@ class ExplorerView(TerminalView):
         win.refresh()
 
     def draw_content_window(self):
-        pass
+        if not self._content and self._entry_list:
+            sidebar_spacing = Others.SCROLLBAR_PADDING
+            height = self._screen_height - self._header.height - self._footer.height - self._entry_list.height
+            width = self._screen_width - self._sidebar.width - Others.SCREEN_PADDING - sidebar_spacing
+            y = self._entry_list.start_y + self._entry_list.height
+            x = self._sidebar.width + sidebar_spacing
+            self._content = Window(height, width, y, x)
+            self._content.draw_box()
+            self._content.refresh()
 
     def display_content(self):
         pass

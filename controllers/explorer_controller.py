@@ -8,7 +8,7 @@ class ExplorerController(TerminalController):
 
     def init_state(self):
         super().init_state()
-        #self.state.screen = Screens.TERMINAL # DEBUG ONLY
+        self.state.screen = Screens.TERMINAL # DEBUG ONLY
 
     def handle_input(self):
         key = super().handle_input()
@@ -189,3 +189,4 @@ class ExplorerController(TerminalController):
                 self.view.draw_header(self.model.name.upper())
                 self.view.draw_sidebar(self.model.categories, self.state.selected_category, self.state.category_scroll_offset, True if focus == Focus.CATEGORIES else False)
                 self.view.draw_entry_list(open_category, self.state.selected_entry, self.state.entry_scroll_offset, True if focus == Focus.ENTRIES else False)
+                self.view.draw_content_window()

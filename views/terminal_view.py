@@ -36,7 +36,7 @@ class TerminalView:
     # (C) Terminal Systems
     def draw_footer(self, text=""):
         if not self._footer:
-            self._footer = Window(1, self._screen_width - 2, self._screen_height - 1, 1)
+            self._footer = Window(1, self._screen_width, self._screen_height - 1, 0)
             self._footer.background = Colors.DEFAULT
             x = self._footer.width // 2 - len(text) // 2  # x-Position so, dass der Text mittig ist
             self._footer.write_animate(text, y=0, x=x, color=Colors.DEFAULT)
@@ -57,7 +57,7 @@ class TerminalView:
         logo_width = max(len(line) for line in logo)
         bar_length = logo_width
 
-        startup = Window(self._screen_height -1, self._screen_width, 0, 0)
+        startup = Window(self._screen_height - self._footer.height, self._screen_width, 0, 0)
 
         win_height = parent_window.height
         win_width = parent_window.width

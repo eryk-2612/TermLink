@@ -6,6 +6,10 @@ class Others:
     SCREEN_PADDING = 1
     SCROLLBAR_PADDING = 2
     CODE_PLACEHOLDER = "_"
+    MINIMUM_ENTRIES = 2
+    MAXIMUM_ENTRIES = 2 # 0 = unlimited
+    MINIMUM_CATEGORIES = 4
+    MAXIMUM_CATEGORIES = -1 # 0 = unlimited | <0 = no additional boxes
 
 class Colors:
     DEFAULT     = 1
