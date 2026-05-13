@@ -1,5 +1,7 @@
 import curses
 import time
+from unittest import skip
+
 from core import Colors, TokensDE, Others
 
 class PasscodeBox:
@@ -65,6 +67,7 @@ class Messagebox:
         self.expires_at = time.time() + self.duration
         self.drawn = False
         self.color = color
+        self._skip = False
 
         self.messagebox_height = 3
         self.messagebox_width = len(text) + 4
@@ -81,7 +84,13 @@ class Messagebox:
 
     @property
     def visible(self):
-        return time.time() < self.expires_at
+        if self._skip:
+            return False
+        else:
+            return time.time() < self.expires_at
+
+    def skip(self):
+        self._skip = True
 
     def draw(self):
         if self.drawn:

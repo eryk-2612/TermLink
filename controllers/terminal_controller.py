@@ -62,9 +62,12 @@ class TerminalController:
         entered_code = self.state.entered_code
         if screen == Screens.SIGNIN:
             self.trigger_event(Events.SIGNIN)
-        if screen == Screens.BOOT and focus == Focus.LOCK:
-            if len(entered_code) == len(self.model.unlock_code):
-                self.trigger_event(Events.ATTEMPT_UNLOCK)
+        if screen == Screens.BOOT:
+            if focus == Focus.LOCK:
+                if len(entered_code) == len(self.model.unlock_code):
+                    self.trigger_event(Events.ATTEMPT_UNLOCK)
+            if focus == Focus.MSG:
+                self.trigger_event(Events.SKIP)
 
     def number_pressed(self, key):
         focus = self.state.focus
@@ -107,6 +110,9 @@ class TerminalController:
         if event == Events.SIGNIN:
             self.continue_boot()
             return True
+        if event == Events.SKIP:
+            self.skip_messagebox()
+            return True
         if screen == Screens.BOOT:
             if focus == Focus.LOCK:
                 if event == Events.ATTEMPT_UNLOCK:
@@ -128,6 +134,10 @@ class TerminalController:
         else:
             self.prepare_messagebox(TokensDE.MSG_FAIL, Colors.SELECTED, self.get_window(True))
             self.state.entered_code = ""
+
+    def skip_messagebox(self):
+        if self.state.msgbox:
+            self.state.msgbox.skip()
 
     def prepare_messagebox(self, text, color, parent):
         self.state.msgbox = self.view.create_messagebox(text.upper(), color, parent)

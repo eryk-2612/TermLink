@@ -1,5 +1,3 @@
-from unittest.mock import DEFAULT
-
 from core import Colors, Others
 import curses
 import time
@@ -122,21 +120,16 @@ class Window:
     def move(self, y, x):
         self.win.mvwin(y, x)
 
-    # def resize(self, h, w):
-    #     self._win_height = h
-    #     self._win_width = w
-    #     self.win.resize(h, w)
-
     def write_animate(self, text, y=1, x=2, delay=0.0, color=Colors.DEFAULT, bold=False):
         curses.flushinp()
 
-        max_width = self.width - x - 1  # Platz bis zum Rand
+        max_width = self.width - x - 1
 
         if len(text) > max_width:
             if max_width > 4:
                 text = text[:max_width - 4] + "..."
             else:
-                text = text[:max_width]  # falls extrem wenig Platz
+                text = text[:max_width]
 
         for char in text:
             if bold:
@@ -156,28 +149,32 @@ class Window:
 
     def write_new_line(self, text, delay=0.0, color=Colors.DEFAULT, bold=False):
         if text == "":
-            self.log.append("")  # Log erweitern
-            self.write_animate("", y=len(self.log))  # in der letzten Zeile schreiben
+            self.log.append("")
+            self.write_animate("", y=len(self.log))
         else:
             wrapped = textwrap.wrap(text, self.width - 4)
             self.log.extend(wrapped)
-            last_line = len(self.log) - len(wrapped) # bestimmt die letzte zeile des logs
+            last_line = len(self.log) - len(wrapped)
             for i, line in enumerate(self.log):
                 if i >= last_line:
-                    self.write_animate(line, i + 1, delay=delay, color=color, bold=bold)  # animieren
+                    self.write_animate(line, i + 1, delay=delay, color=color, bold=bold)
                 else:
-                    self.write_animate(line, i + 1, delay=0, color=color, bold=bold)  # nicht animieren
+                    self.write_animate(line, i + 1, delay=0, color=color, bold=bold)
+
+    def log_lines(self, lines):
+        if lines:
+            for line in lines:
+                split_lines = line.split('\n')
+                for subline in split_lines:
+                    wrapped = textwrap.wrap(subline, self.width - 4)
+                    self.log.extend(wrapped if wrapped else [''])
 
     def render_log(self, offset=0):
-        if self.boxed:
-            self.draw_box()
-
         visible_lines = self.height - 2
         start = offset
         end = offset + visible_lines
 
         for i, line in enumerate(self.log[start:end]):
-            # Leere Zeile vorher überschreiben, um Reste zu löschen
             self.win.addstr(i + 1, 2, " " * (self.width - 4))
             self.write_simple(line, y=i + 1, x=2)
 

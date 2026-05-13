@@ -146,7 +146,7 @@ class ExplorerController(TerminalController):
         self.switch_focus(Focus.CATEGORIES)
 
     def open_entry(self, entry):
-        #self.set_focus(Focus.CONTENT)
+        self.switch_focus(Focus.CONTENT)
         self.state.open_entry = entry
         if entry.type == EntryTypes.QUIT:
             self.trigger_event(Events.QUIT)
@@ -182,6 +182,7 @@ class ExplorerController(TerminalController):
         screen = self.state.screen
         focus = self.state.focus
         open_category = self.state.open_category
+        open_entry = self.state.open_entry
 
         match screen:
              case Screens.TERMINAL:
@@ -190,3 +191,6 @@ class ExplorerController(TerminalController):
                 self.view.draw_sidebar(self.model.categories, self.state.selected_category, self.state.category_scroll_offset, True if focus == Focus.CATEGORIES else False)
                 self.view.draw_entry_list(open_category, self.state.selected_entry, self.state.entry_scroll_offset, True if focus == Focus.ENTRIES else False)
                 self.view.draw_content_window()
+                if focus == Focus.CONTENT: # HIER WEITER MACHEN
+                    if open_entry.type == EntryTypes.TEXT:
+                        self.view.display_text(open_entry.lines, self.state.content_scroll_offset, True if focus == Focus.CONTENT else False)

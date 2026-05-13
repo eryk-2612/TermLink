@@ -53,6 +53,7 @@ class Events:
     ATTEMPT_UNLOCK      = "try_unlock"
     SIGNIN              = "signin"
     QUIT                = "quit"
+    SKIP                = "skip"
 
 class TokensDE:
     MSG_SUCCESS     = "Zugriff gewährt"

@@ -284,11 +284,20 @@ class ExplorerView(TerminalView):
             sidebar_spacing = Others.SCROLLBAR_PADDING
             height = self._screen_height - self._header.height - self._footer.height - self._entry_list.height
             width = self._screen_width - self._sidebar.width - Others.SCREEN_PADDING - sidebar_spacing
-            y = self._entry_list.start_y + self._entry_list.height
+            y = self._entry_list.start_y + self._entry_list.height + Others.SCREEN_PADDING
             x = self._sidebar.width + sidebar_spacing
             self._content = Window(height, width, y, x)
             self._content.draw_box()
             self._content.refresh()
 
-    def display_content(self):
-        pass
+
+    def display_text(self, lines, scroll_offset, infocus):
+        if not self._content:
+            return
+        if self._content:
+            if infocus:
+                self._content.log_lines(lines)
+                visible_lines = self._content.height - 2
+                max_offset = max(0, len(self._content.log) - visible_lines)
+                scroll_offset = max(0, min(scroll_offset, max_offset))
+                self._content.render_log(scroll_offset)
