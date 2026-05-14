@@ -1,5 +1,4 @@
 import curses
-
 from views.terminal_view import TerminalView
 import time
 from .window import Window
@@ -13,6 +12,8 @@ class ExplorerView(TerminalView):
         self._sidebar = None
         self._entry_list = None
         self._content = None
+        self._content_inner = None
+        self._content_scrollbar = None
         self._sidebar_scrollbar = None
         self._entries_scrollbar = None
         self._categories = []
@@ -25,6 +26,11 @@ class ExplorerView(TerminalView):
 
     def get_visible_entries_count(self):
         return self._visible_entries_count
+
+    def get_content_max_scroll(self):
+        if not self._content_inner:
+            return 0
+        return self._content_inner.get_max_scroll_offset()
 
     def draw_header(self, title=""):
         if not self._header:
@@ -100,7 +106,7 @@ class ExplorerView(TerminalView):
             else:
                 title = categories[actual_index].title
 
-                if selected_category == actual_index:
+                if selected_category == actual_index and infocus:
                     bgcolor = Colors.SELECTED
                     txtcolor = Colors.SELECTED
                 else:
@@ -215,7 +221,6 @@ class ExplorerView(TerminalView):
                 txtcolor = Colors.DEFAULT
             else:
                 title = entries[actual_index].title
-
                 if selected_entry == actual_index and infocus:
                     bgcolor = Colors.SELECTED
                     txtcolor = Colors.SELECTED
@@ -230,9 +235,6 @@ class ExplorerView(TerminalView):
         try:
             if not self._entries_scrollbar:
                 self._entries_scrollbar = Window(height, 1, y, x, parent_window=entries_win)
-
-            if self._entries_scrollbar.height != height:
-                self._entries_scrollbar.resize(height, 1)
 
             up_y = 1
             down_y = max(1, height - 2)
@@ -284,20 +286,63 @@ class ExplorerView(TerminalView):
             sidebar_spacing = Others.SCROLLBAR_PADDING
             height = self._screen_height - self._header.height - self._footer.height - self._entry_list.height
             width = self._screen_width - self._sidebar.width - Others.SCREEN_PADDING - sidebar_spacing
-            y = self._entry_list.start_y + self._entry_list.height + Others.SCREEN_PADDING
+            y = self._entry_list.start_y + self._entry_list.height
             x = self._sidebar.width + sidebar_spacing
             self._content = Window(height, width, y, x)
             self._content.draw_box()
             self._content.refresh()
 
-
     def display_text(self, lines, scroll_offset, infocus):
         if not self._content:
             return
-        if self._content:
-            if infocus:
-                self._content.log_lines(lines)
-                visible_lines = self._content.height - 2
-                max_offset = max(0, len(self._content.log) - visible_lines)
-                scroll_offset = max(0, min(scroll_offset, max_offset))
-                self._content.render_log(scroll_offset)
+
+        if not self._content_inner and infocus:
+            self._content_inner = Window(self._content.height - 2, self._content.width - 3, 1, 1, parent_window=self._content)
+
+        self.draw_content_scrollbar(self._content, self._content.height - 2, scroll_offset, 1, self._content.width - 2, infocus)
+
+        if self._content_inner and infocus:
+            self._content_inner.dump_log()
+            self._content_inner.log_lines(lines)
+            self._content_inner.render_log(scroll_offset)
+
+    def clear_content(self):
+        if not self._content_inner:
+            return
+
+        self._content_inner.empty()
+        self._content_inner.refresh()
+
+    def draw_content_scrollbar(self, content_win, height, scroll_offset, y, x, infocus):
+        try:
+            if not self._content_scrollbar:
+                self._content_scrollbar = Window(height, 1, y, x, parent_window=content_win)
+
+            up_y = 1
+            down_y = max(1, height - 2)
+
+            can_scroll_up = scroll_offset > 0
+            can_scroll_down = scroll_offset < self.get_content_max_scroll()
+
+            scroll_needed = self.get_content_max_scroll() > 0
+
+            arrow_up = "△"
+            arrow_down = "▽"
+
+            if can_scroll_up:
+                arrow_up = "▲"
+
+            if can_scroll_down:
+                arrow_down = "▼"
+
+            if not scroll_needed or not infocus:
+                arrow_up = " "
+                arrow_down = " "
+
+            self._content_scrollbar.write_simple(arrow_up, up_y, 0)
+            self._content_scrollbar.write_simple(arrow_down, down_y, 0)
+
+            self._content_scrollbar.refresh()
+
+        except curses.error:
+            pass

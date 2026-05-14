@@ -22,6 +22,7 @@ class TermTypes:
 class EntryTypes:
     TEXT    = "text"
     SWITCH  = "switch"
+    BUTTON  = "button"
     AUDIO   = "audio"
     LOST    = "lost"
     QUIT    = "quit"

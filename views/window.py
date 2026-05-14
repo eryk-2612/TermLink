@@ -34,7 +34,7 @@ class Window:
             self.draw_box()
         self.refresh()
 
-    def empty(self, text_length):
+    def empty(self, text_length=0):
         # this code clears the box from old texts but keeps desired text intact - should work with line breaking text
 
         if self.boxed:
@@ -166,19 +166,26 @@ class Window:
             for line in lines:
                 split_lines = line.split('\n')
                 for subline in split_lines:
-                    wrapped = textwrap.wrap(subline, self.width - 4)
+                    wrapped = textwrap.wrap(subline, self.width - 2)
                     self.log.extend(wrapped if wrapped else [''])
 
     def render_log(self, offset=0):
-        visible_lines = self.height - 2
+        visible_lines = self.height
         start = offset
         end = offset + visible_lines
 
         for i, line in enumerate(self.log[start:end]):
-            self.win.addstr(i + 1, 2, " " * (self.width - 4))
-            self.write_simple(line, y=i + 1, x=2)
+            self.win.addstr(i, 1, " " * (self.width -2))
+            self.write_simple(line, y=i, x=1)
 
         self.refresh()
 
     def dump_log(self):
         self.log = []
+
+    def get_visible_log_lines(self):
+        return self.height
+
+    def get_max_scroll_offset(self):
+        visible_lines = self.get_visible_log_lines()
+        return max(0, len(self.log) - visible_lines)

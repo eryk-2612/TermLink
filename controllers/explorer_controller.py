@@ -48,11 +48,14 @@ class ExplorerController(TerminalController):
                     self.state.e_index -= 1
                     if self.state.e_index < self.state.entry_scroll_offset:
                         self.state.entry_scroll_offset = self.state.e_index
-            if focus == Focus.CATEGORIES:
+            elif focus == Focus.CATEGORIES:
                 if c_index > 0:
                     self.state.c_index -= 1
                     if self.state.c_index < self.state.category_scroll_offset:
                         self.state.category_scroll_offset = self.state.c_index
+            elif focus == Focus.CONTENT:
+                if self.state.content_scroll_offset > 0:
+                    self.state.content_scroll_offset -= 1
 
     def arrowdown_pressed(self):
         screen = self.state.screen
@@ -68,13 +71,16 @@ class ExplorerController(TerminalController):
                     self.state.e_index += 1
                     if self.state.e_index >= self.state.entry_scroll_offset + visible_entries_count:
                         self.state.entry_scroll_offset = self.state.e_index - visible_entries_count + 1
-            if focus == Focus.CATEGORIES:
+            elif focus == Focus.CATEGORIES:
                 total_categories = len(self.model.categories)
                 visible_categories_count = self.view.get_visible_categories_count()
                 if c_index < total_categories - 1:
                     self.state.c_index += 1
                     if self.state.c_index >= self.state.category_scroll_offset + visible_categories_count:
                         self.state.category_scroll_offset = self.state.c_index - visible_categories_count + 1
+            elif focus == Focus.CONTENT:
+                max_scroll = self.view.get_content_max_scroll()
+                self.state.content_scroll_offset = min(self.state.content_scroll_offset + 1, max_scroll)
 
     def arrowleft_pressed(self):
         screen = self.state.screen
@@ -102,6 +108,8 @@ class ExplorerController(TerminalController):
         if screen == Screens.TERMINAL:
             if focus == Focus.ENTRIES:
                 self.trigger_event(Events.CLOSE_CATEGORY)
+            elif focus == Focus.CONTENT:
+                self.trigger_event(Events.CLOSE_ENTRY)
 
     def handle_events(self):
         super().handle_events()
@@ -120,13 +128,13 @@ class ExplorerController(TerminalController):
             if event == Events.OPEN_CATEGORY:
                 self.open_category(self.model.categories[self.state.c_index])
                 return True
-            if event == Events.CLOSE_CATEGORY:
+            elif event == Events.CLOSE_CATEGORY:
                 self.close_category()
                 return True
-            if event == Events.OPEN_ENTRY:
+            elif event == Events.OPEN_ENTRY:
                 self.open_entry(self.state.open_category.entries[self.state.e_index])
                 return True
-            if event == Events.CLOSE_ENTRY:
+            elif event == Events.CLOSE_ENTRY:
                 self.close_entry()
                 return True
         return False
@@ -191,6 +199,8 @@ class ExplorerController(TerminalController):
                 self.view.draw_sidebar(self.model.categories, self.state.selected_category, self.state.category_scroll_offset, True if focus == Focus.CATEGORIES else False)
                 self.view.draw_entry_list(open_category, self.state.selected_entry, self.state.entry_scroll_offset, True if focus == Focus.ENTRIES else False)
                 self.view.draw_content_window()
-                if focus == Focus.CONTENT: # HIER WEITER MACHEN
+                if open_entry is None:
+                    self.view.clear_content()
+                if focus == Focus.CONTENT:
                     if open_entry.type == EntryTypes.TEXT:
                         self.view.display_text(open_entry.lines, self.state.content_scroll_offset, True if focus == Focus.CONTENT else False)
