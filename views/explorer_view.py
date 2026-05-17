@@ -88,7 +88,7 @@ class ExplorerView(TerminalView):
         max_scroll = max(0, total_categories - length)
         scroll_offset = min(scroll_offset, max_scroll)
 
-        self.draw_sidebar_scrollbar(self._sidebar, total_height, total_categories, length, scroll_offset, y, self._sidebar.width - 1, infocus)
+        self._sidebar_scrollbar = self.draw_scrollbar(self._sidebar, self._sidebar_scrollbar, total_height, total_categories, length, scroll_offset, y, self._sidebar.width - 1, infocus)
 
         while len(self._categories) < length:
             self._categories.append(None)
@@ -116,26 +116,6 @@ class ExplorerView(TerminalView):
             self.draw_category(title, y, box_height, box_width, i, bgcolor, txtcolor)
 
             y += box_height
-
-    def draw_sidebar_scrollbar(self, sidebar_win, height, total_categories, visible_categories, scroll_offset, y, x, infocus):
-        if not self._sidebar_scrollbar:
-            self._sidebar_scrollbar = Window(height, 1, y, x, parent_window=sidebar_win)
-        arrow_up = "△"
-        arrow_down = "▽"
-        up_y = 1
-        down_y = height - 2
-        can_scroll_up = scroll_offset > 0
-        can_scroll_down = scroll_offset + visible_categories < total_categories
-        if can_scroll_up:
-            arrow_up = "▲"
-        if can_scroll_down:
-            arrow_down = "▼"
-        if not can_scroll_up and not can_scroll_down or not infocus:
-            arrow_up = " "
-            arrow_down = " "
-        self._sidebar_scrollbar.write_simple(arrow_up, up_y, 0)
-        self._sidebar_scrollbar.write_simple(arrow_down, down_y, 0)
-        self._sidebar_scrollbar.refresh()
 
     def draw_category(self, title,y, box_height, box_width, wid, bgcolor, txtcolor):
         while len(self._categories) <= wid:
@@ -202,7 +182,7 @@ class ExplorerView(TerminalView):
 
         self._entry_list.write_simple(TokensDE.FILES.upper(), y - 1, 0)
 
-        self.draw_entries_scrollbar(self._entry_list, total_height, total_entries, length, scroll_offset, y, self._entry_list.width - 1, infocus)
+        self._entries_scrollbar = self.draw_scrollbar(self._entry_list, self._entries_scrollbar, total_height, total_entries, length, scroll_offset, y, self._entry_list.width - 1, infocus)
 
         while len(self._entries) < length:
             self._entries.append(None)
@@ -231,39 +211,40 @@ class ExplorerView(TerminalView):
             self.draw_entry(title, current_y, box_height, box_width, i, bgcolor, txtcolor)
             current_y += box_height
 
-    def draw_entries_scrollbar(self, entries_win, height, total_entries, visible_entries_count, scroll_offset, y, x, infocus):
-        try:
-            if not self._entries_scrollbar:
-                self._entries_scrollbar = Window(height, 1, y, x, parent_window=entries_win)
+    def draw_scrollbar(self, parent_win, scrollbar_win, height, total, visible_count, scroll_offset, y, x, infocus):
+        if not scrollbar_win:
+            scrollbar_win = Window(height, 1, y, x, parent_window=parent_win)
 
-            up_y = 1
-            down_y = max(1, height - 2)
+        up_y = 1
+        down_y = max(1, height - 2)
 
-            can_scroll_up = scroll_offset > 0
-            can_scroll_down = scroll_offset + visible_entries_count < total_entries
+        can_scroll_up = scroll_offset > 0
+        can_scroll_down = scroll_offset + visible_count < total
 
-            scroll_needed = total_entries > visible_entries_count
+        scroll_needed = total > visible_count
 
-            arrow_up = "△"
-            arrow_down = "▽"
+        arrow_up = "△"
+        arrow_down = "▽"
 
+        if can_scroll_up:
+            arrow_up = "▲"
+
+        if can_scroll_down:
+            arrow_down = "▼"
+
+        if not scroll_needed or not infocus:
+            arrow_up = " "
+            arrow_down = " "
+
+        if up_y == down_y:
             if can_scroll_up:
-                arrow_up = "▲"
-
-            if can_scroll_down:
-                arrow_down = "▼"
-
-            if not scroll_needed or not infocus:
-                arrow_up = " "
-                arrow_down = " "
-
-            self._entries_scrollbar.write_simple(arrow_up, up_y, 0)
-            self._entries_scrollbar.write_simple(arrow_down, down_y, 0)
-
-            self._entries_scrollbar.refresh()
-
-        except curses.error:
-            pass
+                scrollbar_win.write_simple(arrow_up, up_y, 0)
+            elif can_scroll_down:
+                scrollbar_win.write_simple(arrow_down, down_y, 0)
+        else:
+            scrollbar_win.write_simple(arrow_up, up_y, 0)
+            scrollbar_win.write_simple(arrow_down, down_y, 0)
+        return scrollbar_win
 
     def draw_entry(self, title, y, box_height, box_width, wid, bgcolor, txtcolor):
         while len(self._entries) <= wid:
@@ -299,50 +280,20 @@ class ExplorerView(TerminalView):
         if not self._content_inner and infocus:
             self._content_inner = Window(self._content.height - 2, self._content.width - 3, 1, 1, parent_window=self._content)
 
-        self.draw_content_scrollbar(self._content, self._content.height - 2, scroll_offset, 1, self._content.width - 2, infocus)
-
         if self._content_inner and infocus:
             self._content_inner.dump_log()
             self._content_inner.log_lines(lines)
             self._content_inner.render_log(scroll_offset)
 
+        self._content_scrollbar = self.draw_scrollbar(self._content, self._content_scrollbar, self._content.height - 2, self.get_content_max_scroll(), 0, scroll_offset, 1, self._content.width - 2, infocus)
+
     def clear_content(self):
         if not self._content_inner:
             return
+        else:
+            self._content_inner.empty()
 
-        self._content_inner.empty()
-        self._content_inner.refresh()
-
-    def draw_content_scrollbar(self, content_win, height, scroll_offset, y, x, infocus):
-        try:
-            if not self._content_scrollbar:
-                self._content_scrollbar = Window(height, 1, y, x, parent_window=content_win)
-
-            up_y = 1
-            down_y = max(1, height - 2)
-
-            can_scroll_up = scroll_offset > 0
-            can_scroll_down = scroll_offset < self.get_content_max_scroll()
-
-            scroll_needed = self.get_content_max_scroll() > 0
-
-            arrow_up = "△"
-            arrow_down = "▽"
-
-            if can_scroll_up:
-                arrow_up = "▲"
-
-            if can_scroll_down:
-                arrow_down = "▼"
-
-            if not scroll_needed or not infocus:
-                arrow_up = " "
-                arrow_down = " "
-
-            self._content_scrollbar.write_simple(arrow_up, up_y, 0)
-            self._content_scrollbar.write_simple(arrow_down, down_y, 0)
-
-            self._content_scrollbar.refresh()
-
-        except curses.error:
-            pass
+        if not self._content_scrollbar:
+            return
+        else:
+            self._content_scrollbar.empty()

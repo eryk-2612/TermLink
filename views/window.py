@@ -63,6 +63,7 @@ class Window:
             except curses.error:
                 pass # I know this is silly but it works
             x = padding
+        self.refresh()
 
     @property
     def log(self):
