@@ -11,12 +11,12 @@ class JsonLoader:
     def load_entry(self, entry_data):
         return EntryModel(
             title=entry_data.get("title"),
-            type=entry_data.get("type", EntryTypes.LOST),
+            type=entry_data.get("type", "text"),
             lines=entry_data.get("lines", []),
             unlock_code=entry_data.get("unlock_code"),
             default_state=entry_data.get("default_state", False),
-            state_strings=entry_data.get("state_strings"),
-            caption_strings=entry_data.get("caption_strings"),
+            state_labels=entry_data.get("state_labels"),
+            action_verbs=entry_data.get("action_verbs"),
             audio=entry_data.get("audio")
         )
 

@@ -1,4 +1,6 @@
 import curses
+from zoneinfo import available_timezones
+
 from views.terminal_view import TerminalView
 import time
 from .window import Window
@@ -297,3 +299,57 @@ class ExplorerView(TerminalView):
             return
         else:
             self._content_scrollbar.empty()
+
+    def display_switch(self, state_labels, action_verbs, switch_selected, current_state):
+        parent = self._content
+
+        if not parent:
+            return
+
+        min_box_height = 3
+        max_box_height = 5
+        available_height = parent.height - Others.BORDER_PADDING
+        box_height = max(min_box_height, min(max_box_height, available_height))
+
+        text_spacing = 2
+        min_box_width = 5
+        longest_label = max(state_labels + action_verbs, key=len, default="")
+        max_box_width = len(longest_label) + Others.BORDER_PADDING + text_spacing
+        available_width = parent.width - Others.BORDER_PADDING
+        box_width = max(min_box_width, min(max_box_width, (available_width // 2)))
+
+        y = (available_height // 2) - (box_height // 2)
+        left_x = (available_width // 2) - box_width
+        right_x = left_x + box_width
+
+        switch_left = Window(box_height, box_width, y, left_x, parent_window=parent)
+        switch_right = Window(box_height, box_width, y, right_x, parent_window=parent)
+
+        if not current_state:
+            title_l = state_labels[0]
+            title_r = action_verbs[1]
+        else:
+            title_l = action_verbs[0]
+            title_r = state_labels[1]
+
+        if switch_selected == 0:
+            color_l = Colors.SELECTED
+            color_r = Colors.DEFAULT
+        else:
+            color_l = Colors.DEFAULT
+            color_r = Colors.SELECTED
+
+        switch_left.background = color_l
+        switch_right.background = color_r
+        switch_left.draw_box()
+        switch_right.draw_box()
+
+        x_l = max(1, (box_width - len(title_l)) // 2)
+        x_r = max(1, (box_width - len(title_r)) // 2)
+        y_center = box_height // 2
+
+        switch_left.write_simple(title_l.upper(), y_center, x_l, color_l, True)
+        switch_right.write_simple(title_r.upper(), y_center, x_r, color_r, True)
+
+        switch_left.refresh()
+        switch_right.refresh()

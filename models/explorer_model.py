@@ -23,35 +23,26 @@ class EntryModel:
         unlock_code=None,
         default_state=False,
         current_state=None,
-        state_strings=None,
-        caption_strings=None,
+        state_labels=None,
+        action_verbs=None,
         audio=None
     ):
         self._title = title
-        self._type = type or EntryTypes.LOST
+        self._type = type
         self._lines = lines or []
         self._unlock_code = unlock_code
         self._default_state = default_state
         self._current_state = default_state
-        self._state_strings = state_strings or TokensDE.STATES
-        self._caption_strings = caption_strings or TokensDE.CAPTIONS
+        self._state_labels = state_labels or TokensDE.STATES
+        self._action_verbs = action_verbs or TokensDE.CAPTIONS
         self._lock = bool(self._unlock_code)
 
         self._audio = audio
-        self._is_playing = False
         self._audio_length = 0
         self._audio_start_time = 0
 
         if audio:
             self._audio_length = get_audio_length(Others.AUDIO_PATH + audio)
-
-    @property
-    def is_playing(self):
-        return self._is_playing
-
-    @is_playing.setter
-    def is_playing(self, value):
-        self._is_playing = value
 
     @property
     def audio_start_time(self):
@@ -130,31 +121,26 @@ class EntryModel:
     def default_state(self):
         return self._default_state
 
-    @default_state.setter
-    def default_state(self, value):
-        self._default_state = value
+    @property
+    def state_labels(self):
+        return self._state_labels
+
+    @state_labels.setter
+    def state_labels(self, value):
+        self._state_labels = value
 
     @property
-    def state_strings(self):
-        return self._state_strings
+    def action_verbs(self):
+        return self._action_verbs
 
-    @state_strings.setter
-    def state_strings(self, value):
-        self._state_strings = value
-
-    @property
-    def caption_strings(self):
-        return self._caption_strings
-
-    @caption_strings.setter
-    def caption_strings(self, value):
-        self._caption_strings = value
+    @action_verbs.setter
+    def action_verbs(self, value):
+        self._action_verbs = value
 
 class CategoryModel:
-    def __init__(self, title, entries=None, quit=False):
+    def __init__(self, title, entries=None):
         self._title = title
         self._entries = entries or []
-        self._quit = quit
 
     @property
     def title(self):
@@ -163,14 +149,6 @@ class CategoryModel:
     @title.setter
     def title(self, value):
         self._title = value
-
-    @property
-    def quit(self):
-        return self._quit
-
-    @quit.setter
-    def quit(self, value):
-        self._quit = value
 
     @property
     def entries(self):

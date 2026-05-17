@@ -5,6 +5,7 @@ class Others:
     COPYRIGHT  = "(C) Terminal Systems"
     SCREEN_PADDING = 1
     SCROLLBAR_PADDING = 2
+    BORDER_PADDING = 2
     CODE_PLACEHOLDER = "_"
     MINIMUM_ENTRIES = 2
     MAXIMUM_ENTRIES = 2 # 0 = unlimited
@@ -24,7 +25,6 @@ class EntryTypes:
     SWITCH  = "switch"
     BUTTON  = "button"
     AUDIO   = "audio"
-    LOST    = "lost"
     QUIT    = "quit"
 
 class Focus:
@@ -33,6 +33,7 @@ class Focus:
     CATEGORIES  = "categories"
     LOCK        = "lock"
     MSG         = "message"
+    SWITCH      = "switch"
 
 class Screens:
     SIGNIN      = "signin"

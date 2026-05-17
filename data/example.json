@@ -15,9 +15,9 @@
 						]
 					},
 					{
-						"title": null,
-						"type": "lost",
-						"lines": []
+						"title": "Datenverlust",
+						"type": "text",
+						"lines": ["[FEHLER] Kritischer Datenverlust"]
 					},
 					{
 						"title": "21/03/2126",
@@ -46,30 +46,24 @@
 						"type": "switch",
 						"unlock_code": "55555",
 						"default_state": true,
-						"state_strings": [
+						"state_labels": [
 							"Geöffnet",
 							"Verschlossen"
 						],
-						"caption_strings": [
+						"action_verbs": [
 							"Öffnen",
 							"Schließen"
-						],
-						"lines": []
+						]
 					},
 					{
 						"title": "Selbstschussanlage",
-						"type": "switch",
+						"type": "button",
 						"unlock_code": "",
 						"default_state": false,
-						"state_strings": [
-							"Scharf",
-							"Entschärft"
-						],
-						"caption_strings": [
+						"action_verbs": [
 							"Scharfstellen",
 							"Entschärfen"
-						],
-						"lines": []
+						]
 					}
 				]
 			},
