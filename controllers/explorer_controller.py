@@ -29,6 +29,7 @@ class ExplorerController(TerminalController):
         screen = self.state.screen
         open_entry = self.state.open_entry
         focus = self.state.focus
+        entered_code = self.state.entered_code
 
         if screen == Screens.TERMINAL:
             if focus == Focus.CATEGORIES:
@@ -38,6 +39,9 @@ class ExplorerController(TerminalController):
                self.trigger_event(Events.OPEN_ENTRY)
             elif focus == Focus.SWITCH:
                 open_entry.current_state = self.state.switch_selected
+            elif focus == Focus.LOCK:
+                if len(entered_code) == len(open_entry.unlock_code):
+                    self.trigger_event(Events.ATTEMPT_UNLOCK)
 
     def arrowup_pressed(self):
         screen = self.state.screen
@@ -117,6 +121,8 @@ class ExplorerController(TerminalController):
                 self.trigger_event(Events.CLOSE_CATEGORY)
             elif focus == Focus.CONTENT or focus == Focus.SWITCH:
                 self.trigger_event(Events.CLOSE_ENTRY)
+            elif focus == Focus.LOCK:
+                self.trigger_event(Events.CLOSE_ENTRY)
 
     def handle_events(self):
         super().handle_events()
@@ -144,6 +150,12 @@ class ExplorerController(TerminalController):
             elif event == Events.CLOSE_ENTRY:
                 self.close_entry()
                 return True
+            elif event == Events.CONTENT_LOCKED:
+                self.prepare_lock(self.state.open_entry.unlock_code, self.get_window())
+                return True
+            elif event == Events.ATTEMPT_UNLOCK:
+                self.unlock_entry(self.state.open_entry, self.state.entered_code)
+                return True
         return False
 
     def preview_category(self, category):
@@ -163,6 +175,7 @@ class ExplorerController(TerminalController):
     def open_entry(self, entry):
         self.switch_focus(Focus.CONTENT)
         self.state.open_entry = entry
+        self.check_entry_lock(entry)
         if entry.type == EntryTypes.QUIT:
             self.trigger_event(Events.QUIT)
 
@@ -170,7 +183,28 @@ class ExplorerController(TerminalController):
         self.state.open_entry = None
         self.state.content_scroll_offset = 0
         self.state.switch_selected = 0
+        self.state.entered_code = ""
+        self.state.content_locked = False
+        if self.state.focus == Focus.LOCK:
+            self.view.destroy_lock()
         self.switch_focus(Focus.ENTRIES)
+
+    def check_entry_lock(self, entry):
+        if entry.locked:
+            self.state.content_locked = True
+            self.trigger_event(Events.CONTENT_LOCKED)
+
+    def unlock_entry(self, entry, entered_code):
+        self.switch_focus(Focus.CONTENT)
+        if entered_code == entry.unlock_code:
+            self.prepare_messagebox(TokensDE.MSG_SUCCESS, Colors.SELECTED, self.get_window())
+            entry.unlock()
+            self.state.entered_code = ""
+            self.state.content_locked = False
+        else:
+            self.prepare_messagebox(TokensDE.MSG_FAIL, Colors.SELECTED, self.get_window())
+            self.state.entered_code = ""
+            self.state.content_locked = True
 
     def update_state(self):
         super().update_state()
@@ -178,6 +212,8 @@ class ExplorerController(TerminalController):
         screen = self.state.screen
         open_entry = self.state.open_entry
         focus = self.state.focus
+        msgbox = self.state.msgbox
+        entry = self.state.open_entry
 
         if self.state.boot_completed:
             self.state.screen = Screens.TERMINAL
@@ -191,6 +227,12 @@ class ExplorerController(TerminalController):
                 self.preview_category(self.model.categories[self.state.c_index])
             if self.state.focus == Focus.CONTENT and open_entry.type == EntryTypes.SWITCH:
                 self.switch_focus(Focus.SWITCH)
+            if focus == Focus.MSG and msgbox:
+                if not msgbox.visible:
+                    msgbox.destroy()
+                    self.state.msgbox = None
+                    self.switch_focus(Focus.CONTENT)
+                    self.check_entry_lock(entry)
 
     def draw_view(self):
         super().draw_view()
@@ -199,6 +241,7 @@ class ExplorerController(TerminalController):
         focus = self.state.focus
         open_category = self.state.open_category
         open_entry = self.state.open_entry
+        msgbox = self.state.msgbox
 
         match screen:
              case Screens.TERMINAL:
@@ -209,9 +252,13 @@ class ExplorerController(TerminalController):
                 self.view.draw_content_window()
                 if open_entry is None:
                     self.view.clear_content()
-                elif focus == Focus.CONTENT or focus == Focus.SWITCH:
+                elif (focus == Focus.CONTENT or focus == Focus.SWITCH) and not self.state.content_locked:
                     entry_type = open_entry.type
                     if entry_type == EntryTypes.TEXT:
                         self.view.display_text(open_entry.lines, self.state.content_scroll_offset, True if focus == Focus.CONTENT else False)
                     if entry_type == EntryTypes.SWITCH:
                         self.view.display_switch(open_entry.state_labels, open_entry.action_verbs, self.state.switch_selected, open_entry.current_state)
+                elif focus == Focus.LOCK:
+                    self.view.draw_lock(self.state.entered_code)
+                elif focus == Focus.MSG:
+                    self.view.draw_messagebox(msgbox)

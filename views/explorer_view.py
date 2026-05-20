@@ -1,8 +1,4 @@
-import curses
-from zoneinfo import available_timezones
-
 from views.terminal_view import TerminalView
-import time
 from .window import Window
 from .popups import Messagebox, PasscodeBox
 from core import Colors, Focus, Screens, Others, TokensDE
@@ -22,6 +18,14 @@ class ExplorerView(TerminalView):
         self._entries = []
         self._visible_categories_count = 0
         self._visible_entries_count = 0
+
+    def get_window(self, state=None):
+        super().get_window(state)
+
+        if state is not None:
+            if state.focus == Focus.CONTENT:
+                return self._content
+        return super()._get_fullscreen()
 
     def get_visible_categories_count(self):
         return self._visible_categories_count

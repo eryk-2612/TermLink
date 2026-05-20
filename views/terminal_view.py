@@ -15,16 +15,13 @@ class TerminalView:
 
     def get_window(self, state=None):
         if state is not None:
-            if state.focus == Focus.LOCK:
-                return self._passcodebox
             if state.screen == Screens.SIGNIN:
                 return self._signin
             if state.screen == Screens.BOOT:
-                return self.__get_fullscreen()
+                return self._get_fullscreen()
+        return self._get_fullscreen()
 
-        return self.__get_fullscreen()
-
-    def __get_fullscreen(self):
+    def _get_fullscreen(self):
         if not self._fullscreen:
             startup_screen_height = self._screen_height
             startup_screen_width = self._screen_width
@@ -42,15 +39,24 @@ class TerminalView:
             self._footer.write_animate(text, y=0, x=x, color=Colors.DEFAULT)
             self._footer.refresh()
 
-    def draw_lock(self, code, entered_code, parent_window):
-        self._passcodebox = PasscodeBox(parent_window, len(code), entered_code)
-        self._passcodebox.draw()
+    def create_lock(self, code, parent_window):
+        self._passcodebox = PasscodeBox(parent_window, len(code))
+
+    def draw_lock(self, entered_code):
+        self._passcodebox.draw(entered_code)
+
+    def destroy_lock(self):
+        self._passcodebox.destroy()
 
     def create_messagebox(self, text, color, parent_window, duration=1.5):
         return Messagebox(parent_window,text, color, duration)
 
     def draw_messagebox(self, messagebox):
         messagebox.draw()
+
+    def destroy_messagebox(self, messagebox):
+        if messagebox:
+            messagebox.destroy()
 
     def draw_startup_animation(self, parent_window, logo):
         logo_height = len(logo)

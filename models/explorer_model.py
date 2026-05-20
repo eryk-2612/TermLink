@@ -100,7 +100,7 @@ class EntryModel:
         self._lines = value
 
     @property
-    def lock(self):
+    def locked(self):
         return self._lock
 
     @property

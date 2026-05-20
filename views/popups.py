@@ -5,10 +5,9 @@ from unittest import skip
 from core import Colors, TokensDE, Others
 
 class PasscodeBox:
-    def __init__(self, parent_window, code_length=5, entered_code="", title=TokensDE.PASSCODE, color=Colors.DEFAULT):
+    def __init__(self, parent_window, code_length=5, title=TokensDE.PASSCODE, color=Colors.DEFAULT):
         self.parent_window = parent_window
         self.code_length = code_length
-        self.entered_code = entered_code
         self.title = title
         self.color = color
 
@@ -27,11 +26,11 @@ class PasscodeBox:
         self.title_win = self.win.derwin(1,self.box_width,0,0)
         self.input_win = self.win.derwin(self.box_height - 1, self.box_width, 1, 0)
 
-    def draw(self):
+    def draw(self, entered_code):
         title = self.title.upper()
         title_x = (self.box_width - len(title)) // 2
         self.title_win.addstr( 0, title_x, title, curses.color_pair(Colors.DEFAULT) | curses.A_BOLD)
-        self.type(self.entered_code)
+        self.type(entered_code)
         self.input_win.refresh()
         self.input_win.box()
 
@@ -57,6 +56,13 @@ class PasscodeBox:
             char = entered_code[i] if i < len(entered_code) else Others.CODE_PLACEHOLDER
             self.write(char, y=1, x=x_pos, color=Colors.DEFAULT)
         self.win.refresh()
+
+    def destroy(self):
+        if self.win:
+            self.win.clear()
+            self.win.refresh()
+            self.parent_window.reload()
+            self.win = None
 
 class Messagebox:
     def __init__(self, parent_window, text, color=Colors.DEFAULT, duration=1.5):
