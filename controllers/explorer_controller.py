@@ -9,7 +9,7 @@ class ExplorerController(TerminalController):
 
     def init_state(self):
         super().init_state()
-        self.state.screen = Screens.TERMINAL # DEBUG ONLY
+        #self.state.screen = Screens.TERMINAL # DEBUG ONLY
 
     def get_window(self, requested_window=None):
         win = super().get_window(requested_window)
@@ -266,7 +266,7 @@ class ExplorerController(TerminalController):
         focus = self.state.focus
         open_category = self.state.open_category
         open_entry = self.state.open_entry
-        popup = self.state.active_popup
+        active_popup = self.state.active_popup
         entered_code = self.state.entered_code
 
         match screen:
@@ -278,13 +278,14 @@ class ExplorerController(TerminalController):
                 self.view.draw_content_window()
                 if open_entry is None:
                     self.view.clear_content()
-                    self.view.destroy_messagebox()
-                    self.view.destroy_lock()
+                    if active_popup:
+                        self.view.destroy_messagebox()
+                        self.view.destroy_lock()
                 else:
-                    if popup:
-                        if popup == Popups.MSG:
+                    if active_popup:
+                        if active_popup == Popups.MSG:
                             self.view.draw_messagebox()
-                        elif popup == Popups.LOCK:
+                        elif active_popup == Popups.LOCK:
                             self.view.create_lock(open_entry.unlock_code, self.get_window(Focus.CONTENT))
                             self.view.draw_lock(entered_code)
                     elif not open_entry.locked:

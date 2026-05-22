@@ -33,11 +33,9 @@ class PasscodeBox(Popup):
         self.parent_height = self.parent_window.height
         self.parent_width = self.parent_window.width
 
-        # relativ im Parent zentriert
         self.y = self.parent_height // 2 - self.box_height // 2
         self.x = self.parent_width // 2 - self.box_width // 2
 
-        # Subwindow im Parent
         self.win = self.parent_window.win.derwin(self.box_height, self.box_width, self.y, self.x)
         self.title_win = self.win.derwin(1, self.box_width, 0, 0)
         self.input_win = self.win.derwin(self.box_height - 1, self.box_width, 1, 0)

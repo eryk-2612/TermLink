@@ -148,7 +148,7 @@ class Window:
         visible_lines = self.get_visible_log_lines()
         return max(0, len(self.log) - visible_lines)
 
-    def refresh(self):  # Fenster aktualisieren
+    def refresh(self):
         self.win.refresh()
 
     def clear(self):

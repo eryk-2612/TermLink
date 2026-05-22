@@ -51,14 +51,14 @@ class ExplorerView(TerminalView):
             self._header.write_simple(title.upper(), y=0, x=1, color=Colors.SELECTED, bold=True)
             self._header.refresh()
 
-    def draw_sidebar(self, categories, selected_category, category_scroll_offset, infocus):
+    def draw_sidebar(self, categories, selected_category, category_scroll_offset, in_focus):
         if not self._sidebar:
             height = (self._screen_height - self._header.height - self._footer.height - Others.SCREEN_PADDING)
             width = self._screen_width // 4 + Others.SCROLLBAR_PADDING
             self._sidebar = Window(height, width, self._header.start_y + 2, 1)
-        self.draw_all_categories(categories, selected_category, category_scroll_offset, infocus)
+        self.draw_all_categories(categories, selected_category, category_scroll_offset, in_focus)
 
-    def draw_all_categories(self, categories, selected_category, category_scroll_offset, infocus):
+    def draw_all_categories(self, categories, selected_category, category_scroll_offset, in_focus):
         max_box_height = 8
         min_box_height = 5
         minimum_categories = Others.MINIMUM_CATEGORIES
@@ -100,7 +100,7 @@ class ExplorerView(TerminalView):
         max_scroll = max(0, total_categories - length)
         scroll_offset = min(scroll_offset, max_scroll)
 
-        self._sidebar_scrollbar = self.draw_scrollbar(self._sidebar, self._sidebar_scrollbar, total_height, total_categories, length, scroll_offset, y, self._sidebar.width - 1, infocus)
+        self._sidebar_scrollbar = self.draw_scrollbar(self._sidebar, self._sidebar_scrollbar, total_height, total_categories, length, scroll_offset, y, self._sidebar.width - 1, in_focus)
 
         while len(self._categories) < length:
             self._categories.append(None)
@@ -118,7 +118,7 @@ class ExplorerView(TerminalView):
             else:
                 title = categories[actual_index].title
 
-                if selected_category == actual_index and infocus:
+                if selected_category == actual_index and in_focus:
                     bgcolor = Colors.SELECTED
                     txtcolor = Colors.SELECTED
                 else:
@@ -145,7 +145,7 @@ class ExplorerView(TerminalView):
         win.write_animate(title.upper(), 1, 2, 0, txtcolor, True)
         win.refresh()
 
-    def draw_entry_list(self, category, selected_entry, entry_scroll_offset, infocus):
+    def draw_entry_list(self, category, selected_entry, entry_scroll_offset, in_focus):
         box_height = 3
         if category:
             entries = category.entries
@@ -155,7 +155,7 @@ class ExplorerView(TerminalView):
                 width = ((self._screen_width - Others.SCREEN_PADDING) - self._sidebar.width - sidebar_spacing) //  3 * 2
                 x = self._sidebar.width + sidebar_spacing
                 self._entry_list = Window(height, width, self._header.start_y + 1, x)
-            self.draw_all_entries(box_height, entries, selected_entry, entry_scroll_offset, infocus)
+            self.draw_all_entries(box_height, entries, selected_entry, entry_scroll_offset, in_focus)
 
     def calculate_entry_list_height(self, box_height, entries, minimum_entries=Others.MINIMUM_ENTRIES, maximum_entries=Others.MAXIMUM_ENTRIES, y_offset=2):
         total_entries = len(entries)
@@ -168,7 +168,7 @@ class ExplorerView(TerminalView):
         required_height = visible_entries * box_height + y_offset
         return required_height
 
-    def draw_all_entries(self, box_height, entries, selected_entry, entry_scroll_offset, infocus):
+    def draw_all_entries(self, box_height, entries, selected_entry, entry_scroll_offset, in_focus):
         minimum_entries = Others.MINIMUM_ENTRIES
         maximum_entries = Others.MAXIMUM_ENTRIES
         y = 2
@@ -194,7 +194,7 @@ class ExplorerView(TerminalView):
 
         self._entry_list.write_simple(TokensDE.FILES.upper(), y - 1, 0)
 
-        self._entries_scrollbar = self.draw_scrollbar(self._entry_list, self._entries_scrollbar, total_height, total_entries, length, scroll_offset, y, self._entry_list.width - 1, infocus)
+        self._entries_scrollbar = self.draw_scrollbar(self._entry_list, self._entries_scrollbar, total_height, total_entries, length, scroll_offset, y, self._entry_list.width - 1, in_focus)
 
         while len(self._entries) < length:
             self._entries.append(None)
@@ -213,7 +213,7 @@ class ExplorerView(TerminalView):
                 txtcolor = Colors.DEFAULT
             else:
                 title = entries[actual_index].title
-                if selected_entry == actual_index and infocus:
+                if selected_entry == actual_index and in_focus:
                     bgcolor = Colors.SELECTED
                     txtcolor = Colors.SELECTED
                 else:
@@ -223,7 +223,7 @@ class ExplorerView(TerminalView):
             self.draw_entry(title, current_y, box_height, box_width, i, bgcolor, txtcolor)
             current_y += box_height
 
-    def draw_scrollbar(self, parent_win, scrollbar_win, height, total, visible_count, scroll_offset, y, x, infocus):
+    def draw_scrollbar(self, parent_win, scrollbar_win, height, total, visible_count, scroll_offset, y, x, in_focus):
         if not scrollbar_win:
             scrollbar_win = Window(height, 1, y, x, parent_window=parent_win)
 
@@ -244,7 +244,7 @@ class ExplorerView(TerminalView):
         if can_scroll_down:
             arrow_down = "▼"
 
-        if not scroll_needed or not infocus:
+        if not scroll_needed or not in_focus:
             arrow_up = " "
             arrow_down = " "
 
@@ -285,19 +285,19 @@ class ExplorerView(TerminalView):
             self._content.draw_box()
             self._content.refresh()
 
-    def display_text(self, lines, scroll_offset, infocus):
+    def display_text(self, lines, scroll_offset, in_focus):
         if not self._content:
             return
 
-        if not self._content_inner and infocus:
+        if not self._content_inner and in_focus:
             self._content_inner = Window(self._content.height - 2, self._content.width - 3, 1, 1, parent_window=self._content)
 
-        if self._content_inner and infocus:
+        if self._content_inner and in_focus:
             self._content_inner.dump_log()
             self._content_inner.log_lines(lines)
             self._content_inner.render_log(scroll_offset)
 
-        self._content_scrollbar = self.draw_scrollbar(self._content, self._content_scrollbar, self._content.height - 2, self.get_content_max_scroll(), 0, scroll_offset, 1, self._content.width - 2, infocus)
+        self._content_scrollbar = self.draw_scrollbar(self._content, self._content_scrollbar, self._content.height - 2, self.get_content_max_scroll(), 0, scroll_offset, 1, self._content.width - 2, in_focus)
 
     def clear_content(self):
         if not self._content:
