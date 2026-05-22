@@ -14,17 +14,28 @@ class TerminalView:
         self._messagebox = None
         self._signin = None
 
-    def get_window(self, requested_window=None):
-        if requested_window:
-            if requested_window == Screens.SIGNIN:
-                return self._signin
-            elif requested_window == Popups.MSG:
-                return self._messagebox
-            elif requested_window == Popups.LOCK:
-                return self._passcodebox
-        return self._get_fullscreen()
+    @property
+    def signin_window(self):
+        return self._signin
 
-    def _get_fullscreen(self):
+    @property
+    def passcode_window(self):
+        return self._passcodebox
+
+    @property
+    def messagebox_window(self):
+        return self._messagebox
+
+    @property
+    def footer_window(self):
+        return self._footer
+
+    @property
+    def header_window(self):
+        return self._header
+
+    @property
+    def fullscreen_window(self):
         if not self._fullscreen:
             startup_screen_height = self._screen_height
             startup_screen_width = self._screen_width
@@ -52,6 +63,7 @@ class TerminalView:
     def destroy_lock(self):
         if self._passcodebox:
             self._passcodebox.destroy()
+            self._passcodebox = None
 
     def create_messagebox(self, text, color, parent_window, duration=1.5):
         self._messagebox = Messagebox(parent_window,text, color, duration)
@@ -112,15 +124,15 @@ class TerminalView:
         parent_window.reload()
         del startup
 
-    def draw_signin(self, parent, image=""):
+    def draw_signin(self, image=""):
         image_height = len(image)
         image_width = max(len(line) for line in image)
 
-        start_y = parent.height // 2 - image_height // 2
-        start_x = parent.width // 2 - image_width // 2
+        start_y = self._screen_height// 2 - image_height // 2
+        start_x = self._screen_width // 2 - image_width // 2
 
         if self._signin is None:
-            self._signin = Window(self._screen_height -1, self._screen_width, 0, 0)
+            self._signin = Window(self._screen_height, self._screen_width, 0, 0)
             self._signin.background = Colors.DEFAULT
 
         for i, line in enumerate(image):

@@ -40,6 +40,7 @@ class Screens:
     SIGNIN      = "signin"
     BOOT        = "boot"
     TERMINAL    = "terminal"
+    FULLSCREEN  = "fullscreen"
 
 class Events:
     CLOSE_ENTRY         = "close_entry"

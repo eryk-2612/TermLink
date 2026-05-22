@@ -28,7 +28,7 @@ class PasscodeBox(Popup):
         self.color = color
 
         self.box_height = 4
-        self.box_width = code_length * 2 + 3
+        self.box_width = max((code_length * 2 + 3), len(self.title) + 2)
 
         self.parent_height = self.parent_window.height
         self.parent_width = self.parent_window.width
@@ -38,8 +38,8 @@ class PasscodeBox(Popup):
         self.x = self.parent_width // 2 - self.box_width // 2
 
         # Subwindow im Parent
-        self.win = self.parent_window.win.derwin(self.box_height,self.box_width,self.y,self.x)
-        self.title_win = self.win.derwin(1,self.box_width,0,0)
+        self.win = self.parent_window.win.derwin(self.box_height, self.box_width, self.y, self.x)
+        self.title_win = self.win.derwin(1, self.box_width, 0, 0)
         self.input_win = self.win.derwin(self.box_height - 1, self.box_width, 1, 0)
 
     def draw(self, entered_code):
@@ -67,6 +67,7 @@ class PasscodeBox(Popup):
 
     def type(self, entered_code):
         start_x = 2
+        start_x = 1 + (self.box_width - self.code_length * 2) // 2
         for i in range(self.code_length):
             x_pos = start_x + i * 2
             char = entered_code[i] if i < len(entered_code) else Others.CODE_PLACEHOLDER

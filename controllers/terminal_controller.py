@@ -15,16 +15,20 @@ class TerminalController:
             return None
 
     def get_window(self, requested_window=None):
-        if requested_window:
-            return self.view.get_window(requested_window)
-        else:
+        if not requested_window:
             if self.state.focus == Focus.LOCK:
-                return self.view.get_window(Focus.LOCK)
+                return self.view.passcode_window
             if self.state.screen == Screens.SIGNIN:
-                return self.view.get_window(Screens.SIGNIN)
-            if self.state.screen == Screens.BOOT:
-                return self.view.get_window()
-        return self.view.get_window()
+                return self.view.signin_window
+            elif self.state.screen == Screens.BOOT:
+                return self.view.fullscreen_window
+        if requested_window:
+            match requested_window:
+                case Screens.SIGNIN:
+                    return self.view.signin_window
+                case Screens.BOOT:
+                    return self.view.fullscreen_window
+        return self.view.fullscreen_window
 
     def clear_focus(self):
         self.state.focus = None
@@ -139,12 +143,11 @@ class TerminalController:
     def unlock_terminal(self):
         if self.state.entered_code == self.model.unlock_code:
             self.model.unlock()
-            self.prepare_messagebox(TokensDE.MSG_SUCCESS, Colors.SELECTED, self.get_window())
+            self.prepare_messagebox(TokensDE.MSG_SUCCESS, Colors.SELECTED, self.get_window(Screens.FULLSCREEN))
             self.activate_popup(Popups.MSG)
         else:
-            self.prepare_messagebox(TokensDE.MSG_FAIL, Colors.SELECTED, self.get_window())
+            self.prepare_messagebox(TokensDE.MSG_FAIL, Colors.SELECTED, self.get_window(Screens.FULLSCREEN))
             self.activate_popup(Popups.MSG)
-
         self.state.entered_code = ""
 
     def prepare_lock(self, code, parent):
@@ -158,8 +161,9 @@ class TerminalController:
         self.view.create_messagebox(text.upper(), color, parent)
 
     def enter_code(self, entered_code, key):
-        if len(entered_code) < len(self.model.unlock_code):
-            self.state.entered_code += chr(key)
+        if self.state.screen == Screens.BOOT:
+            if len(entered_code) < len(self.model.unlock_code):
+                self.state.entered_code += chr(key)
 
     def undo_enter_code(self, entered_code):
         if entered_code:
@@ -193,7 +197,7 @@ class TerminalController:
 
         match screen:
             case Screens.SIGNIN:
-                self.view.draw_signin(self.get_window(), TokensDE.SIGNIN)
+                self.view.draw_signin(TokensDE.SIGNIN)
             case Screens.BOOT:
                 if self.get_window(Screens.SIGNIN):
                     self.view.undraw_signin(TokensDE.SIGNIN)
@@ -202,7 +206,7 @@ class TerminalController:
                     if popup == Popups.MSG:
                         self.view.draw_messagebox()
                     elif popup == Popups.LOCK:
-                        self.view.create_lock(self.model.unlock_code, self.get_window())
+                        self.view.create_lock(self.model.unlock_code, self.get_window(Screens.FULLSCREEN))
                         self.view.draw_lock(entered_code)
                 elif not self.model.locked:
                     self.view.draw_startup_animation(self.get_window(), Logo.DEFAULT)

@@ -17,8 +17,8 @@ class ExplorerState(TerminalState):
     selected_entry: int = 0
     open_category: CategoryModel = None
     open_entry: EntryModel = None
-    c_index: int = 0
-    e_index: int = 0
+    category_index: int = 0
+    entry_index: int = 0
     switch_selected: int = 0
     category_scroll_offset: int = 0
     entry_scroll_offset: int = 0

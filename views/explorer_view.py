@@ -18,11 +18,17 @@ class ExplorerView(TerminalView):
         self._visible_categories_count = 0
         self._visible_entries_count = 0
 
-    def get_window(self, requested_window=None):
-        win = super().get_window(requested_window)
-        if requested_window == Focus.CONTENT:
-            win = self._content
-        return win
+    @property
+    def sidebar_window(self):
+        return self._sidebar
+
+    @property
+    def entry_list_window(self):
+        return self._entry_list
+
+    @property
+    def content_window(self):
+        return self._content
 
     def get_visible_categories_count(self):
         return self._visible_categories_count
@@ -301,9 +307,7 @@ class ExplorerView(TerminalView):
         else:
             self._content_scrollbar.empty()
 
-    def clear_passcodebox(self):
-        if self._passcodebox:
-            self._passcodebox.clear()
+        self._content.reload()
 
     def display_switch(self, state_labels, action_verbs, switch_selected, current_state):
         parent = self._content

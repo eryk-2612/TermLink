@@ -13,14 +13,20 @@ class ExplorerController(TerminalController):
 
     def get_window(self, requested_window=None):
         win = super().get_window(requested_window)
-        if requested_window:
-            return self.view.get_window(requested_window)
-        else:
+        if not requested_window:
+            if self.state.focus == Focus.LOCK:
+                return self.view.passcode_window
             if self.state.focus == Focus.CONTENT:
-                return self.view.get_window(Focus.CONTENT)
+                return self.view.content_window
             if self.state.screen == Screens.TERMINAL:
-                return self.view.get_window()
-        return self.view.get_window()
+                return self.view.fullscreen_window
+        if requested_window:
+            match requested_window:
+                case Screens.TERMINAL:
+                    return self.view.fullscreen_window
+                case Focus.CONTENT:
+                    return self.view.content_window
+        return win
 
     def handle_input(self):
         key = super().handle_input()
@@ -52,7 +58,7 @@ class ExplorerController(TerminalController):
                self.trigger_event(Events.OPEN_ENTRY)
             elif focus == Focus.CONTENT:
                 if open_entry.type == EntryTypes.SWITCH:
-                    self.state.switch_selected = open_entry.current_state
+                    open_entry.current_state = self.state.switch_selected
             elif popup == Popups.LOCK:
                 if len(entered_code) == len(open_entry.unlock_code):
                     self.unlock_entry()
@@ -62,20 +68,20 @@ class ExplorerController(TerminalController):
     def arrowup_pressed(self):
         screen = self.state.screen
         focus = self.state.focus
-        c_index = self.state.c_index
-        e_index = self.state.e_index
+        category_index = self.state.category_index
+        entry_index = self.state.entry_index
 
         if screen == Screens.TERMINAL:
             if focus == Focus.CATEGORIES:
-                if c_index > 0:
-                    self.state.c_index -= 1
-                    if self.state.c_index < self.state.category_scroll_offset:
-                        self.state.category_scroll_offset = self.state.c_index
+                if category_index > 0:
+                    self.state.category_index -= 1
+                    if self.state.category_index < self.state.category_scroll_offset:
+                        self.state.category_scroll_offset = self.state.category_index
             elif focus == Focus.ENTRIES:
-                if e_index > 0:
-                    self.state.e_index -= 1
-                    if self.state.e_index < self.state.entry_scroll_offset:
-                        self.state.entry_scroll_offset = self.state.e_index
+                if entry_index > 0:
+                    self.state.entry_index -= 1
+                    if self.state.entry_index < self.state.entry_scroll_offset:
+                        self.state.entry_scroll_offset = self.state.entry_index
             elif focus == Focus.CONTENT:
                 if self.state.content_scroll_offset > 0:
                     self.state.content_scroll_offset -= 1
@@ -83,24 +89,24 @@ class ExplorerController(TerminalController):
     def arrowdown_pressed(self):
         screen = self.state.screen
         focus = self.state.focus
-        c_index = self.state.c_index
-        e_index = self.state.e_index
+        c_index = self.state.category_index
+        e_index = self.state.entry_index
 
         if screen == Screens.TERMINAL:
             if focus == Focus.CATEGORIES:
                 total_categories = len(self.model.categories)
                 visible_categories_count = self.view.get_visible_categories_count()
                 if c_index < total_categories - 1:
-                    self.state.c_index += 1
-                    if self.state.c_index >= self.state.category_scroll_offset + visible_categories_count:
-                        self.state.category_scroll_offset = self.state.c_index - visible_categories_count + 1
+                    self.state.category_index += 1
+                    if self.state.category_index >= self.state.category_scroll_offset + visible_categories_count:
+                        self.state.category_scroll_offset = self.state.category_index - visible_categories_count + 1
             elif focus == Focus.ENTRIES:
                 visible_entries_count = self.view.get_visible_entries_count()
                 total_entries = len(self.state.open_category.entries)
                 if e_index < total_entries - 1:
-                    self.state.e_index += 1
-                    if self.state.e_index >= self.state.entry_scroll_offset + visible_entries_count:
-                        self.state.entry_scroll_offset = self.state.e_index - visible_entries_count + 1
+                    self.state.entry_index += 1
+                    if self.state.entry_index >= self.state.entry_scroll_offset + visible_entries_count:
+                        self.state.entry_scroll_offset = self.state.entry_index - visible_entries_count + 1
             elif focus == Focus.CONTENT:
                 max_scroll = self.view.get_content_max_scroll()
                 self.state.content_scroll_offset = min(self.state.content_scroll_offset + 1, max_scroll)
@@ -142,6 +148,12 @@ class ExplorerController(TerminalController):
             elif focus == Focus.CONTENT or focus == Focus.LOCK:
                 self.trigger_event(Events.CLOSE_ENTRY)
 
+    def enter_code(self, entered_code, key):
+        super().enter_code(entered_code, key)
+        if self.state.open_entry:
+            if len(entered_code) < len(self.state.open_entry.unlock_code):
+                self.state.entered_code += chr(key)
+
     def handle_events(self):
         super().handle_events()
         while self.state.event_queue:
@@ -157,13 +169,13 @@ class ExplorerController(TerminalController):
 
         if screen == Screens.TERMINAL:
             if event == Events.OPEN_CATEGORY:
-                self.open_category(self.model.categories[self.state.c_index])
+                self.open_category(self.model.categories[self.state.category_index])
                 return True
             elif event == Events.CLOSE_CATEGORY:
                 self.close_category()
                 return True
             elif event == Events.OPEN_ENTRY:
-                self.open_entry(self.state.open_category.entries[self.state.e_index])
+                self.open_entry(self.state.open_category.entries[self.state.entry_index])
                 return True
             elif event == Events.CLOSE_ENTRY:
                 self.close_entry()
@@ -175,12 +187,12 @@ class ExplorerController(TerminalController):
 
     def open_category(self, category):
         self.state.open_category = category
-        self.state.e_index = 0
+        self.state.entry_index = 0
         self.switch_focus(Focus.ENTRIES)
 
     def close_category(self):
         self.state.open_category = None
-        self.state.e_index = 0
+        self.state.entry_index = 0
         self.state.entry_scroll_offset = 0
         self.switch_focus(Focus.CATEGORIES)
 
@@ -198,6 +210,8 @@ class ExplorerController(TerminalController):
         self.state.open_entry = None
         self.state.content_scroll_offset = 0
         self.state.switch_selected = 0
+        self.state.entered_code = ""
+        self.clear_popup()
         self.switch_focus(Focus.ENTRIES)
 
     def unlock_entry(self):
@@ -224,16 +238,16 @@ class ExplorerController(TerminalController):
             if focus is None:
                 self.switch_focus(Focus.CATEGORIES)
             elif self.state.focus == Focus.ENTRIES:
-                self.state.selected_entry = self.state.e_index
+                self.state.selected_entry = self.state.entry_index
             elif self.state.focus == Focus.CATEGORIES:
-                self.state.selected_category = self.state.c_index
-                self.preview_category(self.model.categories[self.state.c_index])
+                self.state.selected_category = self.state.category_index
+                self.preview_category(self.model.categories[self.state.category_index])
             elif self.state.focus == Focus.LOCK:
                 if not self.state.open_entry.locked:
                     self.switch_focus(Focus.CONTENT)
                 else:
                     if self.view.messagebox_finished:
-                        self.open_entry(self.state.open_category.entries[self.state.e_index])
+                        self.open_entry(self.state.open_category.entries[self.state.entry_index])
 
     def draw_view(self):
         super().draw_view()
@@ -254,7 +268,8 @@ class ExplorerController(TerminalController):
                 self.view.draw_content_window()
                 if open_entry is None:
                     self.view.clear_content()
-                    self.view.clear_passcodebox()
+                    self.view.destroy_messagebox()
+                    self.view.destroy_lock()
                 else:
                     if popup:
                         if popup == Popups.MSG:
