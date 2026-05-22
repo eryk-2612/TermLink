@@ -56,14 +56,16 @@
 						]
 					},
 					{
-						"title": "Selbstschussanlage",
+						"title": "Selbstzerstörung",
 						"type": "button",
-						"unlock_code": "",
 						"default_state": false,
+						"state_labels": [
+							"Aktiviert"
+						],
 						"action_verbs": [
-							"Scharfstellen",
-							"Entschärfen"
-						]
+							"Aktivieren"
+						],
+						"message": "Selbstzerstörung\naktiviert"
 					}
 				]
 			},

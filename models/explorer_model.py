@@ -25,7 +25,8 @@ class EntryModel:
         current_state=None,
         state_labels=None,
         action_verbs=None,
-        audio=None
+        audio=None,
+        message=None
     ):
         self._title = title
         self._type = type
@@ -34,7 +35,8 @@ class EntryModel:
         self._default_state = default_state
         self._current_state = default_state
         self._state_labels = state_labels or TokensDE.STATES
-        self._action_verbs = action_verbs or TokensDE.CAPTIONS
+        self._action_verbs = action_verbs or TokensDE.VERBS
+        self._message = message or TokensDE.MESSAGE
         self._lock = bool(self._unlock_code)
 
         self._audio = audio
@@ -136,6 +138,14 @@ class EntryModel:
     @action_verbs.setter
     def action_verbs(self, value):
         self._action_verbs = value
+
+    @property
+    def message(self):
+        return self._message
+
+    @message.setter
+    def message(self, value):
+        self._message = value
 
 class CategoryModel:
     def __init__(self, title, entries=None):

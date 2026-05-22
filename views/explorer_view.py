@@ -13,6 +13,9 @@ class ExplorerView(TerminalView):
         self._content_scrollbar = None
         self._sidebar_scrollbar = None
         self._entries_scrollbar = None
+        self._switch_left = None
+        self._switch_right = None
+        self._button = None
         self._categories = []
         self._entries = []
         self._visible_categories_count = 0
@@ -297,6 +300,11 @@ class ExplorerView(TerminalView):
         self._content_scrollbar = self.draw_scrollbar(self._content, self._content_scrollbar, self._content.height - 2, self.get_content_max_scroll(), 0, scroll_offset, 1, self._content.width - 2, infocus)
 
     def clear_content(self):
+        if not self._content:
+            return
+        else:
+            self._content.empty()
+
         if not self._content_inner:
             return
         else:
@@ -311,7 +319,6 @@ class ExplorerView(TerminalView):
 
     def display_switch(self, state_labels, action_verbs, switch_selected, current_state):
         parent = self._content
-
         if not parent:
             return
 
@@ -331,15 +338,17 @@ class ExplorerView(TerminalView):
         left_x = (available_width // 2) - box_width
         right_x = left_x + box_width
 
-        switch_left = Window(box_height, box_width, y, left_x, parent_window=parent)
-        switch_right = Window(box_height, box_width, y, right_x, parent_window=parent)
+        if not self._switch_left:
+            self._switch_left = Window(box_height, box_width, y, left_x, parent_window=parent)
+        if not self._switch_right:
+            self._switch_right = Window(box_height, box_width, y, right_x, parent_window=parent)
 
-        if not current_state:
-            title_l = state_labels[0]
-            title_r = action_verbs[1]
-        else:
+        if current_state:
             title_l = action_verbs[0]
             title_r = state_labels[1]
+        else:
+            title_l = state_labels[0]
+            title_r = action_verbs[1]
 
         if switch_selected == 0:
             color_l = Colors.SELECTED
@@ -348,17 +357,77 @@ class ExplorerView(TerminalView):
             color_l = Colors.DEFAULT
             color_r = Colors.SELECTED
 
-        switch_left.background = color_l
-        switch_right.background = color_r
-        switch_left.draw_box()
-        switch_right.draw_box()
+        self._switch_left.background = color_l
+        self._switch_right.background = color_r
+        self._switch_left.draw_box()
+        self._switch_right.draw_box()
 
         x_l = max(1, (box_width - len(title_l)) // 2)
         x_r = max(1, (box_width - len(title_r)) // 2)
         y_center = box_height // 2
 
-        switch_left.write_simple(title_l.upper(), y_center, x_l, color_l, True)
-        switch_right.write_simple(title_r.upper(), y_center, x_r, color_r, True)
+        pad_l = box_width - 2
+        pad_r = box_width - 2
 
-        switch_left.refresh()
-        switch_right.refresh()
+        self._switch_left.clear_line(y_center - 1, 1, pad_l)
+        self._switch_left.clear_line(y_center, 1, pad_l)
+        self._switch_left.clear_line(y_center + 1, 1, pad_l)
+
+        self._switch_right.clear_line(y_center - 1, 1, pad_r)
+        self._switch_right.clear_line(y_center, 1, pad_r)
+        self._switch_right.clear_line(y_center + 1, 1, pad_r)
+
+
+        self._switch_left.write_simple(title_l.upper(), y_center, x_l, color_l, True)
+        self._switch_right.write_simple(title_r.upper(), y_center, x_r, color_r, True)
+
+    def display_button(self, state_labels, action_verbs, current_state):
+        parent = self._content
+        if not parent:
+            return
+
+        if current_state:
+            label = state_labels[0]
+            color = Colors.DEFAULT
+        else:
+            label = action_verbs[0]
+            color = Colors.SELECTED
+
+        min_box_height = 3
+        max_box_height = 5
+        text_spacing = 2
+        min_box_width = len(label)
+
+        available_height = parent.height - Others.BORDER_PADDING
+        available_width = parent.width - Others.BORDER_PADDING
+
+        box_height = max(min_box_height, min(max_box_height, available_height))
+
+        max_box_width = len(label) + Others.BORDER_PADDING + text_spacing
+
+        box_width = max(min_box_width, min(max_box_width, available_width))
+
+        y = (available_height // 2) - (box_height // 2)
+        x = (available_width // 2) - (box_width // 2)
+
+        if not self._button:
+            self._button = Window(box_height, box_width, y, x, parent_window=parent)
+        if self._button.height != box_height or self._button.width != box_width:
+            self._button.background = Colors.DEFAULT
+            self._button.clear()
+            self._button.refresh()
+            self._button.resize(box_height, box_width)
+
+        self._button.background = color
+        self._button.draw_box()
+
+        x_l = max(1, (box_width - len(label)) // 2)
+        y_center = box_height // 2
+
+        pad_l = box_width - 2
+
+        self._button.clear_line(y_center - 1, 1, pad_l)
+        self._button.clear_line(y_center, 1, pad_l)
+        self._button.clear_line(y_center + 1, 1, pad_l)
+
+        self._button.write_simple(label.upper(), y_center, x_l, color, True)

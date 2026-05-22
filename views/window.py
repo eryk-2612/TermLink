@@ -77,6 +77,10 @@ class Window:
     def move(self, y, x):
         self.win.mvwin(y, x)
 
+    def resize(self, height, width):
+        self.win.resize(height, width)
+        self.height, self.width = height, width
+
     def write_animate(self, text, y=1, x=2, delay=0.0, color=Colors.DEFAULT, bold=False):
         curses.flushinp()
 
@@ -186,3 +190,9 @@ class Window:
                 pass # I know this is silly but it works
             x = padding
         self.refresh()
+
+    def clear_line(self, y, x, width):
+        try:
+            self.win.addstr(y, x, " " * width)
+        except curses.error:
+            pass

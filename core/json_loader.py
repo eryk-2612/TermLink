@@ -17,7 +17,8 @@ class JsonLoader:
             default_state=entry_data.get("default_state", False),
             state_labels=entry_data.get("state_labels"),
             action_verbs=entry_data.get("action_verbs"),
-            audio=entry_data.get("audio")
+            audio=entry_data.get("audio"),
+            message=entry_data.get("message")
         )
 
     def load_category(self, category_data):
@@ -31,8 +32,6 @@ class JsonLoader:
         if termtype == TermTypes.EXPLORER:
             categories = [self.load_category(c) for c in terminal.get("categories", [])]
             return ExplorerModel(name=terminal.get("title", TokensDE.TERM_UNNAMED), categories=categories, unlock_code=terminal.get("unlock_code"))
-        elif termtype == TermTypes.CHAT:
-            return ChatModel(name=terminal.get("title", TokensDE.TERM_UNNAMED), unlock_code=terminal.get("unlock_code"))
         else:
             return TerminalModel(TokensDE.TERM_UNNAMED)
 

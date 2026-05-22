@@ -84,9 +84,10 @@ class Messagebox(Popup):
         self._drawn = False
         self.color = color
         self._skip = False
+        lines = text.split("\n")
 
-        self.messagebox_height = 3
-        self.messagebox_width = len(text) + 4
+        self.messagebox_height = len(lines) + 2
+        self.messagebox_width = max(len(line) for line in lines) + 4
 
         self.parent_height = self.parent_window.height
         self.parent_width = self.parent_window.width
@@ -119,13 +120,39 @@ class Messagebox(Popup):
         self.win.refresh()
         self._drawn = True
 
-    def write(self, text, y=1, x=2, delay=0.0, color=Colors.DEFAULT, bold=False):
+    def write(self,text, y=None, x=None, delay=0.0, color=Colors.DEFAULT, bold=False, centered=True):
         curses.flushinp()
-        for char in text:
-            if bold:
-                self.win.addstr(y,x,char,curses.color_pair(color) | curses.A_BOLD)
+
+        lines = text.split("\n")
+
+        if y is None:
+            y = (self.messagebox_height // 2) - (len(lines) // 2)
+
+        attr = curses.color_pair(color)
+
+        if bold:
+            attr |= curses.A_BOLD
+
+        for line_index, line in enumerate(lines):
+
+            current_y = y + line_index
+
+            if centered:
+                usable_width = self.messagebox_width - 2
+                current_x = 1 + ((usable_width - len(line)) // 2)
             else:
-                self.win.addstr(y,x,char,curses.color_pair(color))
-            x += 1
-            self.win.refresh()
-            time.sleep(delay)
+                current_x = x if x is not None else 0
+
+            for char in line:
+                try:
+                    self.win.addstr(current_y, current_x, char, attr)
+                except curses.error:
+                    pass
+
+                current_x += 1
+
+                if delay > 0:
+                    self.win.refresh()
+                    time.sleep(delay)
+
+        self.win.refresh()

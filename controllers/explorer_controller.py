@@ -9,7 +9,7 @@ class ExplorerController(TerminalController):
 
     def init_state(self):
         super().init_state()
-        #self.state.screen = Screens.TERMINAL # DEBUG ONLY
+        self.state.screen = Screens.TERMINAL # DEBUG ONLY
 
     def get_window(self, requested_window=None):
         win = super().get_window(requested_window)
@@ -59,6 +59,10 @@ class ExplorerController(TerminalController):
             elif focus == Focus.CONTENT:
                 if open_entry.type == EntryTypes.SWITCH:
                     open_entry.current_state = self.state.switch_selected
+                if open_entry.type == EntryTypes.BUTTON:
+                    open_entry.current_state = True
+                    self.prepare_messagebox(open_entry.message, Colors.SELECTED, self.get_window(Focus.CONTENT))
+                    self.activate_popup(Popups.MSG)
             elif popup == Popups.LOCK:
                 if len(entered_code) == len(open_entry.unlock_code):
                     self.unlock_entry()
@@ -70,6 +74,7 @@ class ExplorerController(TerminalController):
         focus = self.state.focus
         category_index = self.state.category_index
         entry_index = self.state.entry_index
+        open_entry = self.state.open_entry
 
         if screen == Screens.TERMINAL:
             if focus == Focus.CATEGORIES:
@@ -83,27 +88,30 @@ class ExplorerController(TerminalController):
                     if self.state.entry_index < self.state.entry_scroll_offset:
                         self.state.entry_scroll_offset = self.state.entry_index
             elif focus == Focus.CONTENT:
-                if self.state.content_scroll_offset > 0:
-                    self.state.content_scroll_offset -= 1
+                if self.state.content_scroll_offset == 0:
+                    self.trigger_event(Events.CLOSE_ENTRY)
+                if open_entry.type == EntryTypes.TEXT:
+                    if self.state.content_scroll_offset > 0:
+                        self.state.content_scroll_offset -= 1
 
     def arrowdown_pressed(self):
         screen = self.state.screen
         focus = self.state.focus
-        c_index = self.state.category_index
-        e_index = self.state.entry_index
+        category_index = self.state.category_index
+        entry_index = self.state.entry_index
 
         if screen == Screens.TERMINAL:
             if focus == Focus.CATEGORIES:
                 total_categories = len(self.model.categories)
                 visible_categories_count = self.view.get_visible_categories_count()
-                if c_index < total_categories - 1:
+                if category_index < total_categories - 1:
                     self.state.category_index += 1
                     if self.state.category_index >= self.state.category_scroll_offset + visible_categories_count:
                         self.state.category_scroll_offset = self.state.category_index - visible_categories_count + 1
             elif focus == Focus.ENTRIES:
                 visible_entries_count = self.view.get_visible_entries_count()
                 total_entries = len(self.state.open_category.entries)
-                if e_index < total_entries - 1:
+                if entry_index < total_entries - 1:
                     self.state.entry_index += 1
                     if self.state.entry_index >= self.state.entry_scroll_offset + visible_entries_count:
                         self.state.entry_scroll_offset = self.state.entry_index - visible_entries_count + 1
@@ -199,6 +207,8 @@ class ExplorerController(TerminalController):
     def open_entry(self, entry):
         self.switch_focus(Focus.CONTENT)
         self.state.open_entry = entry
+        if entry.type == EntryTypes.SWITCH:
+            self.state.switch_selected = entry.current_state
         if entry.locked:
             self.activate_popup(Popups.LOCK)
             self.switch_focus(Focus.LOCK)
@@ -281,6 +291,8 @@ class ExplorerController(TerminalController):
                         entry_type = open_entry.type
                         if entry_type == EntryTypes.TEXT:
                             self.view.display_text(open_entry.lines, self.state.content_scroll_offset, True if focus == Focus.CONTENT else False)
-                        if entry_type == EntryTypes.SWITCH:
+                        elif entry_type == EntryTypes.SWITCH:
                             self.view.display_switch(open_entry.state_labels, open_entry.action_verbs, self.state.switch_selected, open_entry.current_state)
+                        elif entry_type == EntryTypes.BUTTON:
+                            self.view.display_button(open_entry.state_labels, open_entry.action_verbs, open_entry.current_state)
 

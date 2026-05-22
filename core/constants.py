@@ -61,7 +61,8 @@ class TokensDE:
     TERM_UNNAMED    = "Unbenanntes Terminal"
     ERROR           = "Fehler"
     STATES          = ["An", "Aus"]
-    CAPTIONS        = ["Anschalten", "Ausschalten"]
+    VERBS           = ["Anschalten", "Ausschalten"]
+    MESSAGE         = "Aktiviert"
     PASSCODE        = "Zugangscode"
     SIGNIN          = [
         r"                                              ",
