@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from models import CategoryModel, EntryModel
-from views import Messagebox
 
 @dataclass
 class TerminalState:
@@ -8,16 +7,9 @@ class TerminalState:
     screen: str = None
     event_queue: list = field(default_factory=list)
     focus: str = None
+    active_popup: str = None
     entered_code: str = ""
-    msgbox: Messagebox = None
     boot_completed: bool = False
-    term_locked: bool = False
-
-@dataclass
-class ChatState(TerminalState):
-    response: str = ""
-    request: str = ""
-    input_buffer: str = ""
 
 @dataclass
 class ExplorerState(TerminalState):
@@ -31,4 +23,3 @@ class ExplorerState(TerminalState):
     category_scroll_offset: int = 0
     entry_scroll_offset: int = 0
     content_scroll_offset: int = 0
-    content_locked: bool = False

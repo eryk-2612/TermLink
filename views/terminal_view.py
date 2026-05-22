@@ -1,7 +1,7 @@
 import time
 from .window import Window
 from .popups import Messagebox, PasscodeBox
-from core import Colors, Focus, Screens
+from core import Colors, Focus, Screens, Popups
 
 class TerminalView:
     def __init__(self, stdscr):
@@ -11,14 +11,17 @@ class TerminalView:
         self._header = None
         self._fullscreen = None
         self._passcodebox = None
+        self._messagebox = None
         self._signin = None
 
-    def get_window(self, state=None):
-        if state is not None:
-            if state.screen == Screens.SIGNIN:
+    def get_window(self, requested_window=None):
+        if requested_window:
+            if requested_window == Screens.SIGNIN:
                 return self._signin
-            if state.screen == Screens.BOOT:
-                return self._get_fullscreen()
+            elif requested_window == Popups.MSG:
+                return self._messagebox
+            elif requested_window == Popups.LOCK:
+                return self._passcodebox
         return self._get_fullscreen()
 
     def _get_fullscreen(self):
@@ -43,20 +46,38 @@ class TerminalView:
         self._passcodebox = PasscodeBox(parent_window, len(code))
 
     def draw_lock(self, entered_code):
-        self._passcodebox.draw(entered_code)
+        if self._passcodebox:
+            self._passcodebox.draw(entered_code)
 
     def destroy_lock(self):
-        self._passcodebox.destroy()
+        if self._passcodebox:
+            self._passcodebox.destroy()
 
     def create_messagebox(self, text, color, parent_window, duration=1.5):
-        return Messagebox(parent_window,text, color, duration)
+        self._messagebox = Messagebox(parent_window,text, color, duration)
 
-    def draw_messagebox(self, messagebox):
-        messagebox.draw()
+    def draw_messagebox(self):
+        if self._messagebox:
+            self._messagebox.draw()
 
-    def destroy_messagebox(self, messagebox):
-        if messagebox:
-            messagebox.destroy()
+    def destroy_messagebox(self):
+        if self._messagebox:
+            self._messagebox.destroy()
+            self._messagebox = None
+
+    def skip_messagebox(self):
+        if self._messagebox:
+            self._messagebox.skip()
+
+    @property
+    def messagebox_finished(self):
+        if self._messagebox:
+            if self._messagebox.drawn:
+                return not self._messagebox.visible
+            else:
+                return False
+        else:
+            return True
 
     def draw_startup_animation(self, parent_window, logo):
         logo_height = len(logo)
@@ -107,20 +128,19 @@ class TerminalView:
             self._signin.refresh()
             time.sleep(0.1)
 
-    def undraw_signin(self, parent, image=""):
+    def undraw_signin(self, image=""):
         if self._signin:
             image_height = len(image)
             image_width = max(len(line) for line in image)
 
-            start_y = parent.height // 2 - image_height // 2
-            start_x = parent.width // 2 - image_width // 2
+            start_y = self._signin.height // 2 - image_height // 2
+            start_x = self._signin.width // 2 - image_width // 2
 
             for i, line in enumerate(image):
                 self._signin.write_simple(" " * len(line), y=start_y + i, x=start_x, color=Colors.DEFAULT, bold=True)
                 self._signin.refresh()
                 time.sleep(0.1)
 
-            parent.reload()
             del self._signin
             self._signin = None
 

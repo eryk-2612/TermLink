@@ -17,7 +17,6 @@ class Colors:
     SELECTED    = 2
 
 class TermTypes:
-    CHAT        = "chat"
     EXPLORER    = "explorer"
 
 class EntryTypes:
@@ -28,18 +27,19 @@ class EntryTypes:
     QUIT    = "quit"
 
 class Focus:
-    CONTENT     = "content"
     ENTRIES     = "entries"
     CATEGORIES  = "categories"
+    CONTENT     = "content"
     LOCK        = "lock"
-    MSG         = "message"
-    SWITCH      = "switch"
+
+class Popups:
+    MSG     = "msg"
+    LOCK    = "lock"
 
 class Screens:
     SIGNIN      = "signin"
     BOOT        = "boot"
     TERMINAL    = "terminal"
-    CHAT        = "chat"
 
 class Events:
     CLOSE_ENTRY         = "close_entry"
@@ -47,12 +47,8 @@ class Events:
     OPEN_CATEGORY       = "open_category"
     CLOSE_CATEGORY      = "close_category"
     CANCEL              = "cancel"
-    ATTEMPT_UNLOCK      = "try_unlock"
-    TERM_LOCKED         = "term_locked"
-    CONTENT_LOCKED      = "content_locked"
     SIGNIN              = "signin"
     QUIT                = "quit"
-    SKIP                = "skip"
 
 class TokensDE:
     MSG_SUCCESS     = "Zugriff gewährt"

@@ -1,4 +1,4 @@
-from core import Events, Logo, TokensDE, Focus, Screens, Colors, Others
+from core import Events, Logo, TokensDE, Focus, Screens, Colors, Others, Popups
 import curses
 
 class TerminalController:
@@ -14,14 +14,32 @@ class TerminalController:
         else:
             return None
 
-    def get_window(self, fullscreen=False):
-        if fullscreen:
-            return self.view.get_window()
+    def get_window(self, requested_window=None):
+        if requested_window:
+            return self.view.get_window(requested_window)
         else:
-            return self.view.get_window(self.state)
+            if self.state.focus == Focus.LOCK:
+                return self.view.get_window(Focus.LOCK)
+            if self.state.screen == Screens.SIGNIN:
+                return self.view.get_window(Screens.SIGNIN)
+            if self.state.screen == Screens.BOOT:
+                return self.view.get_window()
+        return self.view.get_window()
+
+    def clear_focus(self):
+        self.state.focus = None
+
+    def clear_popup(self):
+        self.state.active_popup = None
 
     def switch_focus(self, focus):
         self.state.focus = focus
+
+    def activate_popup(self, popup):
+        if popup and popup != "":
+            self.state.active_popup = popup
+        else:
+            self.state.active_popup = None
 
     def trigger_event(self, event):
         self.state.event_queue.append(event)
@@ -57,18 +75,22 @@ class TerminalController:
     def enter_pressed(self):
         screen = self.state.screen
         focus = self.state.focus
+        popup = self.state.active_popup
         entered_code = self.state.entered_code
+
         if screen == Screens.SIGNIN:
             self.trigger_event(Events.SIGNIN)
-        if screen == Screens.BOOT and focus == Focus.LOCK:
-            if len(entered_code) == len(self.model.unlock_code):
-                self.trigger_event(Events.ATTEMPT_UNLOCK)
-        if focus == Focus.MSG:
-            self.trigger_event(Events.SKIP)
+        if screen == Screens.BOOT:
+            if popup == Popups.MSG:
+                self.view.skip_messagebox()
+            if popup == Popups.LOCK:
+                if len(entered_code) == len(self.model.unlock_code):
+                    self.unlock_terminal()
 
     def number_pressed(self, key):
         focus = self.state.focus
         entered_code = self.state.entered_code
+
         if focus == Focus.LOCK:
             self.enter_code(entered_code, key)
 
@@ -85,8 +107,7 @@ class TerminalController:
             self.undo_enter_code(entered_code)
 
     def escape_pressed(self):
-        screen = self.state.screen
-        if screen == Screens.SIGNIN or screen == Screens.BOOT:
+        if self.state.screen == Screens.SIGNIN or self.state.screen == Screens.BOOT:
             self.trigger_event(Events.QUIT)
 
     def handle_events(self):
@@ -105,54 +126,36 @@ class TerminalController:
             self.quit()
             return True
         if event == Events.SIGNIN:
-            self.continue_boot()
+            self.boot()
             return True
-        if event == Events.SKIP:
-            self.skip_messagebox()
-            return True
-        if screen == Screens.BOOT:
-            if event == Events.TERM_LOCKED:
-                    self.prepare_lock(self.model.unlock_code, self.get_window())
-                    return True
-            if event == Events.ATTEMPT_UNLOCK:
-                    self.unlock_terminal(self.state.entered_code)
-                    return True
         return False
 
     def quit(self):
         self.state.running = False
 
-    def check_term_lock(self):
-        if self.model.locked:
-            self.trigger_event(Events.TERM_LOCKED)
-            self.state.term_locked = True
-
-    def continue_boot(self):
+    def boot(self):
         self.state.screen = Screens.BOOT
-        self.check_term_lock()
 
-    def unlock_terminal(self, entered_code):
-        if entered_code == self.model.unlock_code:
-            self.prepare_messagebox(TokensDE.MSG_SUCCESS, Colors.SELECTED, self.get_window(True))
+    def unlock_terminal(self):
+        if self.state.entered_code == self.model.unlock_code:
             self.model.unlock()
-            self.state.entered_code = ""
-            self.state.term_locked = False
+            self.prepare_messagebox(TokensDE.MSG_SUCCESS, Colors.SELECTED, self.get_window())
+            self.activate_popup(Popups.MSG)
         else:
-            self.prepare_messagebox(TokensDE.MSG_FAIL, Colors.SELECTED, self.get_window(True))
-            self.state.entered_code = ""
-            self.state.term_locked = True
+            self.prepare_messagebox(TokensDE.MSG_FAIL, Colors.SELECTED, self.get_window())
+            self.activate_popup(Popups.MSG)
+
+        self.state.entered_code = ""
 
     def prepare_lock(self, code, parent):
         self.view.create_lock(code, parent)
-        self.switch_focus(Focus.LOCK)
 
     def skip_messagebox(self):
-        if self.state.msgbox:
-            self.state.msgbox.skip()
+        if self.view.messagebox_finished:
+            self.view.skip_messagebox()
 
     def prepare_messagebox(self, text, color, parent):
-        self.state.msgbox = self.view.create_messagebox(text.upper(), color, parent)
-        self.switch_focus(Focus.MSG)
+        self.view.create_messagebox(text.upper(), color, parent)
 
     def enter_code(self, entered_code, key):
         if len(entered_code) < len(self.model.unlock_code):
@@ -164,33 +167,43 @@ class TerminalController:
 
     def update_state(self):
         screen = self.state.screen
+        popup = self.state.active_popup
         focus = self.state.focus
-        msgbox = self.state.msgbox
+
+        if self.view.messagebox_finished:
+            if self.state.active_popup == Popups.MSG:
+                self.view.destroy_messagebox()
+                self.clear_popup()
 
         if screen == Screens.BOOT:
-            if focus == Focus.MSG and msgbox:
-                if not msgbox.visible:
-                    self.view.destroy_messagebox(msgbox)
-                    self.state.msgbox = None
+            if self.model.locked:
+                if popup != Popups.MSG:
+                    self.activate_popup(Popups.LOCK)
+                    self.switch_focus(Focus.LOCK)
+            elif not self.model.locked:
+                if popup == Popups.LOCK:
+                    self.clear_popup()
+                if focus == Focus.LOCK:
                     self.switch_focus(None)
-                    self.check_term_lock()
 
     def draw_view(self):
         screen = self.state.screen
-        focus = self.state.focus
-        msgbox = self.state.msgbox
-        term_locked = self.state.term_locked
+        popup = self.state.active_popup
+        entered_code = self.state.entered_code
 
         match screen:
             case Screens.SIGNIN:
-                self.view.draw_signin(self.get_window(True), TokensDE.SIGNIN)
+                self.view.draw_signin(self.get_window(), TokensDE.SIGNIN)
             case Screens.BOOT:
-                self.view.undraw_signin(self.get_window(True), TokensDE.SIGNIN)
+                if self.get_window(Screens.SIGNIN):
+                    self.view.undraw_signin(TokensDE.SIGNIN)
                 self.view.draw_footer(Others.COPYRIGHT)
-                if focus == Focus.LOCK:
-                    self.view.draw_lock(self.state.entered_code)
-                elif focus == Focus.MSG:
-                    self.view.draw_messagebox(msgbox)
-                elif not term_locked:
-                    self.view.draw_startup_animation(self.get_window(True), Logo.DEFAULT)
+                if popup:
+                    if popup == Popups.MSG:
+                        self.view.draw_messagebox()
+                    elif popup == Popups.LOCK:
+                        self.view.create_lock(self.model.unlock_code, self.get_window())
+                        self.view.draw_lock(entered_code)
+                elif not self.model.locked:
+                    self.view.draw_startup_animation(self.get_window(), Logo.DEFAULT)
                     self.state.boot_completed = True

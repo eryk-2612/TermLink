@@ -1,6 +1,5 @@
 from views.terminal_view import TerminalView
 from .window import Window
-from .popups import Messagebox, PasscodeBox
 from core import Colors, Focus, Screens, Others, TokensDE
 
 class ExplorerView(TerminalView):
@@ -19,13 +18,11 @@ class ExplorerView(TerminalView):
         self._visible_categories_count = 0
         self._visible_entries_count = 0
 
-    def get_window(self, state=None):
-        super().get_window(state)
-
-        if state is not None:
-            if state.focus == Focus.CONTENT:
-                return self._content
-        return super()._get_fullscreen()
+    def get_window(self, requested_window=None):
+        win = super().get_window(requested_window)
+        if requested_window == Focus.CONTENT:
+            win = self._content
+        return win
 
     def get_visible_categories_count(self):
         return self._visible_categories_count
@@ -303,6 +300,10 @@ class ExplorerView(TerminalView):
             return
         else:
             self._content_scrollbar.empty()
+
+    def clear_passcodebox(self):
+        if self._passcodebox:
+            self._passcodebox.clear()
 
     def display_switch(self, state_labels, action_verbs, switch_selected, current_state):
         parent = self._content

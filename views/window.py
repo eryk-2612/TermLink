@@ -11,7 +11,6 @@ class Window:
         self._log = []
         self._start_x = begin_x
         self._start_y = begin_y
-        self.parent_window = parent_window
 
         if parent_window is None:
             self.win = curses.newwin(height, width, begin_y, begin_x)
@@ -21,49 +20,6 @@ class Window:
         self.win.timeout(timeout)
         self.win.keypad(True)
         self._win_height, self._win_width = self.win.getmaxyx()
-
-    def refresh(self):  # Fenster aktualisieren
-        self.win.refresh()
-
-    def clear(self):
-        self.win.clear()
-
-    def reload(self):
-        self.clear()
-        if self.boxed:
-            self.draw_box()
-        self.refresh()
-
-    def empty(self, text_length=0):
-        # this code clears the box from old texts but keeps desired text intact - should work with line breaking text
-
-        if self.boxed:
-            padding = 1
-        else:
-            padding = 0
-
-        x = padding
-        y = padding
-
-        space_width = self.width - padding * 2
-        space_height = self.height  - padding * 2
-
-        length = text_length
-
-        if length < space_width:
-            x = padding * 2 + length
-
-        for i in range(space_height):
-            if length > space_width:
-                length -= space_width
-                continue
-
-            try:
-                self.win.hline(i + y, x, ' ', space_width - length - padding)
-            except curses.error:
-                pass # I know this is silly but it works
-            x = padding
-        self.refresh()
 
     @property
     def log(self):
@@ -187,3 +143,46 @@ class Window:
     def get_max_scroll_offset(self):
         visible_lines = self.get_visible_log_lines()
         return max(0, len(self.log) - visible_lines)
+
+    def refresh(self):  # Fenster aktualisieren
+        self.win.refresh()
+
+    def clear(self):
+        self.win.clear()
+
+    def reload(self):
+        self.clear()
+        if self.boxed:
+            self.draw_box()
+        self.refresh()
+
+    def empty(self, text_length=0):
+        # this code clears the box from old texts but keeps desired text intact - should work with line breaking text
+
+        if self.boxed:
+            padding = 1
+        else:
+            padding = 0
+
+        x = padding
+        y = padding
+
+        space_width = self.width - padding * 2
+        space_height = self.height  - padding * 2
+
+        length = text_length
+
+        if length < space_width:
+            x = padding * 2 + length
+
+        for i in range(space_height):
+            if length > space_width:
+                length -= space_width
+                continue
+
+            try:
+                self.win.hline(i + y, x, ' ', space_width - length - padding)
+            except curses.error:
+                pass # I know this is silly but it works
+            x = padding
+        self.refresh()

@@ -1,12 +1,28 @@
 import curses
 import time
-from unittest import skip
 
 from core import Colors, TokensDE, Others
 
-class PasscodeBox:
-    def __init__(self, parent_window, code_length=5, title=TokensDE.PASSCODE, color=Colors.DEFAULT):
+class Popup:
+    def __init__(self, parent_window):
         self.parent_window = parent_window
+        self.win = None
+
+    def destroy(self):
+        if self.win:
+            self.win.clear()
+            self.win.refresh()
+            self.parent_window.reload()
+            self.win = None
+
+    def clear(self):
+        self.win.clear()
+        self.win.refresh()
+
+class PasscodeBox(Popup):
+    def __init__(self, parent_window, code_length=5, title=TokensDE.PASSCODE, color=Colors.DEFAULT):
+        super().__init__(parent_window)
+
         self.code_length = code_length
         self.title = title
         self.color = color
@@ -57,21 +73,14 @@ class PasscodeBox:
             self.write(char, y=1, x=x_pos, color=Colors.DEFAULT)
         self.win.refresh()
 
-    def destroy(self):
-        if self.win:
-            self.win.clear()
-            self.win.refresh()
-            self.parent_window.reload()
-            self.win = None
-
-class Messagebox:
+class Messagebox(Popup):
     def __init__(self, parent_window, text, color=Colors.DEFAULT, duration=1.5):
-        self.win = None
-        self._parent_window = parent_window
+        super().__init__(parent_window)
+
         self.text = text
         self.duration = duration
         self.expires_at = time.time() + self.duration
-        self.drawn = False
+        self._drawn = False
         self.color = color
         self._skip = False
 
@@ -85,8 +94,8 @@ class Messagebox:
         self.x = self.parent_width // 2 - self.messagebox_width // 2
 
     @property
-    def parent_window(self):
-        return self._parent_window
+    def drawn(self):
+        return self._drawn
 
     @property
     def visible(self):
@@ -107,7 +116,7 @@ class Messagebox:
         self.win.box()
         self.write(self.text,y=1,x=2,delay=0.02,color=self.color,bold=True)
         self.win.refresh()
-        self.drawn = True
+        self._drawn = True
 
     def write(self, text, y=1, x=2, delay=0.0, color=Colors.DEFAULT, bold=False):
         curses.flushinp()
@@ -119,10 +128,3 @@ class Messagebox:
             x += 1
             self.win.refresh()
             time.sleep(delay)
-
-    def destroy(self):
-        if self.win:
-            self.win.clear()
-            self.win.refresh()
-            self.parent_window.reload()
-            self.win = None
