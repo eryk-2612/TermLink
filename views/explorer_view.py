@@ -1,6 +1,6 @@
 from views.terminal_view import TerminalView
 from .window import Window
-from core import Colors, Focus, Screens, Others, TokensDE
+from core import Colors, Others, TokensDE
 
 class ExplorerView(TerminalView):
     def __init__(self, stdscr):

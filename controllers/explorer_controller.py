@@ -1,6 +1,5 @@
-from views import popups
 from .terminal_controller import TerminalController
-from core import Events, Logo, TokensDE, Focus, Screens, Colors, Others, EntryTypes, Popups, play_audio, stop_audio
+from core import Events, TokensDE, Focus, Screens, Colors, Others, EntryTypes, Popups, play_audio, stop_audio
 import curses
 import time
 
@@ -10,7 +9,7 @@ class ExplorerController(TerminalController):
 
     def init_state(self):
         super().init_state()
-        self.state.screen = Screens.TERMINAL # DEBUG ONLY
+        #self.state.screen = Screens.TERMINAL # DEBUG ONLY
 
     def get_window(self, requested_window=None):
         win = super().get_window(requested_window)
