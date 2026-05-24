@@ -94,6 +94,8 @@ class ExplorerController(TerminalController):
                 if open_entry.type == EntryTypes.TEXT:
                     if self.state.content_scroll_offset > 0:
                         self.state.content_scroll_offset -= 1
+            elif focus == Focus.LOCK:
+                self.trigger_event(Events.CLOSE_ENTRY)
 
     def arrowdown_pressed(self):
         screen = self.state.screen

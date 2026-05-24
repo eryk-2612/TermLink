@@ -8,9 +8,9 @@ class Others:
     BORDER_PADDING = 2
     CODE_PLACEHOLDER = "_"
     MINIMUM_ENTRIES = 2
-    MAXIMUM_ENTRIES = 2 # 0 = unlimited
-    MINIMUM_CATEGORIES = 4
-    MAXIMUM_CATEGORIES = -1 # 0 = unlimited | <0 = no additional boxes
+    MAXIMUM_ENTRIES = MINIMUM_ENTRIES # currently not recommended to change
+    MINIMUM_CATEGORIES = 4 # <0 = add empty boxes until max | 0 = dont add empty boxes | n = add empty boxes until n
+    MAXIMUM_CATEGORIES = 4 #  <=0 = no max | n = scroll when more than n
 
 class Colors:
     DEFAULT     = 1

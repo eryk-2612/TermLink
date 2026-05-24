@@ -63,45 +63,47 @@ class ExplorerView(TerminalView):
         max_box_height = 8
         min_box_height = 5
         minimum_categories = Others.MINIMUM_CATEGORIES
-        if Others.MAXIMUM_CATEGORIES < 0:
-            maximum_categories = len(categories)
-        else:
-            maximum_categories = Others.MAXIMUM_CATEGORIES
+        maximum_categories = Others.MAXIMUM_CATEGORIES
 
-        box_width = self._sidebar.width - Others.SCROLLBAR_PADDING
         available_height = self._sidebar.height - 1
         total_categories = len(categories)
         max_fit_by_min_height = available_height // min_box_height
+        box_width = self._sidebar.width - Others.SCROLLBAR_PADDING
 
-        if maximum_categories > 0:
-            max_fit_by_min_height = min(max_fit_by_min_height, maximum_categories)
-
-        length = max(minimum_categories, max_fit_by_min_height)
-        length = min(length, available_height // min_box_height)
-
-        if maximum_categories > 0:
-            length = min(length, maximum_categories)
+        if minimum_categories == -1:
+            length = max_fit_by_min_height
+            if maximum_categories >= 0:
+                length = min(length, maximum_categories)
+        elif minimum_categories > 0:
+            max_actual = maximum_categories if maximum_categories >= 0 else len(categories)
+            max_actual = max(max_actual, minimum_categories)
+            length = min(max(total_categories, minimum_categories), max_fit_by_min_height, max_actual)
+        else:
+            max_actual = maximum_categories if maximum_categories >= 0 else len(categories)
+            length = min(total_categories, max_fit_by_min_height, max_actual)
 
         length = max(1, length)
+
         box_height = available_height // length
         box_height = max(min_box_height, min(box_height, max_box_height))
+
         possible_length = available_height // box_height
-
-        if maximum_categories > 0:
+        if maximum_categories >= 0:
             possible_length = min(possible_length, maximum_categories)
+        length = min(length, possible_length)
 
-        length = max(minimum_categories, possible_length)
-        self._visible_categories_count = length
+        box_height = available_height // length
+        box_height = max(min_box_height, min(box_height, max_box_height))
+
+        scroll_offset = min(category_scroll_offset, max(0, total_categories - length))
         total_height = length * box_height
         y = max(0, self._sidebar.height - total_height)
 
         self._sidebar.write_simple(TokensDE.FOLDER.upper(), y - 1, 0)
-
-        scroll_offset = category_scroll_offset
-        max_scroll = max(0, total_categories - length)
-        scroll_offset = min(scroll_offset, max_scroll)
-
-        self._sidebar_scrollbar = self.draw_scrollbar(self._sidebar, self._sidebar_scrollbar, total_height, total_categories, length, scroll_offset, y, self._sidebar.width - 1, in_focus)
+        self._sidebar_scrollbar = self.draw_scrollbar(
+            self._sidebar, self._sidebar_scrollbar, total_height, total_categories,
+            length, scroll_offset, y, self._sidebar.width - 1, in_focus
+        )
 
         while len(self._categories) < length:
             self._categories.append(None)
@@ -111,24 +113,17 @@ class ExplorerView(TerminalView):
                 break
 
             actual_index = scroll_offset + i
-
             if actual_index >= total_categories:
-                title = ""
-                bgcolor = Colors.DEFAULT
-                txtcolor = Colors.DEFAULT
+                title, bgcolor, txtcolor = "", Colors.DEFAULT, Colors.DEFAULT
             else:
                 title = categories[actual_index].title
-
-                if selected_category == actual_index and in_focus:
-                    bgcolor = Colors.SELECTED
-                    txtcolor = Colors.SELECTED
-                else:
-                    bgcolor = Colors.DEFAULT
-                    txtcolor = Colors.DEFAULT
+                bgcolor = Colors.SELECTED if selected_category == actual_index and in_focus else Colors.DEFAULT
+                txtcolor = bgcolor
 
             self.draw_category(title, y, box_height, box_width, i, bgcolor, txtcolor)
-
             y += box_height
+
+        self._visible_categories_count = length
 
     def draw_category(self, title,y, box_height, box_width, wid, bgcolor, txtcolor):
         while len(self._categories) <= wid:
@@ -177,52 +172,48 @@ class ExplorerView(TerminalView):
         box_width = self._entry_list.width - Others.SCROLLBAR_PADDING
         available_height = self._entry_list.height - y
         total_entries = len(entries)
-        possible_length = available_height // box_height
+        max_fit = available_height // box_height
 
-        if maximum_entries > 0:
-            possible_length = min(possible_length, maximum_entries)
+        if minimum_entries == -1:
+            length = max_fit
+            if maximum_entries > 0:
+                length = min(length, maximum_entries)
+        elif minimum_entries > 0:
+            max_actual = maximum_entries if maximum_entries > 0 else total_entries
+            max_actual = max(max_actual, minimum_entries)
+            length = min(max(total_entries, minimum_entries), max_fit, max_actual)
+        else:
+            max_actual = maximum_entries if maximum_entries > 0 else total_entries
+            length = min(total_entries, max_fit, max_actual)
 
-        length = max(minimum_entries, possible_length)
         length = max(1, length)
 
-        self._visible_entries_count = length
-
         total_height = length * box_height
-
-        scroll_offset = entry_scroll_offset
-        max_scroll = max(0, total_entries - length)
-        scroll_offset = min(scroll_offset, max_scroll)
+        scroll_offset = min(entry_scroll_offset, max(0, total_entries - length))
 
         self._entry_list.write_simple(TokensDE.FILES.upper(), y - 1, 0)
-
-        self._entries_scrollbar = self.draw_scrollbar(self._entry_list, self._entries_scrollbar, total_height, total_entries, length, scroll_offset, y, self._entry_list.width - 1, in_focus)
+        self._entries_scrollbar = self.draw_scrollbar(self._entry_list, self._entries_scrollbar, total_height, total_entries,length, scroll_offset, y, self._entry_list.width - 1, in_focus)
 
         while len(self._entries) < length:
             self._entries.append(None)
 
         current_y = y
-
         for i in range(length):
             if current_y + box_height > self._entry_list.height:
                 break
 
             actual_index = scroll_offset + i
-
             if actual_index >= total_entries:
-                title = ""
-                bgcolor = Colors.DEFAULT
-                txtcolor = Colors.DEFAULT
+                title, bgcolor, txtcolor = "", Colors.DEFAULT, Colors.DEFAULT
             else:
                 title = entries[actual_index].title
-                if selected_entry == actual_index and in_focus:
-                    bgcolor = Colors.SELECTED
-                    txtcolor = Colors.SELECTED
-                else:
-                    bgcolor = Colors.DEFAULT
-                    txtcolor = Colors.DEFAULT
+                bgcolor = Colors.SELECTED if selected_entry == actual_index and in_focus else Colors.DEFAULT
+                txtcolor = bgcolor
 
             self.draw_entry(title, current_y, box_height, box_width, i, bgcolor, txtcolor)
             current_y += box_height
+
+        self._visible_entries_count = length
 
     def draw_scrollbar(self, parent_win, scrollbar_win, height, total, visible_count, scroll_offset, y, x, in_focus):
         if not scrollbar_win:
