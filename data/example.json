@@ -1,7 +1,7 @@
 {
 	"terminal": {
 		"title": "Terminal des Kapitaens",
-		"unlock_code": "55555",
+		"unlock_code": "nostromo",
 		"type": "explorer",
 		"categories": [
 			{

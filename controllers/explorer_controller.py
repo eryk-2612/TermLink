@@ -1,7 +1,8 @@
 from views import popups
 from .terminal_controller import TerminalController
-from core import Events, Logo, TokensDE, Focus, Screens, Colors, Others, EntryTypes, Popups
+from core import Events, Logo, TokensDE, Focus, Screens, Colors, Others, EntryTypes, Popups, play_audio, stop_audio
 import curses
+import time
 
 class ExplorerController(TerminalController):
     def __init__(self, stdscr, model, view, state):
@@ -9,7 +10,7 @@ class ExplorerController(TerminalController):
 
     def init_state(self):
         super().init_state()
-        #self.state.screen = Screens.TERMINAL # DEBUG ONLY
+        self.state.screen = Screens.TERMINAL # DEBUG ONLY
 
     def get_window(self, requested_window=None):
         win = super().get_window(requested_window)
@@ -207,22 +208,32 @@ class ExplorerController(TerminalController):
     def open_entry(self, entry):
         self.switch_focus(Focus.CONTENT)
         self.state.open_entry = entry
-        if entry.type == EntryTypes.SWITCH:
-            self.state.switch_selected = entry.current_state
         if entry.locked:
             self.activate_popup(Popups.LOCK)
             self.switch_focus(Focus.LOCK)
         else:
+            if entry.type == EntryTypes.SWITCH:
+                self.state.switch_selected = entry.current_state
+            if entry.type == EntryTypes.AUDIO:
+                path = Others.AUDIO_PATH + entry.audio
+                success = play_audio(path)
+                self.state.open_entry.is_playing = success
+                if success:
+                    entry.audio_start_time = time.time()
             if entry.type == EntryTypes.QUIT:
                 self.trigger_event(Events.QUIT)
 
     def close_entry(self):
-        self.state.open_entry = None
+        if self.state.open_entry.type == EntryTypes.AUDIO:
+            stop_audio()
+            self.state.open_entry.is_playing = False
+
         self.state.content_scroll_offset = 0
         self.state.switch_selected = 0
         self.state.entered_code = ""
         self.clear_popup()
         self.switch_focus(Focus.ENTRIES)
+        self.state.open_entry = None
 
     def unlock_entry(self):
         if self.state.entered_code == self.state.open_entry.unlock_code:
@@ -296,4 +307,7 @@ class ExplorerController(TerminalController):
                             self.view.display_switch(open_entry.state_labels, open_entry.action_verbs, self.state.switch_selected, open_entry.current_state)
                         elif entry_type == EntryTypes.BUTTON:
                             self.view.display_button(open_entry.state_labels, open_entry.action_verbs, open_entry.current_state)
+                        elif entry_type == EntryTypes.AUDIO:
+                            elapsed_time = min((time.time() - open_entry.audio_start_time), open_entry.audio_length)
+                            self.view.display_audioplayer(open_entry.is_playing, open_entry.audio_length, elapsed_time)
 

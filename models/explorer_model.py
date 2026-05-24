@@ -42,6 +42,7 @@ class EntryModel:
         self._audio = audio
         self._audio_length = 0
         self._audio_start_time = 0
+        self._is_playing = False
 
         if audio:
             self._audio_length = get_audio_length(Others.AUDIO_PATH + audio)
@@ -59,9 +60,23 @@ class EntryModel:
         return self._audio_length
 
     @property
+    def is_playing(self):
+        return self._is_playing
+
+    @is_playing.setter
+    def is_playing(self, value):
+        self._is_playing = value
+
+    @property
     def title(self):
         if self._title:
-            return self._title
+            if self.type == EntryTypes.AUDIO:
+                if self.is_playing:
+                    return "■ " + self._title
+                else:
+                    return "▶ " + self._title
+            else:
+                return self._title
         else :
             return TokensDE.ERROR
 

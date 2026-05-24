@@ -1,7 +1,7 @@
-import time
 from .window import Window
 from .popups import Messagebox, PasscodeBox
 from core import Colors, Focus, Screens, Popups
+import time
 
 class TerminalView:
     def __init__(self, stdscr):

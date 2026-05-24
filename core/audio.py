@@ -1,19 +1,20 @@
 import pygame
 
-def toggle_audio(audio = None, toggle = True):
+def play_audio(audio):
     if not pygame.mixer.get_init():
         pygame.mixer.init()
 
     if not audio:
         return False
 
-    if toggle:
-        pygame.mixer.music.load(audio)
-        pygame.mixer.music.play()
-        return True
-    else:
+    pygame.mixer.music.load(audio)
+    pygame.mixer.music.play()
+    return True
+
+def stop_audio():
+    if pygame.mixer.get_init():
         pygame.mixer.music.stop()
-        return False
+        pygame.mixer.music.unload()
 
 def get_audio_length(audio):
     if not pygame.mixer.get_init():

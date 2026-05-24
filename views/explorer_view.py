@@ -16,6 +16,7 @@ class ExplorerView(TerminalView):
         self._switch_left = None
         self._switch_right = None
         self._button = None
+        self._audioplayer = None
         self._categories = []
         self._entries = []
         self._visible_categories_count = 0
@@ -431,3 +432,54 @@ class ExplorerView(TerminalView):
         self._button.clear_line(y_center + 1, 1, pad_l)
 
         self._button.write_simple(label.upper(), y_center, x_l, color, True)
+
+    def display_audioplayer(self, is_playing, audio_length=0, elapsed_time=0):
+        if not audio_length > 0:
+            return
+
+        parent = self._content
+        if not parent:
+            return
+
+        box_height = 5
+        spacing = 2
+
+        available_height = parent.height - Others.BORDER_PADDING
+        available_width = parent.width - Others.BORDER_PADDING
+
+        box_width = available_width // 3
+        bar_width = box_width - Others.BORDER_PADDING - spacing
+
+        y_box = (available_height // 2) - (box_height // 2)
+        x_box = (available_width // 2) - (box_width // 2)
+
+        if not self._audioplayer:
+            self._audioplayer = Window(box_height, box_width, y_box, x_box, parent_window=parent)
+
+        self._audioplayer.background = Colors.DEFAULT
+        self._audioplayer.draw_box()
+
+        time_text = f"{self.format_time(elapsed_time)} / {self.format_time(audio_length)}"
+
+        text_y = box_height // 2 + 1
+        text_x = box_width // 2 - len(time_text) // 2
+
+        progress = min(elapsed_time / audio_length, 1.0)
+
+        filled = int(progress * bar_width)
+        filled = max(0, min(filled, bar_width))
+
+        remaining = max(0, bar_width - filled)
+
+        bar_y = box_height // 2
+        bar_x = box_width // 2 - bar_width // 2
+
+        if is_playing:
+            self._audioplayer.write_simple(time_text, text_y, text_x, bold=True)
+            self._audioplayer.write_simple("▬" * remaining, bar_y, bar_x + filled, Colors.DEFAULT)
+            self._audioplayer.write_simple("▬" * (filled - 1) + "●", bar_y, bar_x, Colors.DEFAULT)
+
+    def format_time(self, seconds):
+        minutes = int(seconds) // 60
+        secs = int(seconds) % 60
+        return f"{minutes:02}:{secs:02}"
