@@ -16,7 +16,6 @@ def init_menu(height, width, terminals):
     menu = terminals + [TokensDE.LEAVE]
     
     while True:
-        # Alle Einträge zentriert zeichnen
         for idx, item in enumerate(menu):
             if item == TokensDE.LEAVE:
                 text = TokensDE.LEAVE.upper()
@@ -31,7 +30,6 @@ def init_menu(height, width, terminals):
             else:
                 win.write_simple(text, y, x, Colors.DEFAULT, False)
 
-        # Eingabe abfragen
         key = win.win.getch()
         if key == curses.KEY_UP:
             current_idx = (current_idx - 1) % len(menu)
@@ -46,10 +44,10 @@ def init_menu(height, width, terminals):
             return selected
 
 def main(stdscr):
-    curses.curs_set(0)  # Versteckt den curser
-    stdscr.keypad(True) # Aktiviert das numpad
-    #stdscr.timeout(300) # nach 300ms input skippen
-    init_colors()       # Init Farben
+    curses.curs_set(0)
+    stdscr.keypad(True)
+    #stdscr.timeout(300)
+    init_colors()
 
     loader = JsonLoader()
     terminals = loader.load_all_terminals()
