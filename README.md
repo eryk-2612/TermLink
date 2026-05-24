@@ -4,6 +4,10 @@ Build using pygame and curses.
   - Use the example.json as a template.
 - UI is hardcoded in german but easy to change. 
 
+## Dependencies
+  - pip install windows-curses
+  - pip install pygame-ce   
+
 ## Features
 - Lock the Terminal or Entries with a passcode containing digits or characters
 - Entries can be:
