@@ -39,7 +39,7 @@ class Popups:
 class Screens:
     SIGNIN      = "signin"
     BOOT        = "boot"
-    TERMINAL    = "terminal"
+    EXPLORER    = "explorer"
     FULLSCREEN  = "fullscreen"
 
 class Events:

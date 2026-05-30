@@ -18,11 +18,11 @@ class ExplorerController(TerminalController):
                 return self.view.passcode_window
             if self.state.focus == Focus.CONTENT:
                 return self.view.content_window
-            if self.state.screen == Screens.TERMINAL:
+            if self.state.screen == Screens.EXPLORER:
                 return self.view.fullscreen_window
         if requested_window:
             match requested_window:
-                case Screens.TERMINAL:
+                case Screens.EXPLORER:
                     return self.view.fullscreen_window
                 case Focus.CONTENT:
                     return self.view.content_window
@@ -50,7 +50,7 @@ class ExplorerController(TerminalController):
         popup = self.state.active_popup
         entered_code = self.state.entered_code
 
-        if screen == Screens.TERMINAL:
+        if screen == Screens.EXPLORER:
             if focus == Focus.CATEGORIES:
                 if self.state.open_category and not self.state.open_category.entries == []:
                     self.trigger_event(Events.OPEN_CATEGORY)
@@ -76,7 +76,7 @@ class ExplorerController(TerminalController):
         entry_index = self.state.entry_index
         open_entry = self.state.open_entry
 
-        if screen == Screens.TERMINAL:
+        if screen == Screens.EXPLORER:
             if focus == Focus.CATEGORIES:
                 if category_index > 0:
                     self.state.category_index -= 1
@@ -102,7 +102,7 @@ class ExplorerController(TerminalController):
         category_index = self.state.category_index
         entry_index = self.state.entry_index
 
-        if screen == Screens.TERMINAL:
+        if screen == Screens.EXPLORER:
             if focus == Focus.CATEGORIES:
                 total_categories = len(self.model.categories)
                 visible_categories_count = self.view.get_visible_categories_count()
@@ -126,7 +126,7 @@ class ExplorerController(TerminalController):
         focus = self.state.focus
         open_entry = self.state.open_entry
 
-        if screen == Screens.TERMINAL:
+        if screen == Screens.EXPLORER:
             if focus == Focus.ENTRIES:
                 self.trigger_event(Events.CLOSE_CATEGORY)
             elif focus == Focus.CONTENT:
@@ -138,7 +138,7 @@ class ExplorerController(TerminalController):
         focus = self.state.focus
         open_entry = self.state.open_entry
 
-        if screen == Screens.TERMINAL:
+        if screen == Screens.EXPLORER:
             if focus == Focus.CATEGORIES:
                 if self.state.open_category and not self.state.open_category.entries == []:
                     self.trigger_event(Events.OPEN_CATEGORY)
@@ -152,7 +152,7 @@ class ExplorerController(TerminalController):
         screen = self.state.screen
         focus = self.state.focus
 
-        if screen == Screens.TERMINAL:
+        if screen == Screens.EXPLORER:
             if focus == Focus.ENTRIES:
                 self.trigger_event(Events.CLOSE_CATEGORY)
             elif focus == Focus.CONTENT or focus == Focus.LOCK:
@@ -177,7 +177,7 @@ class ExplorerController(TerminalController):
         screen = self.state.screen
         focus = self.state.focus
 
-        if screen == Screens.TERMINAL:
+        if screen == Screens.EXPLORER:
             if event == Events.OPEN_CATEGORY:
                 self.open_category(self.model.categories[self.state.category_index])
                 return True
@@ -209,12 +209,12 @@ class ExplorerController(TerminalController):
     def open_entry(self, entry):
         self.switch_focus(Focus.CONTENT)
         self.state.open_entry = entry
+        if entry.type == EntryTypes.SWITCH:
+            self.state.switch_selected = entry.current_state
         if entry.locked:
             self.activate_popup(Popups.LOCK)
             self.switch_focus(Focus.LOCK)
         else:
-            if entry.type == EntryTypes.SWITCH:
-                self.state.switch_selected = entry.current_state
             if entry.type == EntryTypes.AUDIO:
                 path = Others.AUDIO_PATH + entry.audio
                 success = play_audio(path)
@@ -255,8 +255,8 @@ class ExplorerController(TerminalController):
         popup = self.state.active_popup
 
         if self.state.boot_completed:
-            self.state.screen = Screens.TERMINAL
-        if screen == Screens.TERMINAL:
+            self.state.screen = Screens.EXPLORER
+        if screen == Screens.EXPLORER:
             if focus is None:
                 self.switch_focus(Focus.CATEGORIES)
             elif self.state.focus == Focus.ENTRIES:
@@ -282,7 +282,7 @@ class ExplorerController(TerminalController):
         entered_code = self.state.entered_code
 
         match screen:
-             case Screens.TERMINAL:
+             case Screens.EXPLORER:
                 self.view.draw_footer(Others.COPYRIGHT)
                 self.view.draw_header(self.model.name.upper())
                 self.view.draw_sidebar(self.model.categories, self.state.selected_category, self.state.category_scroll_offset, True if focus == Focus.CATEGORIES else False)

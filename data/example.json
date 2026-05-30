@@ -45,7 +45,7 @@
 						"title": "Sicherheitsschleuse",
 						"type": "switch",
 						"unlock_code": "55555",
-						"default_state": true,
+						"default_state": false,
 						"state_labels": [
 							"Geöffnet",
 							"Verschlossen"
