@@ -60,9 +60,10 @@ class ExplorerController(TerminalController):
                 if open_entry.type == EntryTypes.SWITCH:
                     open_entry.current_state = self.state.switch_selected
                 if open_entry.type == EntryTypes.BUTTON:
-                    open_entry.current_state = True
-                    self.prepare_messagebox(open_entry.message, Colors.SELECTED, self.get_window(Focus.CONTENT))
-                    self.activate_popup(Popups.MSG)
+                    if not open_entry.current_state:
+                        open_entry.current_state = True
+                        self.prepare_messagebox(open_entry.message, Colors.SELECTED, self.get_window(Focus.CONTENT))
+                        self.activate_popup(Popups.MSG)
             elif popup == Popups.LOCK:
                 if len(entered_code) == len(open_entry.unlock_code):
                     self.unlock_entry()
