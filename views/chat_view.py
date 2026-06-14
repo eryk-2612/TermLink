@@ -24,7 +24,7 @@ class ChatView(TerminalView):
             y = self._header.height
             x = 0
             self._outputwin = Window(height, width, y, x)
-            #self._outputwin.draw_box()
+            self._outputwin.draw_box()
             self._outputwin.refresh()
 
         if not text == "":
@@ -39,10 +39,10 @@ class ChatView(TerminalView):
         if not self._inputwin  and self._outputwin:
             height = 3
             width = self._screen_width - Others.SCREEN_PADDING
-            y = self._outputwin.height
+            y = self._outputwin.height + Others.SCREEN_PADDING
             x = 0
             self._inputwin = Window(height, width, y, x)
-            self._inputwin.draw_box()
+            #self._inputwin.draw_box()
             self._inputwin.refresh()
 
         cursor = "> "

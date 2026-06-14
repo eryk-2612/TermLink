@@ -79,9 +79,11 @@ class ChatController(TerminalController):
         return False
 
     def send_request(self):
-        response = get_response(self.model.url, self.model.apikey, self.model.system_prompt, self.state.request, self.model.previous_response_id)
+        request = self.state.request
+        response = get_response(self.model.url, self.model.apikey, self.model.system_prompt, request, self.model.previous_response_id)
+
         if response:
-            self.state.output_text = response[0].upper() + "\n"
+            self.state.output_text = "> " + request  + "\n" + response[0].upper() + "\n"
             self.model.previous_response_id = response[1]
 
     def update_state(self):

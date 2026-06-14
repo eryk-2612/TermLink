@@ -69,7 +69,7 @@ class TerminalController:
 
         if key in [10, 13]:
             self.enter_pressed()
-        if key is not None and 32 <= key <= 126:
+        elif key is not None and key >= 32:
             self.typekey_pressed(key)
         elif key in [curses.KEY_BACKSPACE, 127, 8]:
             self.backspace_pressed()
@@ -93,7 +93,7 @@ class TerminalController:
     def typekey_pressed(self, key):
         focus = self.state.focus
         entered_code = self.state.entered_code
-        if focus == Focus.LOCK:
+        if focus == Focus.LOCK and key != 32:
             self.enter_code(entered_code, key)
 
     def backspace_pressed(self):
