@@ -1,14 +1,18 @@
-import os
 from .terminal_model import TerminalModel
 
 class ChatModel(TerminalModel):
-    def __init__(self, name, unlock_code=None):
+    def __init__(self, name, unlock_code=None, apikey=None, url=None, instructions=None):
         super().__init__(name, unlock_code)
-        self.__api_key = os.getenv("MOTHER_API_KEY", "")
+        self.apikey = apikey
+        self.instructions = instructions
+        self.url = url
+        self._previous_response_id = None
+        self.system_prompt = "Please. Keep your answers short. Dont use formatting like html or md and never use emojis. You may use \"\n\" where necessary. Only provide the desired output."
 
-    def get_response(self, request):
-        return self.simulate_response()
+    @property
+    def previous_response_id(self):
+        return self._previous_response_id
 
-    @staticmethod
-    def simulate_response():
-        return "Oberste Priorität\nSicherstellung der Rückführung des Organismus zur Analyse. Alle anderen Überlegungen sind zweitrangig.\nBesatzung ersetztbar."
+    @previous_response_id.setter
+    def previous_response_id(self, value):
+        self._previous_response_id = value

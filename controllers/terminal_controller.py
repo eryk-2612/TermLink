@@ -66,12 +66,11 @@ class TerminalController:
     def handle_input(self):
         window = self.get_window()
         key = self.get_input(window)
+
         if key in [10, 13]:
             self.enter_pressed()
-        elif key in range(ord('0'), ord('9') + 1):
-            self.number_pressed(key)
-        elif key in range(ord('a'), ord('z') + 1) or key in range(ord('A'), ord('Z') + 1):
-            self.char_pressed(key)
+        if key is not None and 32 <= key <= 126:
+            self.typekey_pressed(key)
         elif key in [curses.KEY_BACKSPACE, 127, 8]:
             self.backspace_pressed()
         return key
@@ -91,14 +90,7 @@ class TerminalController:
                 if len(entered_code) == len(self.model.unlock_code):
                     self.unlock_terminal()
 
-    def number_pressed(self, key):
-        focus = self.state.focus
-        entered_code = self.state.entered_code
-
-        if focus == Focus.LOCK:
-            self.enter_code(entered_code, key)
-
-    def char_pressed(self, key):
+    def typekey_pressed(self, key):
         focus = self.state.focus
         entered_code = self.state.entered_code
         if focus == Focus.LOCK:

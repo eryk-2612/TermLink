@@ -18,6 +18,7 @@ class Colors:
 
 class TermTypes:
     EXPLORER    = "explorer"
+    CHAT        = "chat"
 
 class EntryTypes:
     TEXT    = "text"
@@ -31,6 +32,7 @@ class Focus:
     CATEGORIES  = "categories"
     CONTENT     = "content"
     LOCK        = "lock"
+    INPUT       = "input"
 
 class Popups:
     MSG     = "msg"
@@ -41,6 +43,7 @@ class Screens:
     BOOT        = "boot"
     EXPLORER    = "explorer"
     FULLSCREEN  = "fullscreen"
+    CHAT        = "chat"
 
 class Events:
     CLOSE_ENTRY         = "close_entry"
@@ -50,6 +53,7 @@ class Events:
     CANCEL              = "cancel"
     SIGNIN              = "signin"
     QUIT                = "quit"
+    SEND_REQUEST        = "request"
 
 class TokensDE:
     MSG_SUCCESS     = "Zugriff gewährt"

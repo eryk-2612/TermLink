@@ -106,18 +106,20 @@ class Window:
         self.refresh()
 
     def write_new_line(self, text, delay=0.0, color=Colors.DEFAULT, bold=False):
-        if text == "":
-            self.log.append("")
-            self.write_animate("", y=len(self.log))
-        else:
-            wrapped = textwrap.wrap(text, self.width - 4)
-            self.log.extend(wrapped)
-            last_line = len(self.log) - len(wrapped)
-            for i, line in enumerate(self.log):
-                if i >= last_line:
-                    self.write_animate(line, i + 1, delay=delay, color=color, bold=bold)
-                else:
-                    self.write_animate(line, i + 1, delay=0, color=color, bold=bold)
+        lines = text.split("\n")
+
+        for part in lines:
+            wrapped = textwrap.wrap(part, self.width - 4)
+
+            if not wrapped:
+                self.log.append("")
+                self.write_animate("", y=len(self.log), delay=delay, color=color, bold=bold)
+            else:
+                start_index = len(self.log)
+                self.log.extend(wrapped)
+
+                for i, line in enumerate(wrapped):
+                    self.write_animate(line, start_index + i + 1, delay=delay ,color=color, bold=bold)
 
     def log_lines(self, lines):
         if lines:

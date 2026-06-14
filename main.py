@@ -55,11 +55,11 @@ def main(stdscr):
     while True:
         controller_list = []
         for model in terminals:
-            # if isinstance(model, ChatModel):
-            #     view = ChatView(stdscr)
-            #     state = ChatState()
-            #     controller_list.append(ChatController(stdscr, model, view, state))
-            if isinstance(model, ExplorerModel):
+            if isinstance(model, ChatModel):
+                view = ChatView(stdscr)
+                state = ChatState()
+                controller_list.append(ChatController(stdscr, model, view, state))
+            elif isinstance(model, ExplorerModel):
                 view = ExplorerView(stdscr)
                 state = ExplorerState()
                 controller_list.append(ExplorerController(stdscr, model, view, state))

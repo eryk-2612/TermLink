@@ -9,7 +9,7 @@ class ExplorerController(TerminalController):
 
     def init_state(self):
         super().init_state()
-        #self.state.screen = Screens.TERMINAL # DEBUG ONLY
+        #self.state.screen = Screens.EXPLORER # DEBUG ONLY
 
     def get_window(self, requested_window=None):
         win = super().get_window(requested_window)

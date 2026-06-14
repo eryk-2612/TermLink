@@ -23,3 +23,41 @@ class ExplorerState(TerminalState):
     category_scroll_offset: int = 0
     entry_scroll_offset: int = 0
     content_scroll_offset: int = 0
+
+@dataclass
+class ChatState(TerminalState):
+    _input_text: str = ""
+    _output_text: str = ""
+    _request: str = ""
+
+    @property
+    def input_text(self):
+        return self._input_text
+
+    @input_text.setter
+    def input_text(self, value):
+        self._input_text = value
+
+    def clear_input_text(self):
+        self.request = self._input_text
+        self._input_text = ""
+
+    @property
+    def output_text(self):
+        buffer = self._output_text
+        self._output_text = ""
+        return buffer
+
+    @output_text.setter
+    def output_text(self, value):
+        self._output_text = value
+
+    @property
+    def request(self):
+        buffer = self._request
+        self._request = ""
+        return buffer
+
+    @request.setter
+    def request(self, value):
+        self._request = value
