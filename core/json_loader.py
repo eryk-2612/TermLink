@@ -5,7 +5,7 @@ from core import TermTypes, TokensDE
 from models import CategoryModel, EntryModel, ExplorerModel, ChatModel, TerminalModel
 
 class JsonLoader:
-    def __init__(self, folder="data"):
+    def __init__(self, folder):
         self.folder = folder
 
     def load_entry(self, entry_data):

@@ -49,7 +49,7 @@ def main(stdscr):
     #stdscr.timeout(300)
     init_colors()
 
-    loader = JsonLoader()
+    loader = JsonLoader(Others.DATA_PATH)
     terminals = loader.load_all_terminals()
 
     while True:
