@@ -54,6 +54,8 @@ class TerminalController:
         self.state.event = None
         self.state.focus = None
         self.state.boot_completed = False
+        self.state.loading_progress = 0
+        self.state.boot_logo_drawn = False
 
     def run(self):
         self.init_state()
@@ -77,7 +79,6 @@ class TerminalController:
 
     def enter_pressed(self):
         screen = self.state.screen
-        focus = self.state.focus
         popup = self.state.active_popup
         entered_code = self.state.entered_code
 
@@ -115,9 +116,6 @@ class TerminalController:
                 break
 
     def handle_single_event(self, event):
-        screen = self.state.screen
-        focus = self.state.focus
-
         if event == Events.QUIT:
             self.quit()
             return True
@@ -182,6 +180,9 @@ class TerminalController:
                 if focus == Focus.LOCK:
                     self.switch_focus(None)
 
+        if self.state.loading_progress >= 100 and self.state.boot_logo_drawn:
+            self.state.boot_completed = True
+
     def draw_view(self):
         screen = self.state.screen
         popup = self.state.active_popup
@@ -201,5 +202,8 @@ class TerminalController:
                         self.view.create_lock(self.model.unlock_code, self.get_window(Screens.FULLSCREEN))
                         self.view.draw_lock(entered_code)
                 elif not self.model.locked:
-                    self.view.draw_startup_animation(self.get_window(), Logo.DEFAULT)
-                    self.state.boot_completed = True
+                    self.view.draw_startup_logo(self.get_window(), Logo.DEFAULT)
+                    self.state.boot_logo_drawn = True
+                    self.view.draw_startup_progressbar(self.get_window(), Logo.DEFAULT, self.state.loading_progress)
+                    if self.state.loading_progress >= 100:
+                        self.view.clean_up_startup_animation(self.get_window())

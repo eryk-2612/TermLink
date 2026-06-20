@@ -63,7 +63,6 @@ class PasscodeBox(Popup):
         self.input_win.refresh()
 
     def type(self, entered_code):
-        start_x = 2
         start_x = 1 + (self.box_width - self.code_length * 2) // 2
         for i in range(self.code_length):
             x_pos = start_x + i * 2

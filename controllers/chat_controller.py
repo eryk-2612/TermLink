@@ -7,13 +7,16 @@ class ChatController(TerminalController):
 
     def init_state(self):
         super().init_state()
+        if not self.model.previous_response_id:
+            self.state.ai_loaded = False
+        else:
+            self.state.ai_loaded = True
         #self.state.screen = Screens.CHAT # DEBUG ONLY
 
-        if not self.model.previous_response_id:
-            self.init_ai_chat()
-
     def init_ai_chat(self):
-        self.model.previous_response_id = get_response(self.model.url, self.model.apikey, "If you understood, only answer with OK", self.model.instructions)[1]
+        if not self.model.previous_response_id:
+            self.model.previous_response_id = get_response(self.model.url, self.model.apikey, "If you understood, only answer with OK", self.model.instructions)[1]
+            self.state.ai_loaded = True
 
     def get_window(self, requested_window=None):
         win = super().get_window(requested_window)
@@ -89,6 +92,14 @@ class ChatController(TerminalController):
     def update_state(self):
         super().update_state()
 
+        if not self.state.ai_loaded and self.state.boot_logo_drawn:
+            self.init_ai_chat()
+
+        if not self.state.ai_loaded:
+            self.state.loading_progress = 50
+        else:
+            self.state.loading_progress = 100
+
         if self.state.boot_completed:
             self.state.screen = Screens.CHAT
 
@@ -97,7 +108,6 @@ class ChatController(TerminalController):
 
     def draw_view(self):
         super().draw_view()
-
         screen = self.state.screen
 
         match screen:

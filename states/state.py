@@ -10,6 +10,8 @@ class TerminalState:
     active_popup: str = None
     entered_code: str = ""
     boot_completed: bool = False
+    loading_progress: int = 0
+    boot_logo_drawn: bool = False
 
 @dataclass
 class ExplorerState(TerminalState):
@@ -29,6 +31,7 @@ class ChatState(TerminalState):
     _input_text: str = ""
     _output_text: str = ""
     _request: str = ""
+    ai_loaded: bool = False
 
     @property
     def input_text(self):

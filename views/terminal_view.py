@@ -13,6 +13,7 @@ class TerminalView:
         self._passcodebox = None
         self._messagebox = None
         self._signin = None
+        self._startup = None
 
     @property
     def signin_window(self):
@@ -91,12 +92,14 @@ class TerminalView:
         else:
             return True
 
-    def draw_startup_animation(self, parent_window, logo):
+    def draw_startup_logo(self, parent_window, logo):
+        if self._startup:
+            return
+
+        self._startup = Window(self._screen_height - self._footer.height, self._screen_width, 0, 0)
+
         logo_height = len(logo)
         logo_width = max(len(line) for line in logo)
-        bar_length = logo_width
-
-        startup = Window(self._screen_height - self._footer.height, self._screen_width, 0, 0)
 
         win_height = parent_window.height
         win_width = parent_window.width
@@ -107,22 +110,43 @@ class TerminalView:
         start_x = win_width // 2 - logo_width // 2
 
         for i, line in enumerate(logo):
-            startup.write_simple(line, y=start_y + i, x=start_x, color=Colors.DEFAULT, bold=True)
-            startup.refresh()
+            self._startup.write_simple(line, y=start_y + i, x=start_x, color=Colors.DEFAULT, bold=True)
+            self._startup.refresh()
             time.sleep(0.35)
+
+    def draw_startup_progressbar(self, parent_window, logo, progress):
+        if not self._startup:
+            return
+
+        logo_height = len(logo)
+        logo_width = max(len(line) for line in logo)
+        bar_length = logo_width
+
+        win_height = parent_window.height
+        win_width = parent_window.width
+
+        total_height = logo_height + 2
+
+        start_y = win_height // 2 - total_height // 2
 
         bar_y = start_y + logo_height + 1
         bar_x = win_width // 2 - logo_width // 2
 
+        progress = max(0, min(100, progress))
+        filled = int((logo_width * progress) / 100)
+
         for i in range(bar_length + 1):
-            startup.write_simple(" " * i, bar_y, bar_x, Colors.SELECTED)
-            startup.write_simple(" " * (bar_length - i), bar_y, bar_x + i, Colors.DEFAULT)
-            startup.refresh()
+            if i >= filled:
+                break
+            self._startup.write_simple(" " * i, bar_y, bar_x, Colors.SELECTED)
+            # self._startup.write_simple(" " * (bar_length - i), bar_y, bar_x + i, Colors.DEFAULT)
+            self._startup.refresh()
             time.sleep(0.02)
 
+    def clean_up_startup_animation(self, parent_window,):
         time.sleep(1)
         parent_window.reload()
-        del startup
+        del self._startup
 
     def draw_signin(self, image=""):
         image_height = len(image)

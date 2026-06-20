@@ -9,6 +9,7 @@ class ExplorerController(TerminalController):
 
     def init_state(self):
         super().init_state()
+        self.state.loading_progress = 100
         #self.state.screen = Screens.EXPLORER # DEBUG ONLY
 
     def get_window(self, requested_window=None):
@@ -176,7 +177,6 @@ class ExplorerController(TerminalController):
 
     def _handle_single_event(self, event):
         screen = self.state.screen
-        focus = self.state.focus
 
         if screen == Screens.EXPLORER:
             if event == Events.OPEN_CATEGORY:
@@ -252,8 +252,6 @@ class ExplorerController(TerminalController):
 
         screen = self.state.screen
         focus = self.state.focus
-        entry = self.state.open_entry
-        popup = self.state.active_popup
 
         if self.state.boot_completed:
             self.state.screen = Screens.EXPLORER
