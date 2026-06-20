@@ -112,7 +112,7 @@ class ChatController(TerminalController):
 
         match screen:
             case Screens.CHAT:
-                self.view.draw_footer(Others.COPYRIGHT)
+                self.view.draw_footer(TokensDE.COPYRIGHT)
                 self.view.draw_header(self.model.name.upper())
                 self.view.draw_output_window(self.state.output_text)
                 self.view.draw_input_window(self.state.input_text)

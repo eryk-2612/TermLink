@@ -217,7 +217,7 @@ class ExplorerController(TerminalController):
             self.switch_focus(Focus.LOCK)
         else:
             if entry.type == EntryTypes.AUDIO:
-                path = Others.AUDIO_PATH + entry.audio
+                path = Others.DATA_PATH + entry.audio
                 success = play_audio(path)
                 self.state.open_entry.is_playing = success
                 if success:
@@ -282,7 +282,7 @@ class ExplorerController(TerminalController):
 
         match screen:
              case Screens.EXPLORER:
-                self.view.draw_footer(Others.COPYRIGHT)
+                self.view.draw_footer(TokensDE.COPYRIGHT)
                 self.view.draw_header(self.model.name.upper())
                 self.view.draw_sidebar(self.model.categories, self.state.selected_category, self.state.category_scroll_offset, True if focus == Focus.CATEGORIES else False)
                 self.view.draw_entry_list(open_category, self.state.selected_entry, self.state.entry_scroll_offset, True if focus == Focus.ENTRIES else False)

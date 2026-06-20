@@ -34,7 +34,7 @@
 					{
 						"title": "Memo",
 						"type": "audio",
-						"audio": "test.mp3"
+						"audio": "audio/test.mp3"
 					}
 				]
 			},

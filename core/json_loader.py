@@ -1,7 +1,7 @@
 import json
 import os
 
-from core import EntryTypes, TermTypes, TokensDE
+from core import TermTypes, TokensDE
 from models import CategoryModel, EntryModel, ExplorerModel, ChatModel, TerminalModel
 
 class JsonLoader:

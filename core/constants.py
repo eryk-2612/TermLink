@@ -1,8 +1,6 @@
-
 class Others:
-    AUDIO_PATH = "data/audio/"
+    DATA_PATH = "data/"
     TIMEOUT = 300
-    COPYRIGHT  = "(C) Terminal Systems"
     SCREEN_PADDING = 1
     SCROLLBAR_PADDING = 2
     BORDER_PADDING = 2
@@ -56,6 +54,7 @@ class Events:
     SEND_REQUEST        = "request"
 
 class TokensDE:
+    COPYRIGHT  = "(C) Terminal Systems"
     MSG_SUCCESS     = "Zugriff gewährt"
     MSG_FAIL        = "Zugriff verweigert"
     LOST            = "[FEHLER] Kritischer Datenverlust"

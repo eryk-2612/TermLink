@@ -45,7 +45,7 @@ class EntryModel:
         self._is_playing = False
 
         if audio:
-            self._audio_length = get_audio_length(Others.AUDIO_PATH + audio)
+            self._audio_length = get_audio_length(Others.DATA_PATH + audio)
 
     @property
     def audio_start_time(self):
