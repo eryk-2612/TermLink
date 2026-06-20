@@ -13,12 +13,12 @@ def init_colors():
 def init_menu(height, width, terminals):
     win = Window(height, width, 0, 0)
     current_idx = 0
-    menu = terminals + [TokensDE.LEAVE]
+    menu = terminals + [Tokens.LEAVE]
     
     while True:
         for idx, item in enumerate(menu):
-            if item == TokensDE.LEAVE:
-                text = TokensDE.LEAVE.upper()
+            if item == Tokens.LEAVE:
+                text = Tokens.LEAVE.upper()
             else:
                 text = item.model.name.upper()
 
@@ -37,7 +37,7 @@ def init_menu(height, width, terminals):
             current_idx = (current_idx + 1) % len(menu)
         elif key in [10, 13, curses.KEY_ENTER]:
             selected = menu[current_idx]
-            if selected == TokensDE.LEAVE:
+            if selected == Tokens.LEAVE:
                 return None
             win.reload()
             del win

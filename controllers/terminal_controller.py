@@ -1,4 +1,4 @@
-from core import Events, Logo, TokensDE, Focus, Screens, Colors, Others, Popups
+from core import Events, Tokens, Focus, Screens, Colors, Popups
 import curses
 
 class TerminalController:
@@ -21,12 +21,14 @@ class TerminalController:
             if self.state.screen == Screens.SIGNIN:
                 return self.view.signin_window
             elif self.state.screen == Screens.BOOT:
-                return self.view.fullscreen_window
-        if requested_window:
+                return self.view.startup_window
+        else:
             match requested_window:
                 case Screens.SIGNIN:
                     return self.view.signin_window
                 case Screens.BOOT:
+                    return self.view.startup_window
+                case Screens.FULLSCREEN:
                     return self.view.fullscreen_window
         return self.view.fullscreen_window
 
@@ -133,10 +135,10 @@ class TerminalController:
     def unlock_terminal(self):
         if self.state.entered_code == self.model.unlock_code:
             self.model.unlock()
-            self.prepare_messagebox(TokensDE.MSG_SUCCESS, Colors.SELECTED, self.get_window(Screens.FULLSCREEN))
+            self.prepare_messagebox(Tokens.MSG_SUCCESS, Colors.SELECTED, self.get_window(Screens.BOOT))
             self.activate_popup(Popups.MSG)
         else:
-            self.prepare_messagebox(TokensDE.MSG_FAIL, Colors.SELECTED, self.get_window(Screens.FULLSCREEN))
+            self.prepare_messagebox(Tokens.MSG_FAIL, Colors.SELECTED, self.get_window(Screens.BOOT))
             self.activate_popup(Popups.MSG)
         self.state.entered_code = ""
 
@@ -190,20 +192,21 @@ class TerminalController:
 
         match screen:
             case Screens.SIGNIN:
-                self.view.draw_signin(TokensDE.SIGNIN)
+                self.view.draw_signin(Tokens.SIGNIN)
             case Screens.BOOT:
                 if self.get_window(Screens.SIGNIN):
-                    self.view.undraw_signin(TokensDE.SIGNIN)
-                self.view.draw_footer(TokensDE.COPYRIGHT)
+                    self.view.undraw_signin(Tokens.SIGNIN)
+                self.view.draw_footer(Tokens.COPYRIGHT, self.get_window())
+                self.view.create_startup()
                 if popup:
                     if popup == Popups.MSG:
                         self.view.draw_messagebox()
                     elif popup == Popups.LOCK:
-                        self.view.create_lock(self.model.unlock_code, self.get_window(Screens.FULLSCREEN))
+                        self.view.create_lock(self.model.unlock_code, self.get_window(Screens.BOOT))
                         self.view.draw_lock(entered_code)
                 elif not self.model.locked:
-                    self.view.draw_startup_logo(self.get_window(), Logo.DEFAULT)
+                    self.view.draw_startup_logo(Tokens.LOGO)
                     self.state.boot_logo_drawn = True
-                    self.view.draw_startup_progressbar(self.get_window(), Logo.DEFAULT, self.state.loading_progress)
+                    self.view.draw_startup_progressbar(Tokens.LOGO, self.state.loading_progress)
                     if self.state.loading_progress >= 100:
-                        self.view.clean_up_startup_animation(self.get_window())
+                        self.view.clean_up_startup_animation()

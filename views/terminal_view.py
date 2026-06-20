@@ -36,6 +36,10 @@ class TerminalView:
         return self._header
 
     @property
+    def startup_window(self):
+        return self._startup
+
+    @property
     def fullscreen_window(self):
         if not self._fullscreen:
             startup_screen_height = self._screen_height
@@ -46,9 +50,9 @@ class TerminalView:
         return self._fullscreen
 
     # (C) Terminal Systems
-    def draw_footer(self, text=""):
+    def draw_footer(self, text, parent):
         if not self._footer:
-            self._footer = Window(1, self._screen_width, self._screen_height - 1, 0)
+            self._footer = Window(1, self._screen_width, self._screen_height - 1, 0, parent_window=parent)
             self._footer.background = Colors.DEFAULT
             x = self._footer.width // 2 - len(text) // 2  # x-Position so, dass der Text mittig ist
             self._footer.write_animate(text, y=0, x=x, color=Colors.DEFAULT)
@@ -92,29 +96,29 @@ class TerminalView:
         else:
             return True
 
-    def draw_startup_logo(self, parent_window, logo):
+    def create_startup(self):
         if self._startup:
             return
-
         self._startup = Window(self._screen_height - self._footer.height, self._screen_width, 0, 0)
+
+    def draw_startup_logo(self, logo):
+        if not self._startup:
+            return
 
         logo_height = len(logo)
         logo_width = max(len(line) for line in logo)
 
-        win_height = parent_window.height
-        win_width = parent_window.width
-
         total_height = logo_height + 2
 
-        start_y = win_height // 2 - total_height // 2
-        start_x = win_width // 2 - logo_width // 2
+        start_y = self._screen_height // 2 - total_height // 2
+        start_x = self._screen_width // 2 - logo_width // 2
 
         for i, line in enumerate(logo):
             self._startup.write_simple(line, y=start_y + i, x=start_x, color=Colors.DEFAULT, bold=True)
             self._startup.refresh()
             time.sleep(0.35)
 
-    def draw_startup_progressbar(self, parent_window, logo, progress):
+    def draw_startup_progressbar(self, logo, progress):
         if not self._startup:
             return
 
@@ -122,15 +126,12 @@ class TerminalView:
         logo_width = max(len(line) for line in logo)
         bar_length = logo_width
 
-        win_height = parent_window.height
-        win_width = parent_window.width
-
         total_height = logo_height + 2
 
-        start_y = win_height // 2 - total_height // 2
+        start_y = self._startup.height // 2 - total_height // 2
 
         bar_y = start_y + logo_height + 1
-        bar_x = win_width // 2 - logo_width // 2
+        bar_x = self._startup.width // 2 - logo_width // 2
 
         progress = max(0, min(100, progress))
         filled = int((logo_width * progress) / 100)
@@ -143,16 +144,17 @@ class TerminalView:
             self._startup.refresh()
             time.sleep(0.02)
 
-    def clean_up_startup_animation(self, parent_window,):
-        time.sleep(1)
-        parent_window.reload()
-        del self._startup
+    def clean_up_startup_animation(self):
+        if self._startup:
+            time.sleep(1)
+            self._startup.reload()
+            self._startup = None
 
     def draw_signin(self, image=""):
         image_height = len(image)
         image_width = max(len(line) for line in image)
 
-        start_y = self._screen_height// 2 - image_height // 2
+        start_y = self._screen_height // 2 - image_height // 2
         start_x = self._screen_width // 2 - image_width // 2
 
         if self._signin is None:

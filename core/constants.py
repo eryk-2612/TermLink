@@ -53,8 +53,8 @@ class Events:
     QUIT                = "quit"
     SEND_REQUEST        = "request"
 
-class TokensDE:
-    COPYRIGHT  = "(C) Terminal Systems"
+class Tokens:
+    COPYRIGHT       = "(C) Terminal Systems"
     MSG_SUCCESS     = "Zugriff gewährt"
     MSG_FAIL        = "Zugriff verweigert"
     LOST            = "[FEHLER] Kritischer Datenverlust"
@@ -75,9 +75,7 @@ class TokensDE:
         r" ▐▌ ▐▌▐▌  ▐▌▐▌  ▐▌▐▙▄▄▖▐▙▄▄▖▐▙▄▄▀ ▐▙▄▄▖▐▌  ▐▌ ",
         r"                                              "
     ]
-
-class Logo:
-    DEFAULT         = [
+    LOGO            = [
         r"  ______                    __    _       __  ",
         r" /_  __/__  _________ ___  / /   (_)___  / /__",
         r"  / / / _ \/ ___/ __ \`__\/ /   / / __ \/ //_/",

@@ -1,6 +1,6 @@
 from views.terminal_view import TerminalView
 from .window import Window
-from core import Colors, Others, TokensDE
+from core import Colors, Others, Tokens
 
 class ExplorerView(TerminalView):
     def __init__(self, stdscr):
@@ -21,10 +21,17 @@ class ExplorerView(TerminalView):
         self._entries = []
         self._visible_categories_count = 0
         self._visible_entries_count = 0
+        self._explorer = None
 
     @property
     def sidebar_window(self):
         return self._sidebar
+
+    @property
+    def explorer_window(self):
+        if not self._explorer:
+            self._explorer = Window(self._screen_height, self._screen_width, 0, 0)
+        return self._explorer
 
     @property
     def entry_list_window(self):
@@ -47,7 +54,7 @@ class ExplorerView(TerminalView):
 
     def draw_header(self, title=""):
         if not self._header:
-            self._header = Window(1, self._screen_width, 0, 0)
+            self._header = Window(1, self._screen_width, 0, 0, parent_window=self._explorer)
             self._header.background = Colors.SELECTED
             self._header.write_simple(title.upper(), y=0, x=1, color=Colors.SELECTED, bold=True)
             self._header.refresh()
@@ -56,7 +63,7 @@ class ExplorerView(TerminalView):
         if not self._sidebar:
             height = (self._screen_height - self._header.height - self._footer.height - Others.SCREEN_PADDING)
             width = self._screen_width // 4 + Others.SCROLLBAR_PADDING
-            self._sidebar = Window(height, width, self._header.start_y + 2, 1)
+            self._sidebar = Window(height, width, self._header.start_y + 2, 1, parent_window=self._explorer)
         self.draw_all_categories(categories, selected_category, category_scroll_offset, in_focus)
 
     def draw_all_categories(self, categories, selected_category, category_scroll_offset, in_focus):
@@ -99,11 +106,8 @@ class ExplorerView(TerminalView):
         total_height = length * box_height
         y = max(0, self._sidebar.height - total_height)
 
-        self._sidebar.write_simple(TokensDE.FOLDER.upper(), y - 1, 0)
-        self._sidebar_scrollbar = self.draw_scrollbar(
-            self._sidebar, self._sidebar_scrollbar, total_height, total_categories,
-            length, scroll_offset, y, self._sidebar.width - 1, in_focus
-        )
+        self._sidebar.write_simple(Tokens.FOLDER.upper(), y - 1, 0)
+        self._sidebar_scrollbar = self.draw_scrollbar( self._sidebar, self._sidebar_scrollbar, total_height, total_categories, length, scroll_offset, y, self._sidebar.width - 1, in_focus)
 
         while len(self._categories) < length:
             self._categories.append(None)
@@ -150,7 +154,7 @@ class ExplorerView(TerminalView):
                 height = self.calculate_entry_list_height(box_height, entries)
                 width = ((self._screen_width - Others.SCREEN_PADDING) - self._sidebar.width - sidebar_spacing) //  3 * 2
                 x = self._sidebar.width + sidebar_spacing
-                self._entry_list = Window(height, width, self._header.start_y + 1, x)
+                self._entry_list = Window(height, width, self._header.start_y + 1, x, parent_window=self._explorer)
             self.draw_all_entries(box_height, entries, selected_entry, entry_scroll_offset, in_focus)
 
     def calculate_entry_list_height(self, box_height, entries, minimum_entries=Others.MINIMUM_ENTRIES, maximum_entries=Others.MAXIMUM_ENTRIES, y_offset=2):
@@ -191,7 +195,7 @@ class ExplorerView(TerminalView):
         total_height = length * box_height
         scroll_offset = min(entry_scroll_offset, max(0, total_entries - length))
 
-        self._entry_list.write_simple(TokensDE.FILES.upper(), y - 1, 0)
+        self._entry_list.write_simple(Tokens.FILES.upper(), y - 1, 0)
         self._entries_scrollbar = self.draw_scrollbar(self._entry_list, self._entries_scrollbar, total_height, total_entries,length, scroll_offset, y, self._entry_list.width - 1, in_focus)
 
         while len(self._entries) < length:
@@ -273,7 +277,7 @@ class ExplorerView(TerminalView):
             width = self._screen_width - self._sidebar.width - Others.SCREEN_PADDING - sidebar_spacing
             y = self._entry_list.start_y + self._entry_list.height
             x = self._sidebar.width + sidebar_spacing
-            self._content = Window(height, width, y, x)
+            self._content = Window(height, width, y, x, parent_window=self._explorer)
             self._content.draw_box()
             self._content.refresh()
 

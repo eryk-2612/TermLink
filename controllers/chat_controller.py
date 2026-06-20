@@ -1,5 +1,5 @@
 from .terminal_controller import TerminalController
-from core import Events, TokensDE, Focus, Screens, Colors, Others, EntryTypes, Popups, play_audio, stop_audio, get_response
+from core import Events, Tokens, Focus, Screens, get_response
 
 class ChatController(TerminalController):
     def __init__(self, stdscr, model, view, state):
@@ -7,16 +7,22 @@ class ChatController(TerminalController):
 
     def init_state(self):
         super().init_state()
-        if not self.model.previous_response_id:
-            self.state.ai_loaded = False
-        else:
+        if self.model.previous_response_id:
             self.state.ai_loaded = True
+        else:
+            self.state.ai_loaded = False
         #self.state.screen = Screens.CHAT # DEBUG ONLY
 
     def init_ai_chat(self):
         if not self.model.previous_response_id:
-            self.model.previous_response_id = get_response(self.model.url, self.model.apikey, "If you understood, only answer with OK", self.model.instructions)[1]
-            self.state.ai_loaded = True
+            response = get_response(self.model.url, self.model.apikey, "If you understood, only answer with OK", self.model.instructions)
+
+            if response:
+                self.model.previous_response_id = response[1]
+                self.state.ai_loaded = True
+            else:
+                self.trigger_event(Events.QUIT)
+                self.state.ai_loaded = False
 
     def get_window(self, requested_window=None):
         win = super().get_window(requested_window)
@@ -24,11 +30,11 @@ class ChatController(TerminalController):
             if self.state.focus == Focus.LOCK:
                 return self.view.passcode_window
             if self.state.screen == Screens.CHAT:
-                return self.view.fullscreen_window
+                return self.view.chat_window
         if requested_window:
             match requested_window:
                 case Screens.CHAT:
-                    return self.view.fullscreen_window
+                    return self.view.chat_window
         return win
 
     def handle_input(self):
@@ -112,7 +118,7 @@ class ChatController(TerminalController):
 
         match screen:
             case Screens.CHAT:
-                self.view.draw_footer(TokensDE.COPYRIGHT)
+                self.view.draw_footer(Tokens.COPYRIGHT, self.get_window())
                 self.view.draw_header(self.model.name.upper())
                 self.view.draw_output_window(self.state.output_text)
                 self.view.draw_input_window(self.state.input_text)

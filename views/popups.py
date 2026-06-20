@@ -1,6 +1,6 @@
 import curses
 import time
-from core import Colors, TokensDE, Others
+from core import Colors, Tokens, Others
 
 class Popup:
     def __init__(self, parent_window):
@@ -19,7 +19,7 @@ class Popup:
         self.win.refresh()
 
 class PasscodeBox(Popup):
-    def __init__(self, parent_window, code_length=5, title=TokensDE.PASSCODE, color=Colors.DEFAULT):
+    def __init__(self, parent_window, code_length=5, title=Tokens.PASSCODE, color=Colors.DEFAULT):
         super().__init__(parent_window)
 
         self.code_length = code_length

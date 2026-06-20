@@ -1,5 +1,5 @@
 from .terminal_model import TerminalModel
-from core import Others, TokensDE, EntryTypes, get_audio_length
+from core import Others, Tokens, EntryTypes, get_audio_length
 
 class ExplorerModel(TerminalModel):
     def __init__(self, name, unlock_code=None, categories=None):
@@ -34,9 +34,9 @@ class EntryModel:
         self._unlock_code = unlock_code
         self._default_state = default_state
         self._current_state = default_state
-        self._state_labels = state_labels or TokensDE.STATES
-        self._action_verbs = action_verbs or TokensDE.VERBS
-        self._message = message or TokensDE.MESSAGE
+        self._state_labels = state_labels or Tokens.STATES
+        self._action_verbs = action_verbs or Tokens.VERBS
+        self._message = message or Tokens.MESSAGE
         self._lock = bool(self._unlock_code)
 
         self._audio = audio
@@ -78,7 +78,7 @@ class EntryModel:
             else:
                 return self._title
         else :
-            return TokensDE.ERROR
+            return Tokens.ERROR
 
     @title.setter
     def title(self, value):

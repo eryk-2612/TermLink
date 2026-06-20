@@ -1,5 +1,5 @@
 from .terminal_controller import TerminalController
-from core import Events, TokensDE, Focus, Screens, Colors, Others, EntryTypes, Popups, play_audio, stop_audio
+from core import Events, Tokens, Focus, Screens, Colors, Others, EntryTypes, Popups, play_audio, stop_audio
 import curses
 import time
 
@@ -20,7 +20,7 @@ class ExplorerController(TerminalController):
             if self.state.focus == Focus.CONTENT:
                 return self.view.content_window
             if self.state.screen == Screens.EXPLORER:
-                return self.view.fullscreen_window
+                return self.view.explorer_window
         if requested_window:
             match requested_window:
                 case Screens.EXPLORER:
@@ -240,10 +240,10 @@ class ExplorerController(TerminalController):
     def unlock_entry(self):
         if self.state.entered_code == self.state.open_entry.unlock_code:
             self.state.open_entry.unlock()
-            self.prepare_messagebox(TokensDE.MSG_SUCCESS, Colors.SELECTED, self.get_window(Focus.CONTENT))
+            self.prepare_messagebox(Tokens.MSG_SUCCESS, Colors.SELECTED, self.get_window(Focus.CONTENT))
             self.activate_popup(Popups.MSG)
         else:
-            self.prepare_messagebox(TokensDE.MSG_FAIL, Colors.SELECTED, self.get_window(Focus.CONTENT))
+            self.prepare_messagebox(Tokens.MSG_FAIL, Colors.SELECTED, self.get_window(Focus.CONTENT))
             self.activate_popup(Popups.MSG)
         self.state.entered_code = ""
 
@@ -282,7 +282,7 @@ class ExplorerController(TerminalController):
 
         match screen:
              case Screens.EXPLORER:
-                self.view.draw_footer(TokensDE.COPYRIGHT)
+                self.view.draw_footer(Tokens.COPYRIGHT, self.get_window())
                 self.view.draw_header(self.model.name.upper())
                 self.view.draw_sidebar(self.model.categories, self.state.selected_category, self.state.category_scroll_offset, True if focus == Focus.CATEGORIES else False)
                 self.view.draw_entry_list(open_category, self.state.selected_entry, self.state.entry_scroll_offset, True if focus == Focus.ENTRIES else False)

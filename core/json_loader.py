@@ -1,7 +1,7 @@
 import json
 import os
 
-from core import TermTypes, TokensDE
+from core import TermTypes, Tokens
 from models import CategoryModel, EntryModel, ExplorerModel, ChatModel, TerminalModel
 
 class JsonLoader:
@@ -31,14 +31,14 @@ class JsonLoader:
 
         if termtype == TermTypes.EXPLORER:
             categories = [self.load_category(c) for c in terminal.get("categories", [])]
-            return ExplorerModel(name=terminal.get("title", TokensDE.TERM_UNNAMED), categories=categories, unlock_code=terminal.get("unlock_code"))
+            return ExplorerModel(name=terminal.get("title", Tokens.TERM_UNNAMED), categories=categories, unlock_code=terminal.get("unlock_code"))
         elif termtype == TermTypes.CHAT:
             instructions_file = terminal.get("instruction_file")
             with open(os.path.join(self.folder, instructions_file), 'r', encoding='utf-8') as f:
                 instructions = f.read()
-            return ChatModel(name=terminal.get("title", TokensDE.TERM_UNNAMED), unlock_code=terminal.get("unlock_code"), apikey=terminal.get("apikey"), url=terminal.get("url"), instructions=instructions)
+            return ChatModel(name=terminal.get("title", Tokens.TERM_UNNAMED), unlock_code=terminal.get("unlock_code"), apikey=terminal.get("apikey"), url=terminal.get("url"), instructions=instructions)
         else:
-            return TerminalModel(TokensDE.TERM_UNNAMED)
+            return TerminalModel(Tokens.TERM_UNNAMED)
 
     def load_all_terminals(self):
         terminals = []
