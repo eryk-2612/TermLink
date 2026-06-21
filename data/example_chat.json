@@ -1,0 +1,10 @@
+{
+	"terminal": {
+		"title": "MO/TH/ER Interface",
+		"unlock_code": "55555",
+		"type": "chat",
+		"apikey": "YOUR API KEY",
+		"url": "YOUR URL",
+		"instruction_file": "prompt.txt"
+	}
+}

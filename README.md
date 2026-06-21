@@ -6,16 +6,28 @@ Build using pygame and curses.
 
 ## Dependencies
   - pip install windows-curses
-  - pip install pygame-ce   
+  - pip install pygame-ce 
+  - pip install requests
 
 ## Features
-- Lock the Terminal or Entries with a passcode containing digits or characters
-- Entries can be:
-  - Text
-  - Button with MessageBox
-  - Switch
-  - Audio
-  - Quit
+- customize your terminal using the example json files from the data/ folder
+- Support for two types of terminals:
+  - explorer
+    - a fake file explorer
+  - chat
+    - an LLM chat interface
+- Lock each terminal or entries (for an explorer type terminal) with a passcode
+- Entry Types:
+  - text
+    - just plain text
+  - button
+    - when pressed shows a popup
+  - switch
+    - can change states
+  - audio
+    - can play an audio file
+  - quit
+    - optional button to leave the specific terminal
 
 ## Screenshots
 <img width="1115" height="586" alt="image" src="https://github.com/user-attachments/assets/2ca1ae0b-c5c5-43bd-86d9-a6da0d63f985" />
