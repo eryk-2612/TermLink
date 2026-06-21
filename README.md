@@ -1,8 +1,8 @@
 # TermLink
 Build using pygame and curses. 
 - Needs a "data" folder to operate and at least one json describing the Terminal in the "data" folder. 
-  - Use the example.json as a template.
-- UI is hardcoded in german but easy to change. 
+  - Use the example.json or example_chat.json as a template.
+- UI language is easy to change manually. 
 
 ## Dependencies
   - pip install windows-curses
@@ -30,6 +30,9 @@ Build using pygame and curses.
     - optional button to leave the specific terminal
 - **Languages**: 
   - update locales/tokens.json to your needs, I provided an english example in en_tokens.json (just rename the files)
+
+## Recommendation
+- I recommend to use https://github.com/FiniteSingularity/obs-retro-effects for nice visual effects
 
 ## Screenshots
 <img width="1115" height="586" alt="image" src="https://github.com/user-attachments/assets/2ca1ae0b-c5c5-43bd-86d9-a6da0d63f985" />
