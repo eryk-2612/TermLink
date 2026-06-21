@@ -1,0 +1,36 @@
+{
+  "copyright": "(C) Terminal Systems",
+  "msg_success": "Access granted",
+  "msg_fail": "Access denied",
+  "folder": "Folder",
+  "files": "Files",
+  "leave": "Leave",
+  "term_unnamed": "Unnamed terminal",
+  "error": "Error",
+  "states": [
+    "On",
+    "Off"
+  ],
+  "verbs": [
+    "Turn on",
+    "Turn off"
+  ],
+  "message": "Activated",
+  "passcode": "Passcode",
+  "signin": [
+        "                                        ",
+        "   ▗▄▄▖▗▄▄▄▖ ▗▄▄▖▗▖  ▗▖    ▗▄▄▄▖▗▖  ▗▖  ",
+        "  ▐▌     █  ▐▌   ▐▛▚▖▐▌      █  ▐▛▚▖▐▌  ",
+        "   ▝▀▚▖  █  ▐▌▝▜▌▐▌ ▝▜▌      █  ▐▌ ▝▜▌  ",
+        "  ▗▄▄▞▘▗▄█▄▖▝▚▄▞▘▐▌  ▐▌    ▗▄█▄▖▐▌  ▐▌  ",
+        "                                        "
+  ],
+  "logo": [
+    "  ______                    __    _       __  ",
+    " /_  __/__  _________ ___  / /   (_)___  / /__",
+    "  / / / _ \\/ ___/ __ \\`__\\/ /   / / __ \\/ //_/",
+    " / / /  __/ /  / / / / / / /___/ / / / / ,<   ",
+    "/_/  \\___/_/  /_/ /_/ /_/_____/_/_/ /_/_/|_|  ",
+    "                           by Terminal Systems"
+  ]
+}
