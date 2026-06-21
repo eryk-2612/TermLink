@@ -53,11 +53,13 @@ class Events:
     QUIT                = "quit"
     SEND_REQUEST        = "request"
 
+import json
+from pathlib import Path
+
 class Tokens:
     COPYRIGHT       = "(C) Terminal Systems"
     MSG_SUCCESS     = "Zugriff gewährt"
     MSG_FAIL        = "Zugriff verweigert"
-    LOST            = "[FEHLER] Kritischer Datenverlust"
     FOLDER          = "Ordner"
     FILES           = "Dateien"
     LEAVE           = "Verlassen"
@@ -84,3 +86,16 @@ class Tokens:
         r"                           by Terminal Systems"
     ]
 
+    @staticmethod
+    def _load_tokens():
+        path = Path(__file__).parent.parent / "locales" / "tokens.json"
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+
+            for key, value in data.items():
+                setattr(Tokens, key.upper(), value)
+        except Exception:
+            print("Failed to load tokens.json")
+
+Tokens._load_tokens()
