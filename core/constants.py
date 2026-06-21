@@ -88,7 +88,7 @@ class Tokens:
 
     @staticmethod
     def _load_tokens():
-        path = Path(__file__).parent.parent / "locales" / "tokens.json"
+        path = "locales/tokens.json"
         try:
             with open(path, encoding="utf-8") as f:
                 data = json.load(f)
