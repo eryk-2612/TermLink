@@ -5,6 +5,8 @@ Build using pygame and curses.
 - UI language is easy to change by editing tokens.json 
 - AI Chat only supports LM Studio API
 
+- See the NEW https://github.com/eryk-2612/TermLink/blob/380f7840d849195a11368224223b3df8ab7cf5ae/docs/Quick%20Start%20Guide.md
+
 ## Dependencies
   - pip install windows-curses
   - pip install pygame-ce 
