@@ -58,6 +58,7 @@
 					{
 						"title": "Selbstzerstörung",
 						"type": "button",
+						"unlock_code": "55555",
 						"default_state": false,
 						"state_labels": [
 							"Aktiviert"

@@ -17,6 +17,8 @@
   ],
   "message": "Activated",
   "passcode": "Passcode",
+  "playing":  "Playing",
+  "paused":   "Paused",
   "signin": [
         "                                        ",
         "   ▗▄▄▖▗▄▄▄▖ ▗▄▄▖▗▖  ▗▖    ▗▄▄▄▖▗▖  ▗▖  ",

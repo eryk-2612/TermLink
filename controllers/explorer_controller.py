@@ -39,6 +39,8 @@ class ExplorerController(TerminalController):
             self.arrowleft_pressed()
         if key == curses.KEY_RIGHT:
             self.arrowright_pressed()
+        elif key == 32:
+            self.spacebar_pressed()
         if key == 27:
             self.escape_pressed()
 
@@ -70,6 +72,19 @@ class ExplorerController(TerminalController):
                     self.unlock_entry()
             if popup == Popups.MSG:
                 self.view.skip_messagebox()
+
+    def spacebar_pressed(self):
+        screen = self.state.screen
+        focus = self.state.focus
+        open_entry = self.state.open_entry
+
+        if screen == Screens.EXPLORER:
+            if focus == Focus.CONTENT:
+                if open_entry.type == EntryTypes.AUDIO:
+                    if not open_entry.is_playing:
+                        self.play_audio(open_entry)
+                    else:
+                        self.stop_audio()
 
     def arrowup_pressed(self):
         screen = self.state.screen
@@ -210,25 +225,31 @@ class ExplorerController(TerminalController):
     def open_entry(self, entry):
         self.switch_focus(Focus.CONTENT)
         self.state.open_entry = entry
-        if entry.type == EntryTypes.SWITCH:
-            self.state.switch_selected = entry.current_state
+
         if entry.locked:
             self.activate_popup(Popups.LOCK)
             self.switch_focus(Focus.LOCK)
         else:
-            if entry.type == EntryTypes.AUDIO:
-                path = Others.DATA_PATH + entry.audio
-                success = play_audio(path)
-                self.state.open_entry.is_playing = success
-                if success:
-                    entry.audio_start_time = time.time()
+            if entry.type == EntryTypes.SWITCH:
+                self.state.switch_selected = entry.current_state
             if entry.type == EntryTypes.QUIT:
                 self.trigger_event(Events.QUIT)
 
+    def play_audio(self, entry):
+        path = Others.DATA_PATH + entry.audio
+        success = play_audio(path)
+        entry.is_playing = success
+        if success:
+            entry.audio_start_time = time.time()
+
+    def stop_audio(self):
+        stop_audio()
+        self.state.open_entry.is_playing = False
+        self.state.open_entry.audio_start_time = 0
+
     def close_entry(self):
         if self.state.open_entry.type == EntryTypes.AUDIO:
-            stop_audio()
-            self.state.open_entry.is_playing = False
+            self.stop_audio()
 
         self.state.content_scroll_offset = 0
         self.state.switch_selected = 0
@@ -252,6 +273,7 @@ class ExplorerController(TerminalController):
 
         screen = self.state.screen
         focus = self.state.focus
+        entry = self.state.open_entry
 
         if self.state.boot_completed:
             self.state.screen = Screens.EXPLORER
@@ -264,8 +286,10 @@ class ExplorerController(TerminalController):
                 self.state.selected_category = self.state.category_index
                 self.preview_category(self.model.categories[self.state.category_index])
             elif self.state.focus == Focus.LOCK:
-                if not self.state.open_entry.locked:
+                if not self.state.open_entry.locked and self.view.messagebox_finished:
                     self.switch_focus(Focus.CONTENT)
+                    if entry.type == EntryTypes.QUIT:
+                        self.trigger_event(Events.QUIT)
                 else:
                     if self.view.messagebox_finished:
                         self.open_entry(self.state.open_category.entries[self.state.entry_index])
@@ -308,6 +332,8 @@ class ExplorerController(TerminalController):
                         elif entry_type == EntryTypes.BUTTON:
                             self.view.display_button(open_entry.state_labels, open_entry.action_verbs, open_entry.current_state)
                         elif entry_type == EntryTypes.AUDIO:
-                            elapsed_time = min((time.time() - open_entry.audio_start_time), open_entry.audio_length)
+                            if open_entry.is_playing:
+                                elapsed_time = min((time.time() - open_entry.audio_start_time), open_entry.audio_length)
+                            else:
+                                elapsed_time = 0
                             self.view.display_audioplayer(open_entry.is_playing, open_entry.audio_length, elapsed_time)
-

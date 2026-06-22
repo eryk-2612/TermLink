@@ -69,6 +69,8 @@ class Tokens:
     VERBS           = ["Anschalten", "Ausschalten"]
     MESSAGE         = "Aktiviert"
     PASSCODE        = "Zugangscode"
+    PLAYING         = "Läuft"
+    PAUSED          = "Pausiert"
     SIGNIN          = [
         r"                                              ",
         r"  ▗▄▖ ▗▖  ▗▖▗▖  ▗▖▗▄▄▄▖▗▖   ▗▄▄▄  ▗▄▄▄▖▗▖  ▗▖ ",

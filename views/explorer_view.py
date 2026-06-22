@@ -470,9 +470,17 @@ class ExplorerView(TerminalView):
         bar_x = box_width // 2 - bar_width // 2
 
         if is_playing:
-            self._audioplayer.write_simple(time_text, text_y, text_x, bold=True)
-            self._audioplayer.write_simple("▬" * remaining, bar_y, bar_x + filled, Colors.DEFAULT)
-            self._audioplayer.write_simple("▬" * (filled - 1) + "●", bar_y, bar_x, Colors.DEFAULT)
+            state = Tokens.PLAYING
+        else:
+            state = Tokens.PAUSED
+
+        state_x = box_width // 2 - len(state) // 2
+
+        self._audioplayer.clear_line(1, 1, box_width - 2)
+        self._audioplayer.write_simple(state.upper(), 1, state_x, bold=True)
+        self._audioplayer.write_simple(time_text, text_y, text_x, bold=True)
+        self._audioplayer.write_simple("▬" * remaining, bar_y, bar_x + filled, Colors.DEFAULT)
+        self._audioplayer.write_simple("▬" * (filled - 1) + "●", bar_y, bar_x, Colors.DEFAULT)
 
     def format_time(self, seconds):
         minutes = int(seconds) // 60

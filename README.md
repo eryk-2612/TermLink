@@ -37,3 +37,6 @@ Build using pygame and curses.
 
 ## Screenshots
 <img width="1115" height="586" alt="image" src="https://github.com/user-attachments/assets/2ca1ae0b-c5c5-43bd-86d9-a6da0d63f985" />
+
+## Video
+https://github.com/user-attachments/assets/2f0e48ea-7b95-4f3d-9fcb-09f97fcf8e0c
