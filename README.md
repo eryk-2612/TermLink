@@ -2,7 +2,8 @@
 Build using pygame and curses. 
 - Needs a "data" folder to operate and at least one json describing the Terminal in the "data" folder. 
   - Use the example.json or example_chat.json as a template.
-- UI language is easy to change manually. 
+- UI language is easy to change by editing tokens.json 
+- AI Chat only supports LM Studio API
 
 ## Dependencies
   - pip install windows-curses

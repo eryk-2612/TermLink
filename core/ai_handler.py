@@ -1,6 +1,6 @@
 import requests
 
-def get_response(url, token, system_prompt, input, prev_id=None):
+def get_response(model, url, token, system_prompt, input, prev_id=None):
     try:
         response = requests.post(
             url,
@@ -9,7 +9,7 @@ def get_response(url, token, system_prompt, input, prev_id=None):
                 "Content-Type": "application/json"
             },
             json={
-                "model": "google/gemma-4-e4b",
+                "model": model,
                 "input": input,
                 "system_prompt": system_prompt,
                 "previous_response_id": prev_id

@@ -36,7 +36,7 @@ class JsonLoader:
             instructions_file = terminal.get("instruction_file")
             with open(os.path.join(self.folder, instructions_file), 'r', encoding='utf-8') as f:
                 instructions = f.read()
-            return ChatModel(name=terminal.get("title", Tokens.TERM_UNNAMED), unlock_code=terminal.get("unlock_code"), apikey=terminal.get("apikey"), url=terminal.get("url"), instructions=instructions)
+            return ChatModel(name=terminal.get("title", Tokens.TERM_UNNAMED), unlock_code=terminal.get("unlock_code"),model=terminal.get("model"), apikey=terminal.get("apikey"), url=terminal.get("url"), instructions=instructions)
         else:
             return TerminalModel(Tokens.TERM_UNNAMED)
 

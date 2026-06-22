@@ -15,7 +15,7 @@ class ChatController(TerminalController):
 
     def init_ai_chat(self):
         if not self.model.previous_response_id:
-            response = get_response(self.model.url, self.model.apikey, "If you understood, only answer with OK", self.model.instructions)
+            response = get_response(self.model.model, self.model.url, self.model.apikey, "If you understood, only answer with OK", self.model.instructions)
 
             if response:
                 self.model.previous_response_id = response[1]
@@ -89,7 +89,7 @@ class ChatController(TerminalController):
 
     def send_request(self):
         request = self.state.request
-        response = get_response(self.model.url, self.model.apikey, self.model.system_prompt, request, self.model.previous_response_id)
+        response = get_response(self.model.model, self.model.url, self.model.apikey, self.model.system_prompt, request, self.model.previous_response_id)
 
         if response:
             self.state.output_text = "> " + request  + "\n" + response[0].upper() + "\n"

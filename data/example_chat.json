@@ -3,8 +3,9 @@
 		"title": "MO/TH/ER Interface",
 		"unlock_code": "55555",
 		"type": "chat",
+		"model": "YOUR MODEL",
 		"apikey": "YOUR API KEY",
-		"url": "YOUR URL",
+		"url": "YOUR_URL:YOUR_PORT/api/v1/chat",
 		"instruction_file": "prompt.txt"
 	}
 }
