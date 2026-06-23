@@ -1,0 +1,467 @@
+{
+    "name": "OBS Retro Filters - TermLink",
+    "DesktopAudioDevice1": {
+        "prev_ver": 536936450,
+        "name": "Desktop-Audio",
+        "uuid": "2b6f14ed-d793-4b3e-a45f-d4b62b4548bf",
+        "id": "wasapi_output_capture",
+        "versioned_id": "wasapi_output_capture",
+        "settings": {
+            "device_id": "default"
+        },
+        "mixers": 255,
+        "sync": 0,
+        "flags": 0,
+        "volume": 1.0,
+        "balance": 0.5,
+        "enabled": true,
+        "muted": true,
+        "push-to-mute": false,
+        "push-to-mute-delay": 0,
+        "push-to-talk": false,
+        "push-to-talk-delay": 0,
+        "hotkeys": {
+            "libobs.mute": [],
+            "libobs.unmute": [],
+            "libobs.push-to-mute": [],
+            "libobs.push-to-talk": []
+        },
+        "deinterlace_mode": 0,
+        "deinterlace_field_order": 0,
+        "monitoring_type": 0,
+        "private_settings": {}
+    },
+    "AuxAudioDevice1": {
+        "prev_ver": 536936450,
+        "name": "Mikrofon-/AUX-Audio",
+        "uuid": "dbe8d18f-95ac-4a5c-9614-085e819cb2a6",
+        "id": "wasapi_input_capture",
+        "versioned_id": "wasapi_input_capture",
+        "settings": {
+            "device_id": "default"
+        },
+        "mixers": 255,
+        "sync": 0,
+        "flags": 0,
+        "volume": 1.0,
+        "balance": 0.5,
+        "enabled": true,
+        "muted": true,
+        "push-to-mute": false,
+        "push-to-mute-delay": 0,
+        "push-to-talk": false,
+        "push-to-talk-delay": 0,
+        "hotkeys": {
+            "libobs.mute": [],
+            "libobs.unmute": [],
+            "libobs.push-to-mute": [],
+            "libobs.push-to-talk": []
+        },
+        "deinterlace_mode": 0,
+        "deinterlace_field_order": 0,
+        "monitoring_type": 0,
+        "private_settings": {}
+    },
+    "groups": [],
+    "scene_order": [
+        {
+            "name": "Szene TermLink"
+        }
+    ],
+    "current_scene": "Szene TermLink",
+    "current_program_scene": "Szene TermLink",
+    "canvases": [],
+    "current_transition": "Überblende",
+    "transition_duration": 300,
+    "transitions": [],
+    "quick_transitions": [
+        {
+            "name": "Schnitt",
+            "duration": 300,
+            "hotkeys": [],
+            "id": 1,
+            "fade_to_black": false
+        },
+        {
+            "name": "Überblende",
+            "duration": 300,
+            "hotkeys": [],
+            "id": 2,
+            "fade_to_black": false
+        },
+        {
+            "name": "Überblende",
+            "duration": 300,
+            "hotkeys": [],
+            "id": 3,
+            "fade_to_black": true
+        }
+    ],
+    "saved_projectors": [],
+    "preview_locked": true,
+    "scaling_enabled": false,
+    "scaling_level": -11,
+    "scaling_off_x": 0.0,
+    "scaling_off_y": 0.0,
+    "virtual-camera": {
+        "type2": 3
+    },
+    "modules": {
+        "auto-scene-switcher": {
+            "interval": 300,
+            "non_matching_scene": "",
+            "switch_if_not_matching": false,
+            "active": false,
+            "switches": []
+        },
+        "captions": {
+            "source": "",
+            "enabled": false,
+            "lang_id": 1031,
+            "provider": "mssapi"
+        },
+        "output-timer": {
+            "streamTimerHours": 0,
+            "streamTimerMinutes": 0,
+            "streamTimerSeconds": 30,
+            "recordTimerHours": 0,
+            "recordTimerMinutes": 0,
+            "recordTimerSeconds": 30,
+            "autoStartStreamTimer": false,
+            "autoStartRecordTimer": false,
+            "pauseRecordTimer": true
+        },
+        "scripts-tool": []
+    },
+    "resolution": {
+        "x": 1920,
+        "y": 1080
+    },
+    "version": 2,
+    "sources": [
+        {
+            "prev_ver": 536936450,
+            "name": "Szene TermLink",
+            "uuid": "95bc6b8c-b5d9-4670-8a98-4cba64a5233d",
+            "id": "scene",
+            "versioned_id": "scene",
+            "settings": {
+                "custom_size": false,
+                "id_counter": 12,
+                "items": [
+                    {
+                        "name": "TermLink",
+                        "source_uuid": "4c65b005-2bec-41a8-b76a-465752f248c1",
+                        "visible": true,
+                        "locked": false,
+                        "rot": 0.0,
+                        "scale_ref": {
+                            "x": 1920.0,
+                            "y": 1080.0
+                        },
+                        "align": 5,
+                        "bounds_type": 2,
+                        "bounds_align": 0,
+                        "bounds_crop": false,
+                        "crop_left": 0,
+                        "crop_top": 0,
+                        "crop_right": 0,
+                        "crop_bottom": 0,
+                        "id": 10,
+                        "group_item_backup": false,
+                        "pos": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "pos_rel": {
+                            "x": -1.7777777910232544,
+                            "y": -1.0
+                        },
+                        "scale": {
+                            "x": 1.0,
+                            "y": 1.0
+                        },
+                        "scale_rel": {
+                            "x": 1.0,
+                            "y": 1.0
+                        },
+                        "bounds": {
+                            "x": 1920.0,
+                            "y": 1080.0
+                        },
+                        "bounds_rel": {
+                            "x": 3.555555582046509,
+                            "y": 2.0
+                        },
+                        "scale_filter": "disable",
+                        "blend_method": "default",
+                        "blend_type": "normal",
+                        "show_transition": {
+                            "duration": 300
+                        },
+                        "hide_transition": {
+                            "duration": 300
+                        },
+                        "private_settings": {}
+                    }
+                ]
+            },
+            "mixers": 0,
+            "sync": 0,
+            "flags": 0,
+            "volume": 1.0,
+            "balance": 0.5,
+            "enabled": true,
+            "muted": false,
+            "push-to-mute": false,
+            "push-to-mute-delay": 0,
+            "push-to-talk": false,
+            "push-to-talk-delay": 0,
+            "hotkeys": {
+                "OBSBasic.SelectScene": [],
+                "libobs.show_scene_item.10": [],
+                "libobs.hide_scene_item.10": []
+            },
+            "deinterlace_mode": 0,
+            "deinterlace_field_order": 0,
+            "monitoring_type": 0,
+            "canvas_uuid": "6c69626f-6273-4c00-9d88-c5136d61696e",
+            "private_settings": {}
+        },
+        {
+            "prev_ver": 536936450,
+            "name": "TermLink",
+            "uuid": "4c65b005-2bec-41a8-b76a-465752f248c1",
+            "id": "window_capture",
+            "versioned_id": "window_capture",
+            "settings": {
+                "priority": 1,
+                "window": "Windows PowerShell:CASCADIA_HOSTING_WINDOW_CLASS:WindowsTerminal.exe",
+                "method": 2,
+                "cursor": false,
+                "force_sdr": false
+            },
+            "mixers": 255,
+            "sync": 0,
+            "flags": 0,
+            "volume": 1.0,
+            "balance": 0.5,
+            "enabled": true,
+            "muted": false,
+            "push-to-mute": false,
+            "push-to-mute-delay": 0,
+            "push-to-talk": false,
+            "push-to-talk-delay": 0,
+            "hotkeys": {
+                "libobs.mute": [],
+                "libobs.unmute": [],
+                "libobs.push-to-mute": [],
+                "libobs.push-to-talk": []
+            },
+            "deinterlace_mode": 0,
+            "deinterlace_field_order": 0,
+            "monitoring_type": 0,
+            "private_settings": {},
+            "filters": [
+                {
+                    "prev_ver": 536936450,
+                    "name": "Zuschneiden/Pad",
+                    "uuid": "0bcf19ad-9cca-4e5e-ab54-0da6c6ae7d35",
+                    "id": "crop_filter",
+                    "versioned_id": "crop_filter",
+                    "settings": {
+                        "right": 15,
+                        "top": 40,
+                        "relative": true
+                    },
+                    "mixers": 0,
+                    "sync": 0,
+                    "flags": 0,
+                    "volume": 1.0,
+                    "balance": 0.5,
+                    "enabled": true,
+                    "muted": false,
+                    "push-to-mute": false,
+                    "push-to-mute-delay": 0,
+                    "push-to-talk": false,
+                    "push-to-talk-delay": 0,
+                    "hotkeys": {},
+                    "deinterlace_mode": 0,
+                    "deinterlace_field_order": 0,
+                    "monitoring_type": 0,
+                    "private_settings": {}
+                },
+                {
+                    "prev_ver": 536936450,
+                    "name": "NTSC",
+                    "uuid": "47126246-3e8d-4be7-8f7b-5e46af9badaf",
+                    "id": "obs_retro_effects_filter",
+                    "versioned_id": "obs_retro_effects_filter",
+                    "settings": {
+                        "filter_type": 7,
+                        "ntsc_tuning_offset": 0,
+                        "ntsc_luma_noise": 5,
+                        "ntsc_luma_band_size": 0,
+                        "ntsc_luma_band_strength": 0,
+                        "ntsc_luma_band_count": 1,
+                        "ntsc_chroma_bleed_size": 0,
+                        "ntsc_chroma_bleed_strength": 0,
+                        "ntsc_chroma_bleed_steps": 1,
+                        "ntsc_brightness": 100,
+                        "ntsc_saturation": 100
+                    },
+                    "mixers": 0,
+                    "sync": 0,
+                    "flags": 0,
+                    "volume": 1.0,
+                    "balance": 0.5,
+                    "enabled": true,
+                    "muted": false,
+                    "push-to-mute": false,
+                    "push-to-mute-delay": 0,
+                    "push-to-talk": false,
+                    "push-to-talk-delay": 0,
+                    "hotkeys": {},
+                    "deinterlace_mode": 0,
+                    "deinterlace_field_order": 0,
+                    "monitoring_type": 0,
+                    "private_settings": {}
+                },
+                {
+                    "prev_ver": 536936450,
+                    "name": "VHS",
+                    "uuid": "d27a4822-931e-4179-b183-52a31e380da9",
+                    "id": "obs_retro_effects_filter",
+                    "versioned_id": "obs_retro_effects_filter",
+                    "settings": {
+                        "vhs_wrinkle_occurrence": 0,
+                        "filter_type": 11,
+                        "vhs_wrinkle_size": 1,
+                        "vhs_wrinkle_duration": 10,
+                        "vhs_jitter_min_size": 0,
+                        "vhs_jitter_max_size": 0,
+                        "vhs_jitter_min_period": 0.01,
+                        "vhs_jitter_max_period": 0.01,
+                        "vhs_jitter_min_interval": 0,
+                        "vhs_jitter_max_interval": 0,
+                        "vhs_pop_lines_amount": 5,
+                        "vhs_head_switch_primary_thickness": 0,
+                        "vhs_head_switch_primary_offset": -100,
+                        "vhs_head_switch_secondary_thickness": 0,
+                        "vhs_head_switch_secondary_horiz_offset": -100,
+                        "vhs_head_switch_secondary_vert_amount": 0
+                    },
+                    "mixers": 0,
+                    "sync": 0,
+                    "flags": 0,
+                    "volume": 1.0,
+                    "balance": 0.5,
+                    "enabled": true,
+                    "muted": false,
+                    "push-to-mute": false,
+                    "push-to-mute-delay": 0,
+                    "push-to-talk": false,
+                    "push-to-talk-delay": 0,
+                    "hotkeys": {},
+                    "deinterlace_mode": 0,
+                    "deinterlace_field_order": 0,
+                    "monitoring_type": 0,
+                    "private_settings": {}
+                },
+                {
+                    "prev_ver": 536936450,
+                    "name": "Scanlines",
+                    "uuid": "3c7f0708-1654-4a11-a333-21e5a0ed8a13",
+                    "id": "obs_retro_effects_filter",
+                    "versioned_id": "obs_retro_effects_filter",
+                    "settings": {
+                        "scanlines_intensity": 10,
+                        "filter_type": 13,
+                        "scanlines_period": 500,
+                        "scanlines_speed": 50,
+                        "scanlines_profile": 2
+                    },
+                    "mixers": 0,
+                    "sync": 0,
+                    "flags": 0,
+                    "volume": 1.0,
+                    "balance": 0.5,
+                    "enabled": true,
+                    "muted": false,
+                    "push-to-mute": false,
+                    "push-to-mute-delay": 0,
+                    "push-to-talk": false,
+                    "push-to-talk-delay": 0,
+                    "hotkeys": {},
+                    "deinterlace_mode": 0,
+                    "deinterlace_field_order": 0,
+                    "monitoring_type": 0,
+                    "private_settings": {}
+                },
+                {
+                    "prev_ver": 536936450,
+                    "name": "Farbkorrektur",
+                    "uuid": "2f298cc1-6c83-4cb2-89b6-de791c3adbb6",
+                    "id": "color_filter",
+                    "versioned_id": "color_filter_v2",
+                    "settings": {
+                        "color_multiply": 4283869184,
+                        "color_add": 4278586112
+                    },
+                    "mixers": 0,
+                    "sync": 0,
+                    "flags": 0,
+                    "volume": 1.0,
+                    "balance": 0.5,
+                    "enabled": true,
+                    "muted": false,
+                    "push-to-mute": false,
+                    "push-to-mute-delay": 0,
+                    "push-to-talk": false,
+                    "push-to-talk-delay": 0,
+                    "hotkeys": {},
+                    "deinterlace_mode": 0,
+                    "deinterlace_field_order": 0,
+                    "monitoring_type": 0,
+                    "private_settings": {}
+                },
+                {
+                    "prev_ver": 536936450,
+                    "name": "CRT",
+                    "uuid": "c71aeaed-3247-4428-b660-f718f1ac539a",
+                    "id": "obs_retro_effects_filter",
+                    "versioned_id": "obs_retro_effects_filter",
+                    "settings": {
+                        "ca_type": 1,
+                        "filter_type": 6,
+                        "crt_phosphor_type": 0,
+                        "crt_mask_intensity": 0,
+                        "crt_bloom": 10,
+                        "crt_bloom_threshold": 0,
+                        "crt_bloom_intensity": 30,
+                        "crt_corner_radius": 0,
+                        "crt_barrel_distort": 1.5,
+                        "crt_vignette": 10,
+                        "crt_black_level": 20
+                    },
+                    "mixers": 0,
+                    "sync": 0,
+                    "flags": 0,
+                    "volume": 1.0,
+                    "balance": 0.5,
+                    "enabled": true,
+                    "muted": false,
+                    "push-to-mute": false,
+                    "push-to-mute-delay": 0,
+                    "push-to-talk": false,
+                    "push-to-talk-delay": 0,
+                    "hotkeys": {},
+                    "deinterlace_mode": 0,
+                    "deinterlace_field_order": 0,
+                    "monitoring_type": 0,
+                    "private_settings": {}
+                }
+            ]
+        }
+    ]
+}
