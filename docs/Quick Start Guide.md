@@ -118,13 +118,19 @@ Simple Example
 				]
 			},
 			{
-				"title": "Shared",
+				"title": "Utility",
 				"entries": [
 					{
-						"title": "Memo",
-						"type": "audio",
-						"audio": "audio/memo.mp3",
-	                    "unlock_code": "12345"
+						"title": "Self-destruction",
+						"type": "button",
+						"default_state": false,
+						"state_labels": [
+							"Activated"
+						],
+						"action_verbs": [
+							"Activate"
+						],
+						"message": "Self-destruction\ninitiated"
 					}
 				]
 			},
