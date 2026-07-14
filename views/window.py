@@ -105,21 +105,21 @@ class Window:
         self.win.addstr(y, x, text, curses.color_pair(color) | (curses.A_BOLD if bold else 0))
         self.refresh()
 
-    def write_new_line(self, text, delay=0.0, color=Colors.DEFAULT, bold=False):
-        lines = text.split("\n")
-
-        for part in lines:
-            wrapped = textwrap.wrap(part, self.width - 4)
-
-            if not wrapped:
-                self.log.append("")
-                self.write_animate("", y=len(self.log), delay=delay, color=color, bold=bold)
-            else:
-                start_index = len(self.log)
-                self.log.extend(wrapped)
-
-                for i, line in enumerate(wrapped):
-                    self.write_animate(line, start_index + i + 1, delay=delay ,color=color, bold=bold)
+    # def write_new_line(self, text, delay=0.0, color=Colors.DEFAULT, bold=False):
+    #     lines = text.split("\n")
+    #
+    #     for part in lines:
+    #         wrapped = textwrap.wrap(part, self.width - 4)
+    #
+    #         if not wrapped:
+    #             self.log.append("")
+    #             self.write_animate("", y=len(self.log), delay=delay, color=color, bold=bold)
+    #         else:
+    #             start_index = len(self.log)
+    #             self.log.extend(wrapped)
+    #
+    #             for i, line in enumerate(wrapped):
+    #                 self.write_animate(line, start_index + i + 1, delay=delay ,color=color, bold=bold)
 
     def log_lines(self, lines):
         if lines:

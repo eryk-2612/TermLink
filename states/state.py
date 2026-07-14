@@ -29,9 +29,10 @@ class ExplorerState(TerminalState):
 @dataclass
 class ChatState(TerminalState):
     _input_text: str = ""
-    _output_text: str = ""
+    output_text: str = ""
     _request: str = ""
     ai_loaded: bool = False
+    chat_scroll_offset: int = 0
 
     @property
     def input_text(self):
@@ -45,15 +46,15 @@ class ChatState(TerminalState):
         self.request = self._input_text
         self._input_text = ""
 
-    @property
-    def output_text(self):
-        buffer = self._output_text
-        self._output_text = ""
-        return buffer
-
-    @output_text.setter
-    def output_text(self, value):
-        self._output_text = value
+    # @property
+    # def output_text(self):
+    #     buffer = self._output_text
+    #     self._output_text = ""
+    #     return buffer
+    #
+    # @output_text.setter
+    # def output_text(self, value):
+    #     self._output_text = value
 
     @property
     def request(self):

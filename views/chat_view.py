@@ -1,6 +1,6 @@
 from views.terminal_view import TerminalView
 from .window import Window
-from core import Colors, Others, Tokens
+from core import Colors, Others
 
 class ChatView(TerminalView):
     def __init__(self, stdscr):
@@ -10,6 +10,9 @@ class ChatView(TerminalView):
         self._inputwin = None
         self._outputwin = None
         self._chat = None
+        self._outputwin_inner = None
+        self._scrollbar = None
+
 
     @property
     def chat_window(self):
@@ -24,7 +27,7 @@ class ChatView(TerminalView):
             self._header.write_simple(title.upper(), y=0, x=1, color=Colors.SELECTED, bold=True)
             self._header.refresh()
 
-    def draw_output_window(self, text=""):
+    def draw_output_window(self):
         if not self._outputwin:
             height = self._screen_height - self._header.height - self._footer.height - 3
             width = self._screen_width - Others.SCREEN_PADDING
@@ -34,13 +37,61 @@ class ChatView(TerminalView):
             self._outputwin.draw_box()
             self._outputwin.refresh()
 
-        if not text == "":
-            try:
-                self._outputwin.write_new_line(text, 0.05, bold=True)
-            except:
-                self._outputwin.dump_log()
-                self._outputwin.empty()
-                self._outputwin.write_new_line(text, 0.05, bold=True)
+    def display_text(self, lines, scroll_offset):
+        if not self._outputwin:
+            return
+
+        if not self._outputwin_inner:
+            self._outputwin_inner = Window(self._outputwin.height - 2, self._outputwin.width - 3, 1, 1, parent_window=self._outputwin)
+
+        if self._outputwin_inner:
+            self._outputwin_inner.clear()
+            self._outputwin_inner.refresh()
+            self._outputwin_inner.dump_log()
+            self._outputwin_inner.log_lines(lines)
+            self._outputwin_inner.render_log(scroll_offset)
+
+        self._scrollbar = self.draw_scrollbar(self._outputwin, self._scrollbar, self._outputwin.height - 2, self.get_chat_max_scroll(), 0, scroll_offset, 1, self._outputwin.width - 2)
+
+    def get_chat_max_scroll(self):
+        if not self._outputwin_inner:
+            return 0
+        return self._outputwin_inner.get_max_scroll_offset()
+
+    def draw_scrollbar(self, parent_win, scrollbar_win, height, total, visible_count, scroll_offset, y, x):
+        if not scrollbar_win:
+            scrollbar_win = Window(height, 1, y, x, parent_window=parent_win)
+
+        up_y = 1
+        down_y = max(1, height - 2)
+
+        can_scroll_up = scroll_offset > 0
+        can_scroll_down = scroll_offset + visible_count < total
+
+        scroll_needed = total > visible_count
+
+        arrow_up = "△"
+        arrow_down = "▽"
+
+        if can_scroll_up:
+            arrow_up = "▲"
+
+        if can_scroll_down:
+            arrow_down = "▼"
+
+        if not scroll_needed:
+            arrow_up = " "
+            arrow_down = " "
+
+        if up_y == down_y:
+            if can_scroll_up:
+                scrollbar_win.write_simple(arrow_up, up_y, 0)
+            elif can_scroll_down:
+                scrollbar_win.write_simple(arrow_down, down_y, 0)
+        else:
+            scrollbar_win.write_simple(arrow_up, up_y, 0)
+            scrollbar_win.write_simple(arrow_down, down_y, 0)
+        return scrollbar_win
 
     def draw_input_window(self, input=""):
         if not self._inputwin  and self._outputwin:

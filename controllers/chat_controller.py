@@ -1,3 +1,5 @@
+import curses
+
 from .terminal_controller import TerminalController
 from core import Events, Tokens, Focus, Screens, get_response
 
@@ -39,6 +41,10 @@ class ChatController(TerminalController):
 
     def handle_input(self):
         key = super().handle_input()
+        if key == curses.KEY_UP:
+            self.arrowup_pressed()
+        if key == curses.KEY_DOWN:
+            self.arrowdown_pressed()
         if key == 27:
             self.escape_pressed()
 
@@ -46,10 +52,9 @@ class ChatController(TerminalController):
         super().enter_pressed()
         screen = self.state.screen
         if screen == Screens.CHAT:
-            if self.state.focus == Focus.INPUT:
-                if not self.state.input_text == "":
-                    self.state.clear_input_text()
-                    self.trigger_event(Events.SEND_REQUEST)
+            if not self.state.input_text == "":
+                self.state.clear_input_text()
+                self.trigger_event(Events.SEND_REQUEST)
 
     def backspace_pressed(self):
         super().backspace_pressed()
@@ -59,15 +64,29 @@ class ChatController(TerminalController):
 
     def typekey_pressed(self, key):
         super().typekey_pressed(key)
-        focus = self.state.focus
         screen = self.state.screen
+
         if screen == Screens.CHAT:
-            if focus == Focus.INPUT:
+            if not key == curses.KEY_UP and not key == curses.KEY_DOWN:
                 self.state.input_text += chr(key)
 
     def escape_pressed(self):
         super().escape_pressed()
         self.trigger_event(Events.QUIT)
+
+    def arrowdown_pressed(self):
+        screen = self.state.screen
+
+        if screen == Screens.CHAT:
+            max_scroll = self.view.get_chat_max_scroll()
+            self.state.chat_scroll_offset = min(self.state.chat_scroll_offset + 1, max_scroll)
+
+    def arrowup_pressed(self):
+        screen = self.state.screen
+
+        if screen == Screens.CHAT:
+            if self.state.chat_scroll_offset > 0:
+                self.state.chat_scroll_offset -= 1
 
     def handle_events(self):
         super().handle_events()
@@ -92,7 +111,8 @@ class ChatController(TerminalController):
         response = get_response(self.model.model, self.model.url, self.model.apikey, self.model.system_prompt, request, self.model.previous_response_id)
 
         if response:
-            self.state.output_text = "> " + request  + "\n" + response[0].upper() + "\n"
+            self.state.chat_scroll_offset = 0
+            self.state.output_text = (["> " + request]+ response[0].splitlines()+ [""])
             self.model.previous_response_id = response[1]
 
     def update_state(self):
@@ -109,16 +129,16 @@ class ChatController(TerminalController):
         if self.state.boot_completed:
             self.state.screen = Screens.CHAT
 
-        if self.state.screen == Screens.CHAT:
-            self.state.focus = Focus.INPUT
-
     def draw_view(self):
         super().draw_view()
         screen = self.state.screen
+        output_text = self.state.output_text
+        input_text = self.state.input_text
 
         match screen:
             case Screens.CHAT:
                 self.view.draw_footer(Tokens.COPYRIGHT, self.get_window())
                 self.view.draw_header(self.model.name.upper())
-                self.view.draw_output_window(self.state.output_text)
-                self.view.draw_input_window(self.state.input_text)
+                self.view.draw_output_window()
+                self.view.draw_input_window(input_text)
+                self.view.display_text(output_text, self.state.chat_scroll_offset)
