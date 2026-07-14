@@ -45,13 +45,29 @@ class ChatView(TerminalView):
             self._outputwin_inner = Window(self._outputwin.height - 2, self._outputwin.width - 3, 1, 1, parent_window=self._outputwin)
 
         if self._outputwin_inner:
-            self._outputwin_inner.clear()
-            self._outputwin_inner.refresh()
             self._outputwin_inner.dump_log()
             self._outputwin_inner.log_lines(lines)
             self._outputwin_inner.render_log(scroll_offset)
 
         self._scrollbar = self.draw_scrollbar(self._outputwin, self._scrollbar, self._outputwin.height - 2, self.get_chat_max_scroll(), 0, scroll_offset, 1, self._outputwin.width - 2)
+
+    def clear_outputwin(self):
+        if not self._outputwin:
+            return
+        else:
+            self._outputwin.empty()
+
+        if not self._outputwin_inner:
+            return
+        else:
+            self._outputwin_inner.empty()
+
+        if not self._scrollbar:
+            return
+        else:
+            self._scrollbar.empty()
+
+        self._outputwin.reload()
 
     def get_chat_max_scroll(self):
         if not self._outputwin_inner:

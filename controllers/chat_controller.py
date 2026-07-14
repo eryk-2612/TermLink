@@ -111,6 +111,7 @@ class ChatController(TerminalController):
         response = get_response(self.model.model, self.model.url, self.model.apikey, self.model.system_prompt, request, self.model.previous_response_id)
 
         if response:
+            self.view.clear_outputwin()
             self.state.chat_scroll_offset = 0
             self.state.output_text = (["> " + request]+ response[0].splitlines()+ [""])
             self.model.previous_response_id = response[1]
