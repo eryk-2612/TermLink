@@ -55,7 +55,6 @@ class FloppyManager:
         self._inserted = True
         self._device = floppy["device"]
         self._mountpoint = floppy["mountpoint"]
-
         return True
 
     def update(self):

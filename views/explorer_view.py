@@ -52,12 +52,20 @@ class ExplorerView(TerminalView):
             return 0
         return self._content_inner.get_max_scroll_offset()
 
-    def draw_header(self, title=""):
-        if not self._header:
+    def draw_header(self, title="", force=False):
+        if not self._header or force:
             self._header = Window(1, self._screen_width, 0, 0, parent_window=self._explorer)
             self._header.background = Colors.SELECTED
+            self._header.empty()
             self._header.write_simple(title.upper(), y=0, x=1, color=Colors.SELECTED, bold=True)
             self._header.refresh()
+
+    def draw_notification_header(self, notification):
+        self._header = Window(1, self._screen_width, 0, 0, parent_window=self._explorer)
+        self._header.background = Colors.DEFAULT
+        self._header.empty()
+        self._header.write_simple(notification.upper(), y=0, x=(self._screen_width - len(notification.upper())) // 2, color=Colors.DEFAULT, bold=True)
+        self._header.refresh()
 
     def draw_sidebar(self, categories, selected_category, category_scroll_offset, in_focus):
         if not self._sidebar:

@@ -11,6 +11,7 @@ class ExplorerController(TerminalController):
     def init_state(self):
         super().init_state()
         self.state.loading_progress = 100
+        self.state.floppy_init = False
         #self.state.screen = Screens.EXPLORER # DEBUG ONLY
 
     def get_window(self, requested_window=None):
@@ -212,6 +213,8 @@ class ExplorerController(TerminalController):
     def quit(self):
         self.unload_categories_from_floppy()
         self.state.floppy_data_loaded = False
+        self.state.floppy_init = False
+        self.destroy_header_notification()
         self.state.running = False
 
     def preview_category(self, category):
@@ -284,6 +287,8 @@ class ExplorerController(TerminalController):
         if self.state.boot_completed:
             self.state.screen = Screens.EXPLORER
         if screen == Screens.EXPLORER:
+            if self.state.show_notification and self.state.notification_timeout and time.time() > self.state.notification_timeout:
+                self.destroy_header_notification()
             self.check_floppy()
             if focus is None:
                 self.switch_focus(Focus.CATEGORIES)
@@ -302,25 +307,47 @@ class ExplorerController(TerminalController):
                     if self.view.messagebox_finished:
                         self.open_entry(self.state.open_category.entries[self.state.entry_index])
 
+    def create_header_notification(self, text):
+        self.destroy_header_notification()
+        self.state.notification = text
+        self.state.show_notification = True
+        self.state.notification_timeout = time.time() + 3
+
+    def destroy_header_notification(self):
+        self.state.notification = ""
+        self.state.show_notification = False
+        self.state.notification_timeout = None
+        self.state.force_header = True
+
     def check_floppy(self):
         event = self.floppy.update()
+
         if event == "inserted":
-            if self.floppy.mountpoint is None:
-                mountpoint = self.floppy.mount()
-                if mountpoint:
-                    self.state.floppy_drive_found = True
-                    self.load_categories_from_floppy(mountpoint)
-                    self.state.floppy_data_loaded = True
+            if not self.state.floppy_init:
+                self.create_header_notification(Tokens.FLOPPY_INSERTED)
+                self.state.floppy_init = True
+
         elif event == "removed":
             if self.state.floppy_drive_found:
                 self.state.floppy_drive_found = False
                 self.unload_categories_from_floppy()
                 self.state.floppy_data_loaded = False
+                self.state.floppy_init = False
+                self.create_header_notification(Tokens.FLOPPY_REMOVED)
+
         elif event == "unchanged":
-            if self.state.floppy_drive_found:
-                if self.floppy.mountpoint and not self.state.floppy_data_loaded:
-                    self.load_categories_from_floppy(self.floppy.mountpoint)
+            if self.state.floppy_init and not self.state.floppy_data_loaded:
+                mountpoint = self.floppy.mountpoint
+
+                if mountpoint is None:
+                    mountpoint = self.floppy.mount()
+
+                if mountpoint:
+                    self.state.floppy_drive_found = True
+                    self.load_categories_from_floppy(mountpoint)
                     self.state.floppy_data_loaded = True
+                    self.create_header_notification(Tokens.FLOPPY_LOADED)
+
         return False
 
     def load_categories_from_floppy(self, mountpoint):
@@ -348,7 +375,11 @@ class ExplorerController(TerminalController):
         match screen:
              case Screens.EXPLORER:
                 self.view.draw_footer(Tokens.COPYRIGHT, self.get_window())
-                self.view.draw_header(self.model.name.upper())
+                if self.state.show_notification:
+                    self.view.draw_notification_header(self.state.notification)
+                else:
+                    self.view.draw_header(self.model.name.upper(), self.state.force_header)
+                    self.state.force_header = False
                 self.view.draw_sidebar(self.model.categories, self.state.selected_category, self.state.category_scroll_offset, True if focus == Focus.CATEGORIES else False)
                 self.view.draw_entry_list(open_category, self.state.selected_entry, self.state.entry_scroll_offset, True if focus == Focus.ENTRIES else False)
                 self.view.draw_content_window()

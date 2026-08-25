@@ -26,7 +26,12 @@ class ExplorerState(TerminalState):
     entry_scroll_offset: int = 0
     content_scroll_offset: int = 0
     floppy_drive_found: bool = False
+    floppy_init: bool = False
     floppy_data_loaded: bool = False
+    notification: str = ""
+    show_notification: bool = False
+    notification_timeout: int = None
+    force_header: bool = False
 
 @dataclass
 class ChatState(TerminalState):

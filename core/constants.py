@@ -71,6 +71,9 @@ class Tokens:
     PASSCODE        = "Zugangscode"
     PLAYING         = "Läuft"
     PAUSED          = "Pausiert"
+    FLOPPY_INSERTED = "Diskette wird geladen ..."
+    FLOPPY_LOADED   = "Diskette geladen"
+    FLOPPY_REMOVED  = "Diskette entfernt"
     SIGNIN          = [
         r"                                              ",
         r"  ▗▄▖ ▗▖  ▗▖▗▖  ▗▖▗▄▄▄▖▗▖   ▗▄▄▄  ▗▄▄▄▖▗▖  ▗▖ ",
