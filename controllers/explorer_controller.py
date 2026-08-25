@@ -1,11 +1,12 @@
 from .terminal_controller import TerminalController
-from core import Events, Tokens, Focus, Screens, Colors, Others, EntryTypes, Popups, play_audio, stop_audio
+from core import Events, Tokens, Focus, Screens, Colors, Others, EntryTypes, Popups, play_audio, stop_audio, FloppyManager, JsonLoader
 import curses
 import time
 
 class ExplorerController(TerminalController):
     def __init__(self, stdscr, model, view, state):
         super().__init__(stdscr, model, view, state)
+        self.floppy = FloppyManager()
 
     def init_state(self):
         super().init_state()
@@ -208,6 +209,11 @@ class ExplorerController(TerminalController):
                 return True
         return False
 
+    def quit(self):
+        self.unload_categories_from_floppy()
+        self.state.floppy_data_loaded = False
+        self.state.running = False
+
     def preview_category(self, category):
         self.state.open_category = category
 
@@ -278,13 +284,15 @@ class ExplorerController(TerminalController):
         if self.state.boot_completed:
             self.state.screen = Screens.EXPLORER
         if screen == Screens.EXPLORER:
+            self.check_floppy()
             if focus is None:
                 self.switch_focus(Focus.CATEGORIES)
             elif self.state.focus == Focus.ENTRIES:
                 self.state.selected_entry = self.state.entry_index
             elif self.state.focus == Focus.CATEGORIES:
                 self.state.selected_category = self.state.category_index
-                self.preview_category(self.model.categories[self.state.category_index])
+                if self.model.categories:
+                    self.preview_category(self.model.categories[self.state.category_index])
             elif self.state.focus == Focus.LOCK:
                 if not self.state.open_entry.locked and self.view.messagebox_finished:
                     self.switch_focus(Focus.CONTENT)
@@ -293,6 +301,39 @@ class ExplorerController(TerminalController):
                 else:
                     if self.view.messagebox_finished:
                         self.open_entry(self.state.open_category.entries[self.state.entry_index])
+
+    def check_floppy(self):
+        event = self.floppy.update()
+        if event == "inserted":
+            if self.floppy.mountpoint is None:
+                mountpoint = self.floppy.mount()
+                if mountpoint:
+                    self.state.floppy_drive_found = True
+                    self.load_categories_from_floppy(mountpoint)
+                    self.state.floppy_data_loaded = True
+        elif event == "removed":
+            if self.state.floppy_drive_found:
+                self.state.floppy_drive_found = False
+                self.unload_categories_from_floppy()
+                self.state.floppy_data_loaded = False
+        elif event == "unchanged":
+            if self.state.floppy_drive_found:
+                if self.floppy.mountpoint and not self.state.floppy_data_loaded:
+                    self.load_categories_from_floppy(self.floppy.mountpoint)
+                    self.state.floppy_data_loaded = True
+        return False
+
+    def load_categories_from_floppy(self, mountpoint):
+        loader = JsonLoader(mountpoint)
+        categories = loader.get_all_categories(mountpoint)
+        for c in categories:
+            self.model.add_temporary_category(c)
+
+    def unload_categories_from_floppy(self):
+        self.model.remove_all_temporary_categories()
+        if self.state.category_index >= len(self.model.categories):
+            self.state.category_index = len(self.model.categories) - 1 if self.model.categories else 0
+            self.state.category_scroll_offset = 0
 
     def draw_view(self):
         super().draw_view()

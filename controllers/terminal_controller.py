@@ -73,7 +73,7 @@ class TerminalController:
 
         if key in [10, 13]:
             self.enter_pressed()
-        elif key is not None and key >= 32:
+        elif key is not None and key >= 32 and key != 127:
             self.typekey_pressed(key)
         elif key in [curses.KEY_BACKSPACE, 127, 8]:
             self.backspace_pressed()

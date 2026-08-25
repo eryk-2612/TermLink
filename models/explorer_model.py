@@ -14,6 +14,21 @@ class ExplorerModel(TerminalModel):
     def categories(self, value):
         self._categories = value
 
+    def add_category(self, category):
+        self._categories.append(category)
+
+    def add_temporary_category(self, category):
+        category.make_temporary()
+        self.add_category(category)
+
+    def remove_category(self, category):
+        self._categories.remove(category)
+
+    def remove_all_temporary_categories(self):
+        for c in reversed(self._categories):
+            if c.temp:
+                self.remove_category(c)
+
 class EntryModel:
     def __init__(
         self,
@@ -166,6 +181,7 @@ class CategoryModel:
     def __init__(self, title, entries=None):
         self._title = title
         self._entries = entries or []
+        self._temp = False
 
     @property
     def title(self):
@@ -182,3 +198,11 @@ class CategoryModel:
     @entries.setter
     def entries(self, value):
         self._entries = value
+
+    @property
+    def temp(self):
+        return self._temp
+
+    def make_temporary(self):
+        self._temp = True
+

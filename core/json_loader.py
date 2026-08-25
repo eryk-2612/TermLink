@@ -25,6 +25,15 @@ class JsonLoader:
         entries = [self.load_entry(e) for e in category_data.get("entries", [])]
         return CategoryModel(category_data.get("title"), entries)
 
+    def get_all_categories(self, directory):
+        cats = []
+        for file in os.listdir(directory):
+            if file.endswith(".json"):
+                with open(os.path.join(self.folder, file), "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    cats.extend([self.load_category(c) for c in data.get("categories", [])])
+        return cats
+
     def load_terminal(self, json_data):
         terminal = json_data.get("terminal", {})
         termtype = terminal.get("type")

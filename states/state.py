@@ -25,6 +25,8 @@ class ExplorerState(TerminalState):
     category_scroll_offset: int = 0
     entry_scroll_offset: int = 0
     content_scroll_offset: int = 0
+    floppy_drive_found: bool = False
+    floppy_data_loaded: bool = False
 
 @dataclass
 class ChatState(TerminalState):
@@ -45,16 +47,6 @@ class ChatState(TerminalState):
     def clear_input_text(self):
         self.request = self._input_text
         self._input_text = ""
-
-    # @property
-    # def output_text(self):
-    #     buffer = self._output_text
-    #     self._output_text = ""
-    #     return buffer
-    #
-    # @output_text.setter
-    # def output_text(self, value):
-    #     self._output_text = value
 
     @property
     def request(self):
