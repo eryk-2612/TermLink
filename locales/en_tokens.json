@@ -19,6 +19,9 @@
   "passcode": "Passcode",
   "playing":  "Playing",
   "paused":   "Paused",
+  "floppy_inserted": "Loading floppy disk...",
+  "floppy_loaded": "Floppy disk loaded",
+  "floppy_removed": "Floppy disk removed",
   "signin": [
         "                                        ",
         "   ▗▄▄▖▗▄▄▄▖ ▗▄▄▖▗▖  ▗▖    ▗▄▄▄▖▗▖  ▗▖  ",
