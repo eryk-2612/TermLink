@@ -9,8 +9,7 @@ class Popup:
 
     def destroy(self):
         if self.win:
-            self.win.clear()
-            self.win.refresh()
+            self.clear()
             self.parent_window.reload()
             self.win = None
 

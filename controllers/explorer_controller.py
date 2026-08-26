@@ -26,7 +26,7 @@ class ExplorerController(TerminalController):
         if requested_window:
             match requested_window:
                 case Screens.EXPLORER:
-                    return self.view.fullscreen_window
+                    return self.view.explorer_window
                 case Focus.CONTENT:
                     return self.view.content_window
         return win
@@ -374,7 +374,7 @@ class ExplorerController(TerminalController):
 
         match screen:
              case Screens.EXPLORER:
-                self.view.draw_footer(Tokens.COPYRIGHT, self.get_window())
+                self.view.draw_footer(Tokens.COPYRIGHT, self.get_window(Screens.EXPLORER))
                 if self.state.show_notification:
                     self.view.draw_notification_header(self.state.notification)
                 else:

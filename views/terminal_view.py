@@ -46,16 +46,22 @@ class TerminalView:
             startup_screen_width = self._screen_width
             startup_screen_y = self._screen_height // 2 - startup_screen_height // 2
             startup_screen_x = self._screen_width // 2 - startup_screen_width // 2
-            self._fullscreen = Window(startup_screen_height - 1, startup_screen_width, startup_screen_y, startup_screen_x)
+            self._fullscreen = Window(startup_screen_height, startup_screen_width, startup_screen_y, startup_screen_x)
         return self._fullscreen
 
-    # (C) Terminal Systems
     def draw_footer(self, text, parent):
         if not self._footer:
-            self._footer = Window(1, self._screen_width, self._screen_height - 1, 0, parent_window=parent)
+            if parent is not None:
+                height = parent.height - 1
+                width = parent.width
+            else:
+                height = self._screen_height - 1
+                width = self._screen_width
+
+            self._footer = Window(1, width, height, 0, parent_window=parent)
             self._footer.background = Colors.DEFAULT
             x = self._footer.width // 2 - len(text) // 2  # x-Position so, dass der Text mittig ist
-            self._footer.write_animate(text, y=0, x=x, color=Colors.DEFAULT)
+            self._footer.write_simple(text, y=0, x=x, color=Colors.DEFAULT)
             self._footer.refresh()
 
     def create_lock(self, code, parent_window):
@@ -149,6 +155,7 @@ class TerminalView:
             time.sleep(1)
             self._startup.reload()
             self._startup = None
+            self._footer = None
 
     def draw_signin(self, image=""):
         image_height = len(image)

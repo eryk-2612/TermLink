@@ -54,23 +54,24 @@ class ExplorerView(TerminalView):
 
     def draw_header(self, title="", force=False):
         if not self._header or force:
-            self._header = Window(1, self._screen_width, 0, 0, parent_window=self._explorer)
+            self._header = Window(1, self._explorer.width, 0, 0, parent_window=self._explorer)
             self._header.background = Colors.SELECTED
             self._header.empty()
             self._header.write_simple(title.upper(), y=0, x=1, color=Colors.SELECTED, bold=True)
             self._header.refresh()
 
     def draw_notification_header(self, notification):
-        self._header = Window(1, self._screen_width, 0, 0, parent_window=self._explorer)
-        self._header.background = Colors.DEFAULT
-        self._header.empty()
-        self._header.write_simple(notification.upper(), y=0, x=(self._screen_width - len(notification.upper())) // 2, color=Colors.DEFAULT, bold=True)
-        self._header.refresh()
+        #if not self._header:
+            self._header = Window(1, self._explorer.width, 0, 0, parent_window=self._explorer)
+            self._header.background = Colors.DEFAULT
+            self._header.empty()
+            self._header.write_simple(notification.upper(), y=0, x=(self._screen_width - len(notification.upper())) // 2, color=Colors.DEFAULT, bold=True)
+            self._header.refresh()
 
     def draw_sidebar(self, categories, selected_category, category_scroll_offset, in_focus):
         if not self._sidebar:
-            height = (self._screen_height - self._header.height - self._footer.height - Others.SCREEN_PADDING)
-            width = self._screen_width // 4 + Others.SCROLLBAR_PADDING
+            height = (self._explorer.height - self._header.height - self._footer.height - Others.SCREEN_PADDING)
+            width = self._explorer.width // 4 + Others.SCROLLBAR_PADDING
             self._sidebar = Window(height, width, self._header.start_y + 2, 1, parent_window=self._explorer)
         self.draw_all_categories(categories, selected_category, category_scroll_offset, in_focus)
 
@@ -160,7 +161,7 @@ class ExplorerView(TerminalView):
             if not self._entry_list:
                 sidebar_spacing = Others.SCROLLBAR_PADDING
                 height = self.calculate_entry_list_height(box_height, entries)
-                width = ((self._screen_width - Others.SCREEN_PADDING) - self._sidebar.width - sidebar_spacing) //  3 * 2
+                width = ((self._explorer.width - Others.SCREEN_PADDING) - self._sidebar.width - sidebar_spacing) //  3 * 2
                 x = self._sidebar.width + sidebar_spacing
                 self._entry_list = Window(height, width, self._header.start_y + 1, x, parent_window=self._explorer)
             self.draw_all_entries(box_height, entries, selected_entry, entry_scroll_offset, in_focus)
@@ -281,8 +282,8 @@ class ExplorerView(TerminalView):
     def draw_content_window(self):
         if not self._content and self._entry_list:
             sidebar_spacing = Others.SCROLLBAR_PADDING
-            height = self._screen_height - self._header.height - self._footer.height - self._entry_list.height
-            width = self._screen_width - self._sidebar.width - Others.SCREEN_PADDING - sidebar_spacing
+            height = self._explorer.height - self._header.height - self._footer.height - self._entry_list.height
+            width = self._explorer.width - self._sidebar.width - Others.SCREEN_PADDING - sidebar_spacing
             y = self._entry_list.start_y + self._entry_list.height
             x = self._sidebar.width + sidebar_spacing
             self._content = Window(height, width, y, x, parent_window=self._explorer)

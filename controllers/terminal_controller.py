@@ -196,7 +196,7 @@ class TerminalController:
             case Screens.BOOT:
                 if self.get_window(Screens.SIGNIN):
                     self.view.undraw_signin(Tokens.SIGNIN)
-                self.view.draw_footer(Tokens.COPYRIGHT, self.get_window())
+                self.view.draw_footer(Tokens.COPYRIGHT, self.get_window(Screens.FULLSCREEN))
                 self.view.create_startup()
                 if popup:
                     if popup == Popups.MSG:

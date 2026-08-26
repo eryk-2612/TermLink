@@ -11,6 +11,7 @@ class Window:
         self._log = []
         self._start_x = begin_x
         self._start_y = begin_y
+        self._drawn = False
 
         if parent_window is None:
             self.win = curses.newwin(height, width, begin_y, begin_x)
@@ -104,22 +105,6 @@ class Window:
     def write_simple(self, text, y=1, x=2, color=Colors.DEFAULT, bold=False):
         self.win.addstr(y, x, text, curses.color_pair(color) | (curses.A_BOLD if bold else 0))
         self.refresh()
-
-    # def write_new_line(self, text, delay=0.0, color=Colors.DEFAULT, bold=False):
-    #     lines = text.split("\n")
-    #
-    #     for part in lines:
-    #         wrapped = textwrap.wrap(part, self.width - 4)
-    #
-    #         if not wrapped:
-    #             self.log.append("")
-    #             self.write_animate("", y=len(self.log), delay=delay, color=color, bold=bold)
-    #         else:
-    #             start_index = len(self.log)
-    #             self.log.extend(wrapped)
-    #
-    #             for i, line in enumerate(wrapped):
-    #                 self.write_animate(line, start_index + i + 1, delay=delay ,color=color, bold=bold)
 
     def log_lines(self, lines):
         if lines:
