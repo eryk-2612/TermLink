@@ -1,0 +1,82 @@
+{
+  "categories": [
+    {
+      "title": "Persoenlich",
+      "entries": [
+        {
+          "title": "20/03/2126",
+          "type": "text",
+          "lines": [
+            "[LOG 042 – Wartungsprotokoll]\n\nSystemzeit: 23:47:12\nStatus: Aktiv\nZugriffsebene: Intern\n\nDie heutige Inspektion des Hauptterminals verlief ohne kritische Zwischenfälle.\nMehrere kleinere Anomalien im Speicherzugriff wurden festgestellt, konnten jedoch\ndurch einen Neustart der betroffenen Module behoben werden.\n\nWährend der Überprüfung des Kommunikationsbusses kam es kurzfristig zu einer\nUnterbrechung der Verbindung zu Knotenpunkt B-17. Die Ursache konnte auf eine\ninstabile Spannungsversorgung zurückgeführt werden. Das Problem wurde durch\nUmleitung über eine redundante Leitung kompensiert.\n\nAuffällig war außerdem eine erhöhte Latenz im Zugriff auf archivierte Logdaten.\nEine Fragmentierung der Speichersegmente wird vermutet. Eine Defragmentierung\nwird für den nächsten Wartungszyklus empfohlen.\n\nHinweis: Die Zugriffsbeschränkungen für gesperrte Einträge wurden verschärft.\nMehrfache Fehlversuche führen nun zu einer temporären Sperre des Systems.\n\nAbschließende Bewertung:\nSystem stabil, jedoch mit Optimierungsbedarf im Speicher- und Netzwerkbereich."
+          ]
+        },
+        {
+          "title": "Datenverlust",
+          "type": "text",
+          "lines": [
+            "[FEHLER] Kritischer Datenverlust"
+          ]
+        },
+        {
+          "title": "21/03/2126",
+          "type": "text",
+          "lines": [
+            "[LOG 044 – Geheimer Bericht]\n\nSystemzeit: 01:12:47\nStatus: Verschlüsselt\nZugriffsebene: Geheim\n\nUnautorisierten Zugriff auf Sektor 7G festgestellt. Protokolldaten zeigen mehrere\nnicht autorisierte Anmeldeversuche aus unbekannten IP-Adressen. Alle betroffenen\nSystemmodule wurden sofort in Quarantäne versetzt.\n\nDie Sicherheitsprotokolle wurden angepasst: Zwei-Faktor-Authentifizierung nun\nobligatorisch für alle kritischen Zugriffe. Monitoring durch KI-Modul Alpha-3\nauf 24/7-Ebene aktiviert.\n\nWeitere Ermittlungen laufen. Verdächtige Aktivitäten wurden automatisch gemeldet\nund isoliert.\n\nAbschließende Bewertung:\nSystem bleibt stabil, jedoch erhöhte Wachsamkeit erforderlich. Weitergabe nur an\nautorisiertes Personal."
+          ],
+          "unlock_code": "55555"
+        }
+      ]
+    },
+    {
+      "title": "Oeffentlich",
+      "entries": [
+        {
+          "title": "Memo",
+          "type": "audio",
+          "audio": "audio/test.mp3"
+        }
+      ]
+    },
+    {
+      "title": "Programme",
+      "entries": [
+        {
+          "title": "Sicherheitsschleuse",
+          "type": "switch",
+          "unlock_code": "55555",
+          "default_state": false,
+          "state_labels": [
+            "Geöffnet",
+            "Verschlossen"
+          ],
+          "action_verbs": [
+            "Öffnen",
+            "Schließen"
+          ]
+        },
+        {
+          "title": "Selbstzerstörung",
+          "type": "button",
+          "unlock_code": "55555",
+          "default_state": false,
+          "state_labels": [
+            "Aktiviert"
+          ],
+          "action_verbs": [
+            "Aktivieren"
+          ],
+          "message": "Selbstzerstörung\naktiviert"
+        }
+      ]
+    },
+    {
+      "title": "Verlassen",
+      "entries": [
+        {
+          "title": "Verlassen",
+          "type": "quit"
+        }
+      ]
+    }
+  ]
+}
