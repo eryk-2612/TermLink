@@ -64,12 +64,9 @@ class TerminalView:
             self._footer.write_simple(text, y=0, x=x, color=Colors.DEFAULT)
             self._footer.refresh()
 
-    def create_lock(self, code, parent_window):
+    def draw_lock(self, code, parent_window, entered_code):
         self._passcodebox = PasscodeBox(parent_window, len(code))
-
-    def draw_lock(self, entered_code):
-        if self._passcodebox:
-            self._passcodebox.draw(entered_code)
+        self._passcodebox.draw(entered_code)
 
     def destroy_lock(self):
         if self._passcodebox:

@@ -142,9 +142,6 @@ class TerminalController:
             self.activate_popup(Popups.MSG)
         self.state.entered_code = ""
 
-    def prepare_lock(self, code, parent):
-        self.view.create_lock(code, parent)
-
     def skip_messagebox(self):
         if self.view.messagebox_finished:
             self.view.skip_messagebox()
@@ -202,8 +199,7 @@ class TerminalController:
                     if popup == Popups.MSG:
                         self.view.draw_messagebox()
                     elif popup == Popups.LOCK:
-                        self.view.create_lock(self.model.unlock_code, self.get_window(Screens.BOOT))
-                        self.view.draw_lock(entered_code)
+                        self.view.draw_lock(self.model.unlock_code, self.get_window(Screens.BOOT), entered_code)
                 elif not self.model.locked:
                     self.view.draw_startup_logo(Tokens.LOGO)
                     self.state.boot_logo_drawn = True

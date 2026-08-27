@@ -393,8 +393,7 @@ class ExplorerController(TerminalController):
                         if active_popup == Popups.MSG:
                             self.view.draw_messagebox()
                         elif active_popup == Popups.LOCK:
-                            self.view.create_lock(open_entry.unlock_code, self.get_window(Focus.CONTENT))
-                            self.view.draw_lock(entered_code)
+                            self.view.draw_lock(open_entry.unlock_code, self.get_window(Focus.CONTENT), entered_code)
                     elif not open_entry.locked:
                         entry_type = open_entry.type
                         if entry_type == EntryTypes.TEXT:
