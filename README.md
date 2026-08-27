@@ -1,7 +1,7 @@
 # TermLink
 Build using pygame and curses. 
 - Needs a "data" folder to operate and at least one json describing the Terminal in the "data" folder. 
-  - Use the example.json or example_chat.json as a template.
+  - Use the example.json, example_chat.json or floppy_example.json as a template.
 - UI language is easy to change by editing tokens.json 
 - AI Chat only supports LM Studio API
 
@@ -12,9 +12,10 @@ Build using pygame and curses.
 
 ## Features
 - customize your terminal using the example json files from the data/ folder
-- Support for two types of terminals:
+- support for two types of terminals:
   - explorer
     - a fake file explorer
+    - can read data (json with categories like explorer) from floppy drives (linux only - developed for linux mint)
   - chat
     - an LLM chat interface
 - Lock each terminal or entries (for an explorer type terminal) with a passcode
@@ -23,6 +24,7 @@ Build using pygame and curses.
     - just plain text
   - button
     - when pressed shows a popup
+    - can only be pressed once
   - switch
     - can change states
   - audio
@@ -30,7 +32,7 @@ Build using pygame and curses.
   - quit
     - optional button to leave the specific terminal
 - **Languages**: 
-  - update locales/tokens.json to your needs, I provided an english example in en_tokens.json (just rename the files)
+  - update locales/tokens.json to your needs, I provided an english example in en_tokens.json (just rename the file to "tokens.json")
 
 ## Recommendation
 - I recommend to use https://github.com/FiniteSingularity/obs-retro-effects for nice visual effects
