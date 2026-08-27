@@ -70,34 +70,18 @@ class TerminalView:
 
     def destroy_lock(self):
         if self._passcodebox:
-            self._passcodebox.destroy()
+            self._passcodebox.undraw()
             self._passcodebox = None
 
-    def create_messagebox(self, text, color, parent_window, duration=1.5):
-        self._messagebox = Messagebox(parent_window,text, color, duration)
-
-    def draw_messagebox(self):
-        if self._messagebox:
+    def draw_messagebox(self, text, color, parent_window):
+        if self._messagebox is None:
+            self._messagebox = Messagebox(parent_window, text, color)
             self._messagebox.draw()
 
-    def destroy_messagebox(self):
+    def undraw_messagebox(self):
         if self._messagebox:
-            self._messagebox.destroy()
+            self._messagebox.undraw()
             self._messagebox = None
-
-    def skip_messagebox(self):
-        if self._messagebox:
-            self._messagebox.skip()
-
-    @property
-    def messagebox_finished(self):
-        if self._messagebox:
-            if self._messagebox.drawn:
-                return not self._messagebox.visible
-            else:
-                return False
-        else:
-            return True
 
     def create_startup(self):
         if self._startup:
@@ -185,5 +169,4 @@ class TerminalView:
 
             del self._signin
             self._signin = None
-
 

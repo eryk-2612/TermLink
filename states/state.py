@@ -12,6 +12,9 @@ class TerminalState:
     boot_completed: bool = False
     loading_progress: int = 0
     boot_logo_drawn: bool = False
+    msg: list[str] = None
+    msg_timeout: int = None
+    show_msg: bool = False
 
 @dataclass
 class ExplorerState(TerminalState):

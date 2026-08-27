@@ -7,7 +7,7 @@ class Popup:
         self.parent_window = parent_window
         self.win = None
 
-    def destroy(self):
+    def undraw(self):
         if self.win:
             self.clear()
             self.parent_window.reload()
@@ -35,6 +35,8 @@ class PasscodeBox(Popup):
         self.x = self.parent_width // 2 - self.box_width // 2
 
         self.win = self.parent_window.win.derwin(self.box_height, self.box_width, self.y, self.x)
+        self.win.timeout(Others.TIMEOUT)
+        self.win.keypad(True)
         self.title_win = self.win.derwin(1, self.box_width, 0, 0)
         self.input_win = self.win.derwin(self.box_height - 1, self.box_width, 1, 0)
 
@@ -70,15 +72,12 @@ class PasscodeBox(Popup):
         self.win.refresh()
 
 class Messagebox(Popup):
-    def __init__(self, parent_window, text, color=Colors.DEFAULT, duration=1.5):
+    def __init__(self, parent_window, text, color=Colors.DEFAULT):
         super().__init__(parent_window)
 
         self.text = text
-        self.duration = duration
-        self.expires_at = time.time() + self.duration
         self._drawn = False
         self.color = color
-        self._skip = False
         lines = text.split("\n")
 
         self.messagebox_height = len(lines) + 2
@@ -94,21 +93,13 @@ class Messagebox(Popup):
     def drawn(self):
         return self._drawn
 
-    @property
-    def visible(self):
-        if self._skip:
-            return False
-        else:
-            return time.time() < self.expires_at
-
-    def skip(self):
-        self._skip = True
-
     def draw(self):
         if self.drawn:
             return
         self.parent_window.reload()
         self.win = self.parent_window.win.derwin(self.messagebox_height,self.messagebox_width,self.y,self.x)
+        self.win.timeout(Others.TIMEOUT)
+        self.win.keypad(True)
         self.win.bkgd(' ', curses.color_pair(self.color))
         self.win.box()
         self.write(self.text,y=1,x=2,delay=0.02,color=self.color,bold=True)

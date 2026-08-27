@@ -67,13 +67,12 @@ class ExplorerController(TerminalController):
                 if open_entry.type == EntryTypes.BUTTON:
                     if not open_entry.current_state:
                         open_entry.current_state = True
-                        self.prepare_messagebox(open_entry.message, Colors.SELECTED, self.get_window(Focus.CONTENT))
-                        self.activate_popup(Popups.MSG)
+                        self.prepare_messagebox(open_entry.message, Colors.SELECTED, Focus.CONTENT)
             elif popup == Popups.LOCK:
                 if len(entered_code) == len(open_entry.unlock_code):
                     self.unlock_entry()
             if popup == Popups.MSG:
-                self.view.skip_messagebox()
+                self.skip_messagebox()
 
     def spacebar_pressed(self):
         screen = self.state.screen
@@ -270,11 +269,9 @@ class ExplorerController(TerminalController):
     def unlock_entry(self):
         if self.state.entered_code == self.state.open_entry.unlock_code:
             self.state.open_entry.unlock()
-            self.prepare_messagebox(Tokens.MSG_SUCCESS, Colors.SELECTED, self.get_window(Focus.CONTENT))
-            self.activate_popup(Popups.MSG)
+            self.prepare_messagebox(Tokens.MSG_SUCCESS, Colors.SELECTED, Focus.CONTENT)
         else:
-            self.prepare_messagebox(Tokens.MSG_FAIL, Colors.SELECTED, self.get_window(Focus.CONTENT))
-            self.activate_popup(Popups.MSG)
+            self.prepare_messagebox(Tokens.MSG_FAIL, Colors.SELECTED, Focus.CONTENT)
         self.state.entered_code = ""
 
     def update_state(self):
@@ -299,12 +296,12 @@ class ExplorerController(TerminalController):
                 if self.model.categories:
                     self.preview_category(self.model.categories[self.state.category_index])
             elif self.state.focus == Focus.LOCK:
-                if not self.state.open_entry.locked and self.view.messagebox_finished:
+                if not self.state.open_entry.locked and not self.state.show_msg:
                     self.switch_focus(Focus.CONTENT)
                     if entry.type == EntryTypes.QUIT:
                         self.trigger_event(Events.QUIT)
                 else:
-                    if self.view.messagebox_finished:
+                    if not self.state.show_msg:
                         self.open_entry(self.state.open_category.entries[self.state.entry_index])
 
     def create_header_notification(self, text):
@@ -386,12 +383,15 @@ class ExplorerController(TerminalController):
                 if open_entry is None:
                     self.view.clear_content()
                     if active_popup:
-                        self.view.destroy_messagebox()
+                        self.view.undraw_messagebox()
                         self.view.destroy_lock()
                 else:
                     if active_popup:
                         if active_popup == Popups.MSG:
-                            self.view.draw_messagebox()
+                            message = self.state.msg[0]
+                            color = self.state.msg[1]
+                            window = self.get_window(self.state.msg[2])
+                            self.view.draw_messagebox(message, color, window)
                         elif active_popup == Popups.LOCK:
                             self.view.draw_lock(open_entry.unlock_code, self.get_window(Focus.CONTENT), entered_code)
                     elif not open_entry.locked:

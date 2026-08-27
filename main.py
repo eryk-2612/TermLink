@@ -46,7 +46,7 @@ def init_menu(height, width, terminals):
 def main(stdscr):
     curses.curs_set(0)
     stdscr.keypad(True)
-    #stdscr.timeout(300)
+    stdscr.timeout(300)
     init_colors()
 
     loader = JsonLoader(Others.DATA_PATH)

@@ -1,5 +1,6 @@
 from core import Events, Tokens, Focus, Screens, Colors, Popups
 import curses
+import time
 
 class TerminalController:
     def __init__(self, stdscr, model, view, state):
@@ -88,7 +89,7 @@ class TerminalController:
             self.trigger_event(Events.SIGNIN)
         if screen == Screens.BOOT:
             if popup == Popups.MSG:
-                self.view.skip_messagebox()
+                self.skip_messagebox()
             if popup == Popups.LOCK:
                 if len(entered_code) == len(self.model.unlock_code):
                     self.unlock_terminal()
@@ -135,19 +136,26 @@ class TerminalController:
     def unlock_terminal(self):
         if self.state.entered_code == self.model.unlock_code:
             self.model.unlock()
-            self.prepare_messagebox(Tokens.MSG_SUCCESS, Colors.SELECTED, self.get_window(Screens.BOOT))
-            self.activate_popup(Popups.MSG)
+            self.prepare_messagebox(Tokens.MSG_SUCCESS, Colors.SELECTED, Screens.BOOT)
         else:
-            self.prepare_messagebox(Tokens.MSG_FAIL, Colors.SELECTED, self.get_window(Screens.BOOT))
-            self.activate_popup(Popups.MSG)
+            self.prepare_messagebox(Tokens.MSG_FAIL, Colors.SELECTED, Screens.BOOT)
         self.state.entered_code = ""
 
     def skip_messagebox(self):
-        if self.view.messagebox_finished:
-            self.view.skip_messagebox()
+        self.state.msg_timeout = time.time()
 
-    def prepare_messagebox(self, text, color, parent):
-        self.view.create_messagebox(text.upper(), color, parent)
+    def prepare_messagebox(self, text, color, window, delay=1.5):
+        self.state.msg = [text.upper(), color, window]
+        self.state.show_msg = True
+        self.state.msg_timeout = time.time() + delay
+        self.activate_popup(Popups.MSG)
+
+    def destroy_messagebox(self):
+        self.view.undraw_messagebox()
+        self.state.msg = None
+        self.state.show_msg = False
+        self.state.msg_timeout = None
+        self.clear_popup()
 
     def enter_code(self, entered_code, key):
         if self.state.screen == Screens.BOOT:
@@ -163,10 +171,9 @@ class TerminalController:
         popup = self.state.active_popup
         focus = self.state.focus
 
-        if self.view.messagebox_finished:
-            if self.state.active_popup == Popups.MSG:
-                self.view.destroy_messagebox()
-                self.clear_popup()
+        if self.state.msg_timeout and time.time() > self.state.msg_timeout:
+            #quit()
+            self.destroy_messagebox()
 
         if screen == Screens.BOOT:
             if self.model.locked:
@@ -197,7 +204,10 @@ class TerminalController:
                 self.view.create_startup()
                 if popup:
                     if popup == Popups.MSG:
-                        self.view.draw_messagebox()
+                        message = self.state.msg[0]
+                        color = self.state.msg[1]
+                        window = self.get_window(self.state.msg[2])
+                        self.view.draw_messagebox(message, color, window)
                     elif popup == Popups.LOCK:
                         self.view.draw_lock(self.model.unlock_code, self.get_window(Screens.BOOT), entered_code)
                 elif not self.model.locked:
