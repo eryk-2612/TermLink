@@ -35,6 +35,7 @@ class ExplorerState(TerminalState):
     show_notification: bool = False
     notification_timeout: int = None
     force_header: bool = False
+    clear_content: bool = False
 
 @dataclass
 class ChatState(TerminalState):

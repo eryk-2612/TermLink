@@ -265,6 +265,7 @@ class ExplorerController(TerminalController):
         self.clear_popup()
         self.switch_focus(Focus.ENTRIES)
         self.state.open_entry = None
+        self.state.clear_content = True
 
     def unlock_entry(self):
         if self.state.entered_code == self.state.open_entry.unlock_code:
@@ -381,7 +382,9 @@ class ExplorerController(TerminalController):
                 self.view.draw_entry_list(open_category, self.state.selected_entry, self.state.entry_scroll_offset, True if focus == Focus.ENTRIES else False)
                 self.view.draw_content_window()
                 if open_entry is None:
-                    self.view.clear_content()
+                    if self.state.clear_content:
+                        self.view.clear_content()
+                        self.state.clear_content = False
                     if active_popup:
                         self.view.undraw_messagebox()
                         self.view.destroy_lock()
