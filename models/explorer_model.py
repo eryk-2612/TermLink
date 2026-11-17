@@ -2,8 +2,8 @@ from .terminal_model import TerminalModel
 from core import Others, Tokens, EntryTypes, get_audio_length
 
 class ExplorerModel(TerminalModel):
-    def __init__(self, name, unlock_code=None, categories=None):
-        super().__init__(name, unlock_code)
+    def __init__(self, name, unlock_code=None, categories=None, skip_signin=False):
+        super().__init__(name, unlock_code, skip_signin)
         self._categories = categories or []
 
     @property

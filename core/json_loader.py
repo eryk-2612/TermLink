@@ -40,17 +40,20 @@ class JsonLoader:
 
         if termtype == TermTypes.EXPLORER:
             categories = [self.load_category(c) for c in terminal.get("categories", [])]
-            return ExplorerModel(name=terminal.get("title", Tokens.TERM_UNNAMED), categories=categories, unlock_code=terminal.get("unlock_code"))
+            return ExplorerModel(name=terminal.get("title", Tokens.TERM_UNNAMED), categories=categories, unlock_code=terminal.get("unlock_code"), skip_signin=terminal.get("skip_signin", False))
         elif termtype == TermTypes.CHAT:
             instructions_file = terminal.get("instruction_file")
             with open(os.path.join(self.folder, instructions_file), 'r', encoding='utf-8') as f:
                 instructions = f.read()
-            return ChatModel(name=terminal.get("title", Tokens.TERM_UNNAMED), unlock_code=terminal.get("unlock_code"),model=terminal.get("model"), apikey=terminal.get("apikey"), url=terminal.get("url"), instructions=instructions)
+            return ChatModel(name=terminal.get("title", Tokens.TERM_UNNAMED), unlock_code=terminal.get("unlock_code"),model=terminal.get("model"), apikey=terminal.get("apikey"), url=terminal.get("url"), instructions=instructions, skip_signin=terminal.get("skip_signin", False))
         else:
             return TerminalModel(Tokens.TERM_UNNAMED)
 
     def load_all_terminals(self):
         terminals = []
+
+        if not os.path.isdir(self.folder):
+            return terminals
 
         for file in os.listdir(self.folder):
             if file.endswith(".json"):

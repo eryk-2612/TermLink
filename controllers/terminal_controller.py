@@ -53,7 +53,7 @@ class TerminalController:
 
     def init_state(self):
         self.state.running = True
-        self.state.screen = Screens.SIGNIN
+        self.state.screen = Screens.BOOT if self.model.skip_signin else Screens.SIGNIN
         self.state.event = None
         self.state.focus = None
         self.state.boot_completed = False

@@ -3,4 +3,5 @@ from .explorer_view import ExplorerView
 from .terminal_view import TerminalView
 from .popups import PasscodeBox, Messagebox, Popup
 from .window import Window
+from .disk_terminal_view import DiskTerminalView
 

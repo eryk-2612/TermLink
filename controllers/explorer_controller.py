@@ -4,9 +4,11 @@ import curses
 import time
 
 class ExplorerController(TerminalController):
-    def __init__(self, stdscr, model, view, state):
+    def __init__(self, stdscr, model, view, state, disk_loaded=False):
         super().__init__(stdscr, model, view, state)
         self.floppy = FloppyManager()
+        self._initial_disk_notification_pending = disk_loaded
+        self._silent_initial_disk_load = False
 
     def init_state(self):
         super().init_state()
@@ -320,6 +322,14 @@ class ExplorerController(TerminalController):
     def check_floppy(self):
         event = self.floppy.update()
 
+        if self._initial_disk_notification_pending:
+            if event == "inserted":
+                self._initial_disk_notification_pending = False
+                self._silent_initial_disk_load = True
+                self.state.floppy_init = True
+            elif event in ("unchanged", "removed"):
+                self._initial_disk_notification_pending = False
+
         if event == "inserted":
             if not self.state.floppy_init:
                 self.create_header_notification(Tokens.FLOPPY_INSERTED)
@@ -330,8 +340,9 @@ class ExplorerController(TerminalController):
                 self.state.floppy_drive_found = False
                 self.unload_categories_from_floppy()
                 self.state.floppy_data_loaded = False
-                self.state.floppy_init = False
                 self.create_header_notification(Tokens.FLOPPY_REMOVED)
+            self.state.floppy_init = False
+            self._silent_initial_disk_load = False
 
         elif event == "unchanged":
             if self.state.floppy_init and not self.state.floppy_data_loaded:
@@ -344,7 +355,10 @@ class ExplorerController(TerminalController):
                     self.state.floppy_drive_found = True
                     self.load_categories_from_floppy(mountpoint)
                     self.state.floppy_data_loaded = True
-                    self.create_header_notification(Tokens.FLOPPY_LOADED)
+                    if self._silent_initial_disk_load:
+                        self._silent_initial_disk_load = False
+                    else:
+                        self.create_header_notification(Tokens.FLOPPY_LOADED)
 
         return False
 

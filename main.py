@@ -13,12 +13,12 @@ def init_colors():
 def init_menu(height, width, terminals):
     win = Window(height, width, 0, 0)
     current_idx = 0
-    menu = terminals + [Tokens.LEAVE]
+    menu = terminals + [Tokens.LOAD_FROM_DISK, Tokens.LEAVE]
     
     while True:
         for idx, item in enumerate(menu):
-            if item == Tokens.LEAVE:
-                text = Tokens.LEAVE.upper()
+            if item == Tokens.LEAVE or item == Tokens.LOAD_FROM_DISK:
+                text = item.upper()
             else:
                 text = item.model.name.upper()
 
@@ -43,6 +43,13 @@ def init_menu(height, width, terminals):
             del win
             return selected
 
+def create_controller(stdscr, model, disk_loaded=False):
+    if isinstance(model, ChatModel):
+        return ChatController(stdscr, model, ChatView(stdscr), ChatState())
+    if isinstance(model, ExplorerModel):
+        return ExplorerController(stdscr, model, ExplorerView(stdscr), ExplorerState(), disk_loaded=disk_loaded)
+    return TerminalController(stdscr, model, TerminalView(stdscr), TerminalState())
+
 def main(stdscr):
     curses.curs_set(0)
     stdscr.keypad(True)
@@ -53,25 +60,16 @@ def main(stdscr):
     terminals = loader.load_all_terminals()
 
     while True:
-        controller_list = []
-        for model in terminals:
-            if isinstance(model, ChatModel):
-                view = ChatView(stdscr)
-                state = ChatState()
-                controller_list.append(ChatController(stdscr, model, view, state))
-            elif isinstance(model, ExplorerModel):
-                view = ExplorerView(stdscr)
-                state = ExplorerState()
-                controller_list.append(ExplorerController(stdscr, model, view, state))
-            else:
-                view = TerminalView(stdscr)
-                state = TerminalState()
-                controller_list.append(TerminalController(stdscr, model, view, state))
+        controller_list = [create_controller(stdscr, model) for model in terminals]
 
         height, width = stdscr.getmaxyx()
         selected_controller = init_menu(height, width, controller_list)
 
-        if selected_controller:
+        if selected_controller == Tokens.LOAD_FROM_DISK:
+            loaded_model = DiskTerminalController(stdscr).run()
+            if loaded_model:
+                create_controller(stdscr, loaded_model, disk_loaded=True).run()
+        elif selected_controller:
             stdscr.refresh()
             selected_controller.run()
         else:

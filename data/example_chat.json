@@ -2,6 +2,7 @@
 	"terminal": {
 		"title": "MO/TH/ER Interface",
 		"unlock_code": "55555",
+		"skip_signin": false,
 		"type": "chat",
 		"model": "YOUR MODEL",
 		"apikey": "YOUR API KEY",

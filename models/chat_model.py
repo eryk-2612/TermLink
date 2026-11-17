@@ -1,8 +1,8 @@
 from .terminal_model import TerminalModel
 
 class ChatModel(TerminalModel):
-    def __init__(self, name, unlock_code=None, model=None, apikey=None, url=None, instructions=None):
-        super().__init__(name, unlock_code)
+    def __init__(self, name, unlock_code=None, model=None, apikey=None, url=None, instructions=None, skip_signin=False):
+        super().__init__(name, unlock_code, skip_signin)
         self.model = model
         self.apikey = apikey
         self.instructions = instructions

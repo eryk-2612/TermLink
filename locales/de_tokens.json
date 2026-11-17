@@ -1,0 +1,48 @@
+{
+  "copyright": "(C) Terminal Systems",
+  "msg_success": "Zugriff gewährt",
+  "msg_fail": "Zugriff verweigert",
+  "folder": "Ordner",
+  "files": "Dateien",
+  "leave": "Verlassen",
+  "term_unnamed": "Unbenanntes Terminal",
+  "error": "Fehler",
+  "states": [
+    "An",
+    "Aus"
+  ],
+  "verbs": [
+    "Anschalten",
+    "Ausschalten"
+  ],
+  "message": "Aktiviert",
+  "passcode": "Zugangscode",
+  "playing":  "Läuft",
+  "paused":   "Pausiert",
+  "floppy_inserted": "Diskette wird geladen ...",
+  "floppy_loaded": "Diskette geladen",
+  "floppy_removed": "Diskette entfernt",
+  "load_from_disk": "Von Diskette lesen",
+  "insert_floppy": "Bitte Diskette einlegen",
+  "floppy_reading": "Daten werden gelesen ...",
+  "floppy_no_terminal": "Datensatz nicht gefunden",
+  "floppy_read_error": "Programm konnte nicht gelesen werden",
+  "floppy_select_terminal": "Programm auswählen",
+  "floppy_select_hint": "Enter: Laden  |  Esc: Zurück",
+  "signin": [
+    "                                              ",
+    "  ▗▄▖ ▗▖  ▗▖▗▖  ▗▖▗▄▄▄▖▗▖   ▗▄▄▄  ▗▄▄▄▖▗▖  ▗▖ ",
+    " ▐▌ ▐▌▐▛▚▖▐▌▐▛▚▞▜▌▐▌   ▐▌   ▐▌  █ ▐▌   ▐▛▚▖▐▌ ",
+    " ▐▛▀▜▌▐▌ ▝▜▌▐▌  ▐▌▐▛▀▀▘▐▌   ▐▌  █ ▐▛▀▀▘▐▌ ▝▜▌ ",
+    " ▐▌ ▐▌▐▌  ▐▌▐▌  ▐▌▐▙▄▄▖▐▙▄▄▖▐▙▄▄▀ ▐▙▄▄▖▐▌  ▐▌ ",
+    "                                              "
+  ],
+  "logo": [
+    "  ______                    __    _       __  ",
+    " /_  __/__  _________ ___  / /   (_)___  / /__",
+    "  / / / _ \\/ ___/ __ \\`__\\/ /   / / __ \\/ //_/",
+    " / / /  __/ /  / / / / / / /___/ / / / / ,<   ",
+    "/_/  \\___/_/  /_/ /_/ /_/_____/_/_/ /_/_/|_|  ",
+    "                           by Terminal Systems"
+  ]
+}

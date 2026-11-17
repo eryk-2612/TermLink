@@ -1,20 +1,8 @@
 # AI Code as I was too lazy to bother - works for my setup
-
 import json
 import subprocess
 
 class FloppyManager:
-    """
-    Erkennt und mountet eine eingelegte USB-Floppy unter Linux.
-
-    Der Manager:
-        - erkennt das Floppy-Laufwerk über lsblk
-        - erkennt das Einlegen/Entfernen
-        - ermittelt einen vorhandenen Mountpoint
-        - kann das Medium über UDisks2 mounten
-        - benötigt dafür normalerweise kein sudo
-    """
-
     def __init__(self):
         self._inserted = False
         self._device = None
@@ -33,13 +21,6 @@ class FloppyManager:
         return self._mountpoint
 
     def scan(self):
-        """
-        Prüft, ob aktuell eine Diskette eingelegt ist.
-
-        Returns:
-            bool: True wenn eine Diskette erkannt wurde.
-        """
-
         data = self._run_lsblk()
 
         if data is None:
@@ -58,15 +39,6 @@ class FloppyManager:
         return True
 
     def update(self):
-        """
-        Aktualisiert den Zustand.
-
-        Returns:
-            "inserted"
-            "removed"
-            "unchanged"
-        """
-
         old_inserted = self._inserted
         old_device = self._device
 
@@ -88,15 +60,6 @@ class FloppyManager:
         return "unchanged"
 
     def mount(self):
-        """
-        Mountet die aktuell eingelegte Diskette über UDisks2.
-
-        Returns:
-            str | None:
-                Mountpoint bei Erfolg,
-                None bei Fehler oder wenn kein Medium vorhanden ist.
-        """
-
         if not self.scan():
             return None
 
@@ -125,13 +88,6 @@ class FloppyManager:
         return mountpoint
 
     def unmount(self):
-        """
-        Unmountet die aktuell eingelegte Diskette.
-
-        Returns:
-            bool: True bei Erfolg.
-        """
-
         if not self._device:
             return False
 
@@ -160,10 +116,6 @@ class FloppyManager:
         return True
 
     def _run_lsblk(self):
-        """
-        Ruft lsblk auf und gibt die JSON-Ausgabe zurück.
-        """
-
         command = [
             "lsblk",
             "-J",
@@ -190,10 +142,6 @@ class FloppyManager:
             return None
 
     def _find_floppy(self, data):
-        """
-        Sucht nach unserem USB-Wechselmedium.
-        """
-
         devices = data.get("blockdevices", [])
 
         for device in devices:
@@ -209,10 +157,6 @@ class FloppyManager:
         return None
 
     def _is_floppy_device(self, device):
-        """
-        Prüft, ob ein Gerät unserem Floppy-Laufwerk entspricht.
-        """
-
         if device.get("tran") != "usb":
             return False
 
@@ -228,15 +172,6 @@ class FloppyManager:
         return True
 
     def _mount_device(self, device):
-        """
-        Mountet ein Blockdevice über UDisks2.
-
-        Beispiel:
-            /dev/sda
-                ↓
-            /media/xxx/787F-1BAF
-        """
-
         try:
             result = subprocess.run(
                 [
@@ -252,7 +187,7 @@ class FloppyManager:
             )
 
         except subprocess.CalledProcessError as error:
-#            print("Floppy konnte nicht gemountet werden:")
+#            print("Floppy could not be mounted:")
 #            print(error.stderr.strip())
 
             return None
@@ -266,14 +201,6 @@ class FloppyManager:
         return self._parse_mountpoint(result.stdout)
 
     def _parse_mountpoint(self, output):
-        """
-        Liest den Mountpoint aus der Ausgabe von udisksctl.
-
-        Beispielausgabe:
-
-        Mounted /dev/sda at /media/xxx/787F-1BAF.
-        """
-
         marker = " at "
 
         if marker not in output:
@@ -287,10 +214,6 @@ class FloppyManager:
         return mountpoint
 
     def _get_mountpoint(self, device):
-        """
-        Ermittelt den Mountpoint aus lsblk.
-        """
-
         mountpoints = device.get("mountpoints")
 
         if not mountpoints:

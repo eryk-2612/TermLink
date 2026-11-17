@@ -1,3 +1,4 @@
 from .terminal_controller import TerminalController
 from .explorer_controller import ExplorerController
 from .chat_controller import ChatController
+from .disk_terminal_controller import DiskTerminalController

@@ -74,6 +74,13 @@ class Tokens:
     FLOPPY_INSERTED = "Diskette wird geladen ..."
     FLOPPY_LOADED   = "Diskette geladen"
     FLOPPY_REMOVED  = "Diskette entfernt"
+    LOAD_FROM_DISK = "Load from Disk"
+    INSERT_FLOPPY = "Bitte Diskette einlegen"
+    FLOPPY_READING = "Terminaldaten werden gelesen ..."
+    FLOPPY_NO_TERMINAL = "Kein vollständiges Terminal gefunden"
+    FLOPPY_READ_ERROR = "Terminal konnte nicht gelesen werden"
+    FLOPPY_SELECT_TERMINAL = "Terminal auswählen"
+    FLOPPY_SELECT_HINT = "Enter: Laden  |  Esc: Zurück"
     SIGNIN          = [
         r"                                              ",
         r"  ▗▄▖ ▗▖  ▗▖▗▖  ▗▖▗▄▄▄▖▗▖   ▗▄▄▄  ▗▄▄▄▖▗▖  ▗▖ ",
