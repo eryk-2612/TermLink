@@ -68,6 +68,8 @@ def main(stdscr):
         if selected_controller == Tokens.LOAD_FROM_DISK:
             loaded_model = DiskTerminalController(stdscr).run()
             if loaded_model:
+                stdscr.erase()
+                stdscr.refresh()
                 create_controller(stdscr, loaded_model, disk_loaded=True).run()
         elif selected_controller:
             stdscr.refresh()
