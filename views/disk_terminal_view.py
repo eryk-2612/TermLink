@@ -5,7 +5,10 @@ from .window import Window
 
 
 class DiskTerminalView:
+    """Draw the disk-loading prompt, errors, and terminal selection screen."""
+
     def __init__(self, stdscr):
+        """Create a full-screen window and initialize render-state caches."""
         self.stdscr = stdscr
         self.height, self.width = stdscr.getmaxyx()
         self.window = Window(self.height, self.width, 0, 0)
@@ -15,7 +18,9 @@ class DiskTerminalView:
         self._message_state = None
 
     def draw_message(self, message, detail=None):
+        """Display a centered status message only when its contents change."""
         message_state = (message, detail)
+        # Preserve the current screen when the message has not changed.
         if message_state == self._message_state:
             return
 
@@ -41,6 +46,8 @@ class DiskTerminalView:
         self._message_state = message_state
 
     def draw_file_selection(self, filenames, selected_index):
+        """Draw a centered, scrollable list and update only changed selection rows."""
+        # Center the heading and visible program list as a single block.
         visible_count = max(1, self.height - 4)
         shown_count = min(len(filenames), visible_count)
         content_height = shown_count + 2
@@ -52,6 +59,7 @@ class DiskTerminalView:
         if names == self._selection_names and first == self._selection_first:
             if selected_index == self._selection_index:
                 return
+            # Redraw only the old and new selected rows while the list stays in place.
             if self._selection_index is not None:
                 self._draw_selection_row(filenames, self._selection_index, first, visible_count, row_start, selected_index)
             self._draw_selection_row(filenames, selected_index, first, visible_count, row_start, selected_index)
@@ -76,6 +84,7 @@ class DiskTerminalView:
         self._selection_first = first
 
     def _draw_selection_row(self, filenames, index, first, visible_count, row_start, selected_index):
+        """Draw one visible program row with its selected state."""
         if index < first or index >= min(first + visible_count, len(filenames)):
             return
         text = filenames[index][:max(0, self.width - 4)]

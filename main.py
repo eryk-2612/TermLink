@@ -11,11 +11,14 @@ def init_colors():
     curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_WHITE) # Selected
 
 def init_menu(height, width, terminals, stdscr):
+    """Show the main menu and return the selected controller or action token."""
     current_idx = 0
+    # Keep the last rendered item so idle input polls do not redraw the menu.
     drawn_idx = None
     menu = terminals + [Tokens.LOAD_FROM_DISK, Tokens.LEAVE]
 
     def draw_item(idx, selected):
+        """Render one menu item with the requested selection style."""
         item = menu[idx]
         if item == Tokens.LEAVE or item == Tokens.LOAD_FROM_DISK:
             text = item.upper()
@@ -33,6 +36,7 @@ def init_menu(height, width, terminals, stdscr):
 
     while True:
         if drawn_idx is None:
+            # Draw the complete menu once, then update only changed selection rows.
             stdscr.erase()
             for idx in range(len(menu)):
                 draw_item(idx, idx == current_idx)
@@ -58,6 +62,7 @@ def init_menu(height, width, terminals, stdscr):
             return selected
 
 def create_controller(stdscr, model, disk_loaded=False):
+    """Build the matching controller and view for a terminal model."""
     if isinstance(model, ChatModel):
         return ChatController(stdscr, model, ChatView(stdscr), ChatState())
     if isinstance(model, ExplorerModel):

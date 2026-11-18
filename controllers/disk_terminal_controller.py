@@ -8,7 +8,10 @@ from views.disk_terminal_view import DiskTerminalView
 
 
 class DiskTerminalController:
+    """Manage disk detection, terminal discovery, and selection from removable media."""
+
     def __init__(self, stdscr):
+        """Initialize the disk-loading flow using the shared curses screen."""
         self.stdscr = stdscr
         self.view = DiskTerminalView(stdscr)
         self.floppy = FloppyManager()
@@ -17,6 +20,7 @@ class DiskTerminalController:
         self._selected_index = 0
 
     def run(self):
+        """Show the disk workflow and return the chosen model, or None on Escape."""
         while True:
             self._draw()
             key = self.stdscr.getch()
@@ -31,6 +35,7 @@ class DiskTerminalController:
                 elif key in (10, 13, curses.KEY_ENTER):
                     return self._terminals[self._selected_index][1]
 
+            # Poll only while waiting for media or for an eject after a read failure.
             if self._mode == "waiting":
                 self._poll_floppy()
                 if self._mode == "launch":
@@ -39,6 +44,7 @@ class DiskTerminalController:
                 self._poll_for_disk_removal()
 
     def _draw(self):
+        """Render the current disk workflow state through its view."""
         if self._mode == "waiting":
             self.view.draw_message(Tokens.INSERT_FLOPPY)
         elif self._mode == "loading":
@@ -51,6 +57,7 @@ class DiskTerminalController:
             self.view.draw_message(Tokens.FLOPPY_NO_TERMINAL)
 
     def _poll_floppy(self):
+        """Detect inserted media, mount it, and discover supported terminal files."""
         event = self.floppy.update()
         if event not in ("inserted", "unchanged") or not self.floppy.inserted:
             return
@@ -81,6 +88,7 @@ class DiskTerminalController:
         self._mode = "select"
 
     def _read_terminals(self, mountpoint):
+        """Load supported complete terminals from JSON files at the mount root."""
         terminals = []
         for filename in sorted(os.listdir(mountpoint)):
             if not filename.lower().endswith(".json"):
@@ -99,11 +107,14 @@ class DiskTerminalController:
         return terminals
 
     def _show_error(self, title, detail):
+        """Switch the workflow to its persistent error screen."""
         self._error_title = title
         self._error_message = detail[:max(0, self.view.window.width - 4)]
         self._mode = "error"
 
     def _poll_for_disk_removal(self):
+        """Reset a failed read after eject so another disk can be inserted."""
+        # Reset the failed attempt so another disk can be tried without leaving this screen.
         if self.floppy.update() == "removed":
             self._terminals = []
             self._selected_index = 0

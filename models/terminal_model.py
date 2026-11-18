@@ -25,10 +25,12 @@ class TerminalModel:
 
     @property
     def skip_signin(self):
+        """Return whether this terminal skips the sign-in screen."""
         return self._skip_signin
 
     @skip_signin.setter
     def skip_signin(self, value):
+        """Set whether this terminal skips the sign-in screen."""
         self._skip_signin = value is True
 
     @property
