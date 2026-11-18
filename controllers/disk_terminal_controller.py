@@ -35,7 +35,13 @@ class DiskTerminalController:
                 elif key in (10, 13, curses.KEY_ENTER):
                     return self._terminals[self._selected_index][1]
 
-            # Poll only while waiting for media or for an eject after a read failure.
+            # While selecting, return to the insert prompt if the disk is ejected.
+            if self._mode == "select" and self.floppy.update() == "removed":
+                self._terminals = []
+                self._selected_index = 0
+                self._mode = "waiting"
+
+            # Poll while waiting for media or for an eject after a read failure.
             if self._mode == "waiting":
                 self._poll_floppy()
                 if self._mode == "launch":
