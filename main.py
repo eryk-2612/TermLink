@@ -71,6 +71,8 @@ def create_controller(stdscr, model, disk_loaded=False):
 
 def main(stdscr):
     curses.curs_set(0)
+    # Keep Escape responsive while still allowing curses to recognize key sequences.
+    curses.set_escdelay(25)
     stdscr.keypad(True)
     stdscr.timeout(300)
     init_colors()
