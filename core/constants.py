@@ -57,57 +57,58 @@ import json
 from pathlib import Path
 
 class Tokens:
-    COPYRIGHT       = "(C) Terminal Systems"
-    MSG_SUCCESS     = "Zugriff gewährt"
-    MSG_FAIL        = "Zugriff verweigert"
-    FOLDER          = "Ordner"
-    FILES           = "Dateien"
-    LEAVE           = "Verlassen"
-    TERM_UNNAMED    = "Unbenanntes Terminal"
-    ERROR           = "Fehler"
-    STATES          = ["An", "Aus"]
-    VERBS           = ["Anschalten", "Ausschalten"]
-    MESSAGE         = "Aktiviert"
-    PASSCODE        = "Zugangscode"
-    PLAYING         = "Läuft"
-    PAUSED          = "Pausiert"
-    FLOPPY_INSERTED = "Diskette wird geladen ..."
-    FLOPPY_LOADED   = "Diskette geladen"
-    FLOPPY_REMOVED  = "Diskette entfernt"
-    LOAD_FROM_DISK = "Load from Disk"
-    INSERT_FLOPPY = "Bitte Diskette einlegen"
-    FLOPPY_READING = "Terminaldaten werden gelesen ..."
-    FLOPPY_NO_TERMINAL = "Kein vollständiges Terminal gefunden"
-    FLOPPY_READ_ERROR = "Terminal konnte nicht gelesen werden"
-    FLOPPY_SELECT_TERMINAL = "Terminal auswählen"
-    FLOPPY_SELECT_HINT = "Enter: Laden  |  Esc: Zurück"
-    SIGNIN          = [
-        r"                                              ",
-        r"  ▗▄▖ ▗▖  ▗▖▗▖  ▗▖▗▄▄▄▖▗▖   ▗▄▄▄  ▗▄▄▄▖▗▖  ▗▖ ",
-        r" ▐▌ ▐▌▐▛▚▖▐▌▐▛▚▞▜▌▐▌   ▐▌   ▐▌  █ ▐▌   ▐▛▚▖▐▌ ",
-        r" ▐▛▀▜▌▐▌ ▝▜▌▐▌  ▐▌▐▛▀▀▘▐▌   ▐▌  █ ▐▛▀▀▘▐▌ ▝▜▌ ",
-        r" ▐▌ ▐▌▐▌  ▐▌▐▌  ▐▌▐▙▄▄▖▐▙▄▄▖▐▙▄▄▀ ▐▙▄▄▖▐▌  ▐▌ ",
-        r"                                              "
+    """English defaults, overridden by locales/tokens.json when available."""
+
+    COPYRIGHT = "(C) Terminal Systems"
+    MSG_SUCCESS = "Access granted"
+    MSG_FAIL = "Access denied"
+    FOLDER = "Folder"
+    FILES = "Files"
+    LEAVE = "Leave"
+    TERM_UNNAMED = "Unnamed terminal"
+    ERROR = "Error"
+    STATES = ["On", "Off"]
+    VERBS = ["Turn on", "Turn off"]
+    MESSAGE = "Activated"
+    PASSCODE = "Passcode"
+    PLAYING = "Playing"
+    PAUSED = "Paused"
+    FLOPPY_INSERTED = "Loading floppy disk..."
+    FLOPPY_LOADED = "Floppy disk loaded"
+    FLOPPY_REMOVED = "Floppy disk removed"
+    LOAD_FROM_DISK = "Load from floppy disk"
+    INSERT_FLOPPY = "Insert a floppy disk"
+    FLOPPY_READING = "Reading data from floppy disk..."
+    FLOPPY_NO_TERMINAL = "No data found"
+    FLOPPY_READ_ERROR = "Could not read program"
+    FLOPPY_SELECT_TERMINAL = "Select a program"
+    SIGNIN = [
+        "                                        ",
+        "   ▗▄▄▖▗▄▄▄▖ ▗▄▄▖▗▖  ▗▖    ▗▄▄▄▖▗▖  ▗▖  ",
+        "  ▐▌     █  ▐▌   ▐▛▚▖▐▌      █  ▐▛▚▖▐▌  ",
+        "   ▝▀▚▖  █  ▐▌▝▜▌▐▌ ▝▜▌      █  ▐▌ ▝▜▌  ",
+        "  ▗▄▄▞▘▗▄█▄▖▝▚▄▞▘▐▌  ▐▌    ▗▄█▄▖▐▌  ▐▌  ",
+        "                                        ",
     ]
-    LOGO            = [
-        r"  ______                    __    _       __  ",
-        r" /_  __/__  _________ ___  / /   (_)___  / /__",
-        r"  / / / _ \/ ___/ __ \`__\/ /   / / __ \/ //_/",
-        r" / / /  __/ /  / / / / / / /___/ / / / / ,<   ",
-        r"/_/  \___/_/  /_/ /_/ /_/_____/_/_/ /_/_/|_|  ",
-        r"                           by Terminal Systems"
+    LOGO = [
+        "  ______                    __    _       __  ",
+        " /_  __/__  _________ ___  / /   (_)___  / /__",
+        "  / / / _ \/ ___/ __ \`__\/ /   / / __ \/ //_/",
+        " / / /  __/ /  / / / / / / /___/ / / / / ,<   ",
+        "/_/  \___/_/  /_/ /_/ /_/_____/_/_/ /_/_/|_|  ",
+        "                           by Terminal Systems",
     ]
 
     @staticmethod
     def _load_tokens():
-        path = "locales/tokens.json"
+        path = Path(__file__).resolve().parent.parent / "locales" / "tokens.json"
         try:
-            with open(path, encoding="utf-8") as f:
+            with path.open(encoding="utf-8") as f:
                 data = json.load(f)
-
             for key, value in data.items():
                 setattr(Tokens, key.upper(), value)
-        except Exception:
-            print("Failed to load tokens.json")
+        except (OSError, json.JSONDecodeError):
+            # Keep the defaults above if the locale file is missing or invalid.
+            pass
 
 Tokens._load_tokens()

@@ -10,37 +10,51 @@ def init_colors():
     curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK) # Default
     curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_WHITE) # Selected
 
-def init_menu(height, width, terminals):
-    win = Window(height, width, 0, 0)
+def init_menu(height, width, terminals, stdscr):
     current_idx = 0
+    drawn_idx = None
     menu = terminals + [Tokens.LOAD_FROM_DISK, Tokens.LEAVE]
-    
+
+    def draw_item(idx, selected):
+        item = menu[idx]
+        if item == Tokens.LEAVE or item == Tokens.LOAD_FROM_DISK:
+            text = item.upper()
+        else:
+            text = item.model.name.upper()
+
+        x = width // 2 - len(text) // 2
+        y = height // 2 - len(menu) // 2 + idx
+        color = Colors.SELECTED if selected else Colors.DEFAULT
+        attributes = curses.color_pair(color) | (curses.A_BOLD if selected else 0)
+        try:
+            stdscr.addstr(y, x, text, attributes)
+        except curses.error:
+            pass
+
     while True:
-        for idx, item in enumerate(menu):
-            if item == Tokens.LEAVE or item == Tokens.LOAD_FROM_DISK:
-                text = item.upper()
-            else:
-                text = item.model.name.upper()
+        if drawn_idx is None:
+            stdscr.erase()
+            for idx in range(len(menu)):
+                draw_item(idx, idx == current_idx)
+            stdscr.refresh()
+            drawn_idx = current_idx
+        elif drawn_idx != current_idx:
+            draw_item(drawn_idx, False)
+            draw_item(current_idx, True)
+            stdscr.refresh()
+            drawn_idx = current_idx
 
-            x = width // 2 - len(text) // 2
-            y = height // 2 - len(menu) // 2 + idx
-
-            if idx == current_idx:
-                win.write_simple(text, y, x, Colors.SELECTED, True)
-            else:
-                win.write_simple(text, y, x, Colors.DEFAULT, False)
-
-        key = win.win.getch()
+        key = stdscr.getch()
         if key == curses.KEY_UP:
             current_idx = (current_idx - 1) % len(menu)
         elif key == curses.KEY_DOWN:
             current_idx = (current_idx + 1) % len(menu)
         elif key in [10, 13, curses.KEY_ENTER]:
             selected = menu[current_idx]
+            stdscr.erase()
+            stdscr.refresh()
             if selected == Tokens.LEAVE:
                 return None
-            win.reload()
-            del win
             return selected
 
 def create_controller(stdscr, model, disk_loaded=False):
@@ -63,7 +77,7 @@ def main(stdscr):
         controller_list = [create_controller(stdscr, model) for model in terminals]
 
         height, width = stdscr.getmaxyx()
-        selected_controller = init_menu(height, width, controller_list)
+        selected_controller = init_menu(height, width, controller_list, stdscr)
 
         if selected_controller == Tokens.LOAD_FROM_DISK:
             loaded_model = DiskTerminalController(stdscr).run()
