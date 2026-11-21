@@ -5,6 +5,7 @@ import os
 from core import FloppyManager, JsonLoader, Others, TermTypes, Tokens
 from models import ChatModel, ExplorerModel
 from views.disk_terminal_view import DiskTerminalView
+from views.render_models import DiskFrame
 
 
 class DiskTerminalController:
@@ -18,12 +19,14 @@ class DiskTerminalController:
         self._mode = "waiting"
         self._terminals = []
         self._selected_index = 0
+        self._read_attempts = 0
+        self._max_read_attempts = 10
 
     def run(self):
         """Show the disk workflow and return the chosen model, or None on Escape."""
         while True:
             self._draw()
-            key = self.stdscr.getch()
+            key = self.view.read_key()
 
             if key == 27:
                 return None
@@ -39,10 +42,11 @@ class DiskTerminalController:
             if self._mode == "select" and self.floppy.update() == "removed":
                 self._terminals = []
                 self._selected_index = 0
+                self._read_attempts = 0
                 self._mode = "waiting"
 
             # Poll while waiting for media or for an eject after a read failure.
-            if self._mode == "waiting":
+            if self._mode in ("waiting", "loading"):
                 self._poll_floppy()
                 if self._mode == "launch":
                     return self._selected_model
@@ -51,20 +55,36 @@ class DiskTerminalController:
 
     def _draw(self):
         """Render the current disk workflow state through its view."""
+        # Keep disk discovery state in the controller and pass only display values.
+        message = ""
+        detail = ""
         if self._mode == "waiting":
-            self.view.draw_message(Tokens.INSERT_FLOPPY)
+            message = Tokens.INSERT_FLOPPY
         elif self._mode == "loading":
-            self.view.draw_message(Tokens.FLOPPY_READING)
+            message = Tokens.FLOPPY_READING
         elif self._mode == "select":
-            self.view.draw_file_selection([model.name for _, model in self._terminals], self._selected_index)
+            pass
         elif self._mode == "error":
-            self.view.draw_message(self._error_title, self._error_message)
+            message, detail = self._error_title, self._error_message
         elif self._mode == "no_data":
-            self.view.draw_message(Tokens.FLOPPY_NO_TERMINAL)
+            message = Tokens.FLOPPY_NO_TERMINAL
+        self.view.render(DiskFrame(
+            mode=self._mode,
+            message=message,
+            detail=detail,
+            filenames=tuple(model.name for _, model in self._terminals),
+            selected_index=self._selected_index,
+        ))
 
     def _poll_floppy(self):
         """Detect inserted media, mount it, and discover supported terminal files."""
         event = self.floppy.update()
+        if event == "removed":
+            self._terminals = []
+            self._selected_index = 0
+            self._read_attempts = 0
+            self._mode = "waiting"
+            return
         if event not in ("inserted", "unchanged") or not self.floppy.inserted:
             return
 
@@ -72,15 +92,16 @@ class DiskTerminalController:
         self._draw()
         mountpoint = self.floppy.mountpoint or self.floppy.mount()
         if not mountpoint:
-            self._show_error(Tokens.FLOPPY_READ_ERROR, "")
+            self._retry_or_show_error()
             return
 
         try:
             self._terminals = self._read_terminals(mountpoint)
         except (OSError, json.JSONDecodeError, ValueError, TypeError):
-            self._show_error(Tokens.FLOPPY_READ_ERROR, "")
+            self._retry_or_show_error()
             return
 
+        self._read_attempts = 0
         if not self._terminals:
             self._mode = "no_data"
             return
@@ -115,8 +136,14 @@ class DiskTerminalController:
     def _show_error(self, title, detail):
         """Switch the workflow to its persistent error screen."""
         self._error_title = title
-        self._error_message = detail[:max(0, self.view.window.width - 4)]
+        self._error_message = detail
         self._mode = "error"
+
+    def _retry_or_show_error(self):
+        self._read_attempts += 1
+        if self._read_attempts >= self._max_read_attempts:
+            # Keep filesystem and parser details out of the user-facing message.
+            self._show_error(Tokens.FLOPPY_READ_ERROR, "")
 
     def _poll_for_disk_removal(self):
         """Reset a failed read after eject so another disk can be inserted."""
@@ -124,6 +151,7 @@ class DiskTerminalController:
         if self.floppy.update() == "removed":
             self._terminals = []
             self._selected_index = 0
+            self._read_attempts = 0
             self._error_title = None
             self._error_message = ""
             self._mode = "waiting"

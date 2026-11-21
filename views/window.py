@@ -75,6 +75,11 @@ class Window:
         self._background = color
         self.win.bkgd(' ', curses.color_pair(self.background))
 
+    @staticmethod
+    def text_attributes(color, bold=False):
+        """Build shared curses attributes for both animated and immediate text."""
+        return curses.color_pair(color) | (curses.A_BOLD if bold else 0)
+
     def move(self, y, x):
         self.win.mvwin(y, x)
 
@@ -94,16 +99,13 @@ class Window:
                 text = text[:max_width]
 
         for char in text:
-            if bold:
-                self.win.addstr(y, x, char, curses.color_pair(color) | curses.A_BOLD)
-            else:
-                self.win.addstr(y, x, char, curses.color_pair(color))
+            self.win.addstr(y, x, char, self.text_attributes(color, bold))
             x += 1
             self.refresh()
             time.sleep(delay)
 
     def write_simple(self, text, y=1, x=2, color=Colors.DEFAULT, bold=False):
-        self.win.addstr(y, x, text, curses.color_pair(color) | (curses.A_BOLD if bold else 0))
+        self.win.addstr(y, x, text, self.text_attributes(color, bold))
         self.refresh()
 
     def log_lines(self, lines):

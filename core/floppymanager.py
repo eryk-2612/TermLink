@@ -7,6 +7,8 @@ class FloppyManager:
         self._inserted = False
         self._device = None
         self._mountpoint = None
+        self._missed_scans = 0
+        self._removal_scan_threshold = 3
 
     @property
     def inserted(self):
@@ -24,15 +26,21 @@ class FloppyManager:
         data = self._run_lsblk()
 
         if data is None:
-            self._clear_state()
-            return False
+            # A transient command failure is not evidence that the disk was removed.
+            return None
 
         floppy = self._find_floppy(data)
 
         if floppy is None:
+            if self._inserted:
+                self._missed_scans += 1
+                if self._missed_scans < self._removal_scan_threshold:
+                    # Keep the last device while lsblk settles after insertion or mount.
+                    return True
             self._clear_state()
             return False
 
+        self._missed_scans = 0
         self._inserted = True
         self._device = floppy["device"]
         self._mountpoint = floppy["mountpoint"]
@@ -42,7 +50,9 @@ class FloppyManager:
         old_inserted = self._inserted
         old_device = self._device
 
-        self.scan()
+        scan_result = self.scan()
+        if scan_result is None:
+            return "unchanged"
 
         if not old_inserted and self._inserted:
             return "inserted"
@@ -60,7 +70,8 @@ class FloppyManager:
         return "unchanged"
 
     def mount(self):
-        if not self.scan():
+        scan_result = self.scan()
+        if scan_result is False:
             return None
 
         # Bereits gemountet
@@ -145,31 +156,32 @@ class FloppyManager:
         devices = data.get("blockdevices", [])
 
         for device in devices:
-
-            if not self._is_floppy_device(device):
-                continue
-
-            return {
-                "device": "/dev/" + device["name"],
-                "mountpoint": self._get_mountpoint(device)
-            }
+            floppy = self._find_floppy_partition(device)
+            if floppy:
+                return floppy
 
         return None
 
+    def _find_floppy_partition(self, device, removable_usb_parent=False):
+        is_removable_usb = removable_usb_parent or self._is_removable_usb_device(device)
+        mountpoint = self._get_mountpoint(device)
+        if is_removable_usb and device.get("fstype") and not self._is_zero_size(device.get("size")):
+            return {"device": "/dev/" + device["name"], "mountpoint": mountpoint}
+
+        for child in device.get("children") or []:
+            floppy = self._find_floppy_partition(child, is_removable_usb)
+            if floppy:
+                return floppy
+        return None
+
+    def _is_removable_usb_device(self, device):
+        return (
+            device.get("tran") == "usb"
+            and self._is_removable(device.get("rm"))
+        )
+
     def _is_floppy_device(self, device):
-        if device.get("tran") != "usb":
-            return False
-
-        if not self._is_removable(device.get("rm")):
-            return False
-
-        if self._is_zero_size(device.get("size")):
-            return False
-
-        if not device.get("fstype"):
-            return False
-
-        return True
+        return self._is_removable_usb_device(device) and bool(device.get("fstype"))
 
     def _mount_device(self, device):
         try:
@@ -246,4 +258,5 @@ class FloppyManager:
         self._inserted = False
         self._device = None
         self._mountpoint = None
+        self._missed_scans = 0
 

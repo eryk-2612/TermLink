@@ -1,5 +1,25 @@
+import sys
+from pathlib import Path
+
+
+if getattr(sys, "frozen", False):
+    _DEFAULT_APP_ROOT = Path(sys.executable).resolve().parent
+else:
+    _DEFAULT_APP_ROOT = Path(__file__).resolve().parent.parent
+
+# Runtime content stays external and optional; support both beside the app and cwd.
+_WORKING_ROOT = Path.cwd()
+_APP_ROOT = next(
+    (
+        root for root in (_DEFAULT_APP_ROOT, _WORKING_ROOT)
+        if (root / "data").is_dir() or (root / "locales").is_dir()
+    ),
+    _DEFAULT_APP_ROOT,
+)
+
+
 class Others:
-    DATA_PATH = "data/"
+    DATA_PATH = str(_APP_ROOT / "data") + "/"
     TIMEOUT = 300
     SCREEN_PADDING = 1
     SCROLLBAR_PADDING = 2
@@ -101,7 +121,7 @@ class Tokens:
 
     @staticmethod
     def _load_tokens():
-        path = Path(__file__).resolve().parent.parent / "locales" / "tokens.json"
+        path = _APP_ROOT / "locales" / "tokens.json"
         try:
             with path.open(encoding="utf-8") as f:
                 data = json.load(f)

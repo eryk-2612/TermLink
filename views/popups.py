@@ -1,6 +1,7 @@
 import curses
 import time
 from core import Colors, Tokens, Others
+from .window import Window
 
 class Popup:
     def __init__(self, parent_window):
@@ -17,6 +18,14 @@ class Popup:
         self.win.clear()
         self.win.refresh()
 
+    @staticmethod
+    def centered_position(parent_window, height, width):
+        """Use the parent window's dimensions consistently for popup placement."""
+        return (
+            parent_window.height // 2 - height // 2,
+            parent_window.width // 2 - width // 2,
+        )
+
 class PasscodeBox(Popup):
     def __init__(self, parent_window, code_length=5, title=Tokens.PASSCODE, color=Colors.DEFAULT):
         super().__init__(parent_window)
@@ -28,11 +37,9 @@ class PasscodeBox(Popup):
         self.box_height = 4
         self.box_width = max((code_length * 2 + 3), len(self.title) + 2)
 
-        self.parent_height = self.parent_window.height
-        self.parent_width = self.parent_window.width
-
-        self.y = self.parent_height // 2 - self.box_height // 2
-        self.x = self.parent_width // 2 - self.box_width // 2
+        self.y, self.x = self.centered_position(
+            self.parent_window, self.box_height, self.box_width
+        )
 
         self.win = self.parent_window.win.derwin(self.box_height, self.box_width, self.y, self.x)
         self.win.timeout(Others.TIMEOUT)
@@ -43,7 +50,9 @@ class PasscodeBox(Popup):
     def draw(self, entered_code):
         title = self.title.upper()
         title_x = (self.box_width - len(title)) // 2
-        self.title_win.addstr( 0, title_x, title, curses.color_pair(Colors.DEFAULT) | curses.A_BOLD)
+        self.title_win.addstr(
+            0, title_x, title, Window.text_attributes(Colors.DEFAULT, bold=True)
+        )
         self.type(entered_code)
         self.input_win.refresh()
         self.input_win.box()
@@ -60,7 +69,7 @@ class PasscodeBox(Popup):
         self.input_win.refresh()
 
     def write(self, text, y=1, x=2, color=Colors.DEFAULT):
-        self.input_win.addstr(y, x, text, curses.color_pair(color) | curses.A_BOLD)
+        self.input_win.addstr(y, x, text, Window.text_attributes(color, bold=True))
         self.input_win.refresh()
 
     def type(self, entered_code):
@@ -83,11 +92,9 @@ class Messagebox(Popup):
         self.messagebox_height = len(lines) + 2
         self.messagebox_width = max(len(line) for line in lines) + 4
 
-        self.parent_height = self.parent_window.height
-        self.parent_width = self.parent_window.width
-
-        self.y = self.parent_height // 2 - self.messagebox_height // 2
-        self.x = self.parent_width // 2 - self.messagebox_width // 2
+        self.y, self.x = self.centered_position(
+            self.parent_window, self.messagebox_height, self.messagebox_width
+        )
 
     @property
     def drawn(self):
@@ -114,10 +121,7 @@ class Messagebox(Popup):
         if y is None:
             y = (self.messagebox_height // 2) - (len(lines) // 2)
 
-        attr = curses.color_pair(color)
-
-        if bold:
-            attr |= curses.A_BOLD
+        attr = Window.text_attributes(color, bold)
 
         for line_index, line in enumerate(lines):
 

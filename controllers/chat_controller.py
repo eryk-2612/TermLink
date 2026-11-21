@@ -2,6 +2,7 @@ import curses
 
 from .terminal_controller import TerminalController
 from core import Events, Tokens, Focus, Screens, get_response
+from views.render_models import ChatFrame
 
 class ChatController(TerminalController):
     def __init__(self, stdscr, model, view, state):
@@ -26,18 +27,8 @@ class ChatController(TerminalController):
                 self.trigger_event(Events.QUIT)
                 self.state.ai_loaded = False
 
-    def get_window(self, requested_window=None):
-        win = super().get_window(requested_window)
-        if not requested_window:
-            if self.state.focus == Focus.LOCK:
-                return self.view.passcode_window
-            if self.state.screen == Screens.CHAT:
-                return self.view.chat_window
-        if requested_window:
-            match requested_window:
-                case Screens.CHAT:
-                    return self.view.chat_window
-        return win
+    def input_target(self):
+        return "lock" if self.state.focus == Focus.LOCK else "chat"
 
     def handle_input(self):
         key = super().handle_input()
@@ -53,7 +44,7 @@ class ChatController(TerminalController):
         screen = self.state.screen
         if screen == Screens.CHAT:
             if not self.state.input_text == "":
-                self.state.clear_input_text()
+                self.state.submit_input()
                 self.trigger_event(Events.SEND_REQUEST)
 
     def backspace_pressed(self):
@@ -78,41 +69,27 @@ class ChatController(TerminalController):
         screen = self.state.screen
 
         if screen == Screens.CHAT:
-            max_scroll = self.view.get_chat_max_scroll()
-            self.state.chat_scroll_offset = min(self.state.chat_scroll_offset + 1, max_scroll)
+            self.view.scroll_chat(1)
 
     def arrowup_pressed(self):
         screen = self.state.screen
 
         if screen == Screens.CHAT:
-            if self.state.chat_scroll_offset > 0:
-                self.state.chat_scroll_offset -= 1
+            self.view.scroll_chat(-1)
 
-    def handle_events(self):
-        super().handle_events()
-        while self.state.event_queue:
-            event = self.state.event_queue[0]
-            if self._handle_single_event(event):
-                self.state.event_queue.pop(0)
-            else:
-                break
-
-    def _handle_single_event(self, event):
-        screen = self.state.screen
-
-        if screen == Screens.CHAT:
-            if event == Events.SEND_REQUEST:
-                self.send_request()
-                return True
-        return False
+    def handle_single_event(self, event):
+        # Handle chat-specific events, then let the base controller handle shared events.
+        if self.state.screen == Screens.CHAT and event == Events.SEND_REQUEST:
+            self.send_request()
+            return True
+        return super().handle_single_event(event)
 
     def send_request(self):
-        request = self.state.request
+        request = self.state.take_request()
         response = get_response(self.model.model, self.model.url, self.model.apikey, self.model.system_prompt, request, self.model.previous_response_id)
 
         if response:
-            self.view.clear_outputwin()
-            self.state.chat_scroll_offset = 0
+            self.view.reset_chat_scroll()
             self.state.output_text = (["> " + request]+ response[0].splitlines()+ [""])
             self.model.previous_response_id = response[1]
 
@@ -132,14 +109,11 @@ class ChatController(TerminalController):
 
     def draw_view(self):
         super().draw_view()
-        screen = self.state.screen
-        output_text = self.state.output_text
-        input_text = self.state.input_text
-
-        match screen:
-            case Screens.CHAT:
-                self.view.draw_footer(Tokens.COPYRIGHT, self.get_window())
-                self.view.draw_header(self.model.name.upper())
-                self.view.draw_output_window()
-                self.view.draw_input_window(input_text)
-                self.view.display_text(output_text, self.state.chat_scroll_offset)
+        if self.state.screen == Screens.CHAT:
+            self.view.render(ChatFrame(
+                title=self.model.name,
+                footer=Tokens.COPYRIGHT,
+                input_text=self.state.input_text,
+                output_lines=tuple(self.state.output_text) if isinstance(self.state.output_text, list)
+                else tuple(str(self.state.output_text).splitlines()),
+            ))

@@ -1,6 +1,8 @@
 from views.terminal_view import TerminalView
 from .window import Window
+from .scrollbar import draw_vertical_scrollbar
 from core import Colors, Others
+from .render_models import ChatFrame, TerminalFrame
 
 class ChatView(TerminalView):
     def __init__(self, stdscr):
@@ -12,6 +14,7 @@ class ChatView(TerminalView):
         self._chat = None
         self._outputwin_inner = None
         self._scrollbar = None
+        self._scroll_offset = 0
 
 
     @property
@@ -19,6 +22,29 @@ class ChatView(TerminalView):
         if not self._chat:
             self._chat = Window(self._screen_height, self._screen_width, 0, 0)
         return self._chat
+
+    def read_key(self, target="chat"):
+        if target == "lock":
+            return super().read_key(target)
+        return self.chat_window.win.getch()
+
+    def render(self, frame: ChatFrame):
+        if isinstance(frame, TerminalFrame):
+            return super().render(frame)
+        self.draw_footer(frame.footer, self.chat_window)
+        self.draw_header(frame.title)
+        self.draw_output_window()
+        self.draw_input_window(frame.input_text)
+        self.display_text(frame.output_lines, self._scroll_offset)
+
+    def scroll_chat(self, direction):
+        # Scroll bounds depend on rendered content and therefore stay with the view.
+        max_scroll = self.get_chat_max_scroll()
+        self._scroll_offset = min(max(0, self._scroll_offset + direction), max_scroll)
+        return self._scroll_offset
+
+    def reset_chat_scroll(self):
+        self._scroll_offset = 0
 
     def draw_header(self, title=""):
         if not self._header:
@@ -75,39 +101,16 @@ class ChatView(TerminalView):
         return self._outputwin_inner.get_max_scroll_offset()
 
     def draw_scrollbar(self, parent_win, scrollbar_win, height, total, visible_count, scroll_offset, y, x):
-        if not scrollbar_win:
-            scrollbar_win = Window(height, 1, y, x, parent_window=parent_win)
-
-        up_y = 1
-        down_y = max(1, height - 2)
-
-        can_scroll_up = scroll_offset > 0
-        can_scroll_down = scroll_offset + visible_count < total
-
-        scroll_needed = total > visible_count
-
-        arrow_up = "△"
-        arrow_down = "▽"
-
-        if can_scroll_up:
-            arrow_up = "▲"
-
-        if can_scroll_down:
-            arrow_down = "▼"
-
-        if not scroll_needed:
-            arrow_up = " "
-            arrow_down = " "
-
-        if up_y == down_y:
-            if can_scroll_up:
-                scrollbar_win.write_simple(arrow_up, up_y, 0)
-            elif can_scroll_down:
-                scrollbar_win.write_simple(arrow_down, down_y, 0)
-        else:
-            scrollbar_win.write_simple(arrow_up, up_y, 0)
-            scrollbar_win.write_simple(arrow_down, down_y, 0)
-        return scrollbar_win
+        return draw_vertical_scrollbar(
+            parent_win,
+            scrollbar_win,
+            height,
+            total,
+            visible_count,
+            scroll_offset,
+            y,
+            x,
+        )
 
     def draw_input_window(self, input=""):
         if not self._inputwin  and self._outputwin:

@@ -2,6 +2,7 @@ import curses
 
 from core import Colors, Tokens
 from .window import Window
+from .render_models import DiskFrame
 
 
 class DiskTerminalView:
@@ -28,22 +29,31 @@ class DiskTerminalView:
         self._selection_names = None
         self._selection_index = None
         self._selection_first = None
-        lines = [message]
+        lines = [message[:max(0, self.width - 2)]]
         if detail:
-            lines.append(detail)
+            lines.append(detail[:max(0, self.width - 2)])
         start_y = max(0, self.height // 2 - len(lines) // 2)
         for index, line in enumerate(lines):
             text = line[:max(0, self.width - 2)]
             x = max(0, (self.width - len(text)) // 2)
             try:
-                attributes = curses.color_pair(Colors.DEFAULT)
-                if index == 0:
-                    attributes |= curses.A_BOLD
+                attributes = self.window.text_attributes(
+                    Colors.DEFAULT, bold=index == 0
+                )
                 self.window.win.addstr(start_y + index, x, text, attributes)
             except curses.error:
                 pass
         self.window.refresh()
         self._message_state = message_state
+
+    def read_key(self):
+        return self.stdscr.getch()
+
+    def render(self, frame: DiskFrame):
+        if frame.mode == "select":
+            self.draw_file_selection(frame.filenames, frame.selected_index)
+        else:
+            self.draw_message(frame.message, frame.detail or None)
 
     def draw_file_selection(self, filenames, selected_index):
         """Draw a centered, scrollable list and update only changed selection rows."""
@@ -92,7 +102,7 @@ class DiskTerminalView:
         row = index - first + row_start
         selected = index == selected_index
         color = Colors.SELECTED if selected else Colors.DEFAULT
-        attributes = curses.color_pair(color) | (curses.A_BOLD if selected else 0)
+        attributes = self.window.text_attributes(color, bold=selected)
         try:
             self.window.win.addstr(row, x, text, attributes)
         except curses.error:

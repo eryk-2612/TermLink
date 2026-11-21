@@ -14,6 +14,7 @@ class TerminalView:
         self._messagebox = None
         self._signin = None
         self._startup = None
+        self._startup_logo_drawn = False
 
     @property
     def signin_window(self):
@@ -48,6 +49,54 @@ class TerminalView:
             startup_screen_x = self._screen_width // 2 - startup_screen_width // 2
             self._fullscreen = Window(startup_screen_height, startup_screen_width, startup_screen_y, startup_screen_x)
         return self._fullscreen
+
+    def read_key(self, target="fullscreen"):
+        """Read a key without exposing the underlying curses window."""
+        if target == "signin":
+            window = self._signin
+        elif target == "boot":
+            window = self._startup
+        elif target == "lock":
+            window = self._passcodebox
+        else:
+            window = self.fullscreen_window
+        return window.win.getch() if window else None
+
+    def render(self, frame):
+        """Render the shared sign-in and boot screens from presentation data."""
+        if frame.screen == "signin":
+            self.draw_signin(frame.signin)
+            return
+        if frame.screen != "boot":
+            return
+
+        if self._signin:
+            self.undraw_signin(frame.signin)
+        self.draw_footer(frame.footer, self.fullscreen_window)
+        self.create_startup()
+        popup_parent = self._startup if frame.popup_target == "boot" else self.fullscreen_window
+        if frame.popup_kind == "lock":
+            self.draw_lock(frame.lock_code, popup_parent, frame.entered_code)
+        elif frame.popup_kind == "msg":
+            self.draw_messagebox(frame.popup_text, frame.popup_color, popup_parent)
+        elif not frame.locked:
+            if not self._startup_logo_drawn:
+                self.draw_startup_logo(frame.logo)
+                self._startup_logo_drawn = True
+            self.draw_startup_progressbar(frame.logo, frame.progress)
+            if frame.progress >= 100:
+                self.clean_up_startup_animation()
+
+    @staticmethod
+    def _center_position(container_height, container_width, content_height, content_width):
+        return (
+            container_height // 2 - content_height // 2,
+            container_width // 2 - content_width // 2,
+        )
+
+    @staticmethod
+    def _image_size(image):
+        return len(image), max(len(line) for line in image)
 
     def draw_footer(self, text, parent):
         if not self._footer:
@@ -92,13 +141,10 @@ class TerminalView:
         if not self._startup:
             return
 
-        logo_height = len(logo)
-        logo_width = max(len(line) for line in logo)
-
-        total_height = logo_height + 2
-
-        start_y = self._screen_height // 2 - total_height // 2
-        start_x = self._screen_width // 2 - logo_width // 2
+        logo_height, logo_width = self._image_size(logo)
+        start_y, start_x = self._center_position(
+            self._screen_height, self._screen_width, logo_height + 2, logo_width
+        )
 
         for i, line in enumerate(logo):
             self._startup.write_simple(line, y=start_y + i, x=start_x, color=Colors.DEFAULT, bold=True)
@@ -109,16 +155,15 @@ class TerminalView:
         if not self._startup:
             return
 
-        logo_height = len(logo)
-        logo_width = max(len(line) for line in logo)
+        logo_height, logo_width = self._image_size(logo)
         bar_length = logo_width
-
-        total_height = logo_height + 2
-
-        start_y = self._startup.height // 2 - total_height // 2
-
+        start_y, _ = self._center_position(
+            self._startup.height, self._startup.width, logo_height + 2, logo_width
+        )
         bar_y = start_y + logo_height + 1
-        bar_x = self._startup.width // 2 - logo_width // 2
+        _, bar_x = self._center_position(
+            self._startup.height, self._startup.width, logo_height + 2, logo_width
+        )
 
         progress = max(0, min(100, progress))
         filled = int((logo_width * progress) / 100)
@@ -137,13 +182,13 @@ class TerminalView:
             self._startup.reload()
             self._startup = None
             self._footer = None
+            self._startup_logo_drawn = False
 
     def draw_signin(self, image=""):
-        image_height = len(image)
-        image_width = max(len(line) for line in image)
-
-        start_y = self._screen_height // 2 - image_height // 2
-        start_x = self._screen_width // 2 - image_width // 2
+        image_height, image_width = self._image_size(image)
+        start_y, start_x = self._center_position(
+            self._screen_height, self._screen_width, image_height, image_width
+        )
 
         if self._signin is None:
             self._signin = Window(self._screen_height, self._screen_width, 0, 0)
@@ -156,11 +201,10 @@ class TerminalView:
 
     def undraw_signin(self, image=""):
         if self._signin:
-            image_height = len(image)
-            image_width = max(len(line) for line in image)
-
-            start_y = self._signin.height // 2 - image_height // 2
-            start_x = self._signin.width // 2 - image_width // 2
+            image_height, image_width = self._image_size(image)
+            start_y, start_x = self._center_position(
+                self._signin.height, self._signin.width, image_height, image_width
+            )
 
             for i, line in enumerate(image):
                 self._signin.write_simple(" " * len(line), y=start_y + i, x=start_x, color=Colors.DEFAULT, bold=True)

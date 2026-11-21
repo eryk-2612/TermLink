@@ -1,4 +1,6 @@
 from core import Events, Tokens, Focus, Screens, Colors, Popups
+from views.render_models import TerminalFrame
+from states.state import PopupState
 import curses
 import time
 
@@ -9,44 +11,29 @@ class TerminalController:
         self.view = view
         self.state = state
 
-    def get_input(self, window):
-        if window:
-            return window.win.getch()
-        else:
-            return None
-
-    def get_window(self, requested_window=None):
-        if not requested_window:
-            if self.state.focus == Focus.LOCK:
-                return self.view.passcode_window
-            if self.state.screen == Screens.SIGNIN:
-                return self.view.signin_window
-            elif self.state.screen == Screens.BOOT:
-                return self.view.startup_window
-        else:
-            match requested_window:
-                case Screens.SIGNIN:
-                    return self.view.signin_window
-                case Screens.BOOT:
-                    return self.view.startup_window
-                case Screens.FULLSCREEN:
-                    return self.view.fullscreen_window
-        return self.view.fullscreen_window
+    def input_target(self):
+        if self.state.focus == Focus.LOCK:
+            return "lock"
+        if self.state.screen == Screens.SIGNIN:
+            return "signin"
+        if self.state.screen == Screens.BOOT:
+            return "boot"
+        return "fullscreen"
 
     def clear_focus(self):
         self.state.focus = None
 
     def clear_popup(self):
-        self.state.active_popup = None
+        self.state.dismiss_popup()
 
     def switch_focus(self, focus):
         self.state.focus = focus
 
     def activate_popup(self, popup):
         if popup and popup != "":
-            self.state.active_popup = popup
+            self.state.show_popup(PopupState(kind=popup))
         else:
-            self.state.active_popup = None
+            self.state.dismiss_popup()
 
     def trigger_event(self, event):
         self.state.event_queue.append(event)
@@ -54,7 +41,6 @@ class TerminalController:
     def init_state(self):
         self.state.running = True
         self.state.screen = Screens.BOOT if self.model.skip_signin else Screens.SIGNIN
-        self.state.event = None
         self.state.focus = None
         self.state.boot_completed = False
         self.state.loading_progress = 0
@@ -69,8 +55,7 @@ class TerminalController:
             self.draw_view()
 
     def handle_input(self):
-        window = self.get_window()
-        key = self.get_input(window)
+        key = self.view.read_key(self.input_target())
 
         if key in [10, 13]:
             self.enter_pressed()
@@ -82,7 +67,7 @@ class TerminalController:
 
     def enter_pressed(self):
         screen = self.state.screen
-        popup = self.state.active_popup
+        popup = self.state.popup.kind if self.state.popup else None
         entered_code = self.state.entered_code
 
         if screen == Screens.SIGNIN:
@@ -111,6 +96,7 @@ class TerminalController:
             self.trigger_event(Events.QUIT)
 
     def handle_events(self):
+        # Subclasses extend handle_single_event so the queue has one dispatch loop.
         while self.state.event_queue:
             event = self.state.event_queue[0]
             if self.handle_single_event(event):
@@ -142,19 +128,21 @@ class TerminalController:
         self.state.entered_code = ""
 
     def skip_messagebox(self):
-        self.state.msg_timeout = time.time()
+        if self.state.popup:
+            self.state.popup.expires_at = time.time()
 
     def prepare_messagebox(self, text, color, window, delay=1.5):
-        self.state.msg = [text.upper(), color, window]
-        self.state.show_msg = True
-        self.state.msg_timeout = time.time() + delay
-        self.activate_popup(Popups.MSG)
+        # Store popup metadata together to avoid partially updated message state.
+        self.state.show_popup(PopupState(
+            kind=Popups.MSG,
+            text=text.upper(),
+            color=color,
+            target=window,
+            expires_at=time.time() + delay,
+        ))
 
     def destroy_messagebox(self):
         self.view.undraw_messagebox()
-        self.state.msg = None
-        self.state.show_msg = False
-        self.state.msg_timeout = None
         self.clear_popup()
 
     def enter_code(self, entered_code, key):
@@ -168,10 +156,10 @@ class TerminalController:
 
     def update_state(self):
         screen = self.state.screen
-        popup = self.state.active_popup
+        popup = self.state.popup.kind if self.state.popup else None
         focus = self.state.focus
 
-        if self.state.msg_timeout and time.time() > self.state.msg_timeout:
+        if self.state.popup_expired(time.time()):
             #quit()
             self.destroy_messagebox()
 
@@ -190,29 +178,23 @@ class TerminalController:
             self.state.boot_completed = True
 
     def draw_view(self):
-        screen = self.state.screen
-        popup = self.state.active_popup
-        entered_code = self.state.entered_code
-
-        match screen:
-            case Screens.SIGNIN:
-                self.view.draw_signin(Tokens.SIGNIN)
-            case Screens.BOOT:
-                if self.get_window(Screens.SIGNIN):
-                    self.view.undraw_signin(Tokens.SIGNIN)
-                self.view.draw_footer(Tokens.COPYRIGHT, self.get_window(Screens.FULLSCREEN))
-                self.view.create_startup()
-                if popup:
-                    if popup == Popups.MSG:
-                        message = self.state.msg[0]
-                        color = self.state.msg[1]
-                        window = self.get_window(self.state.msg[2])
-                        self.view.draw_messagebox(message, color, window)
-                    elif popup == Popups.LOCK:
-                        self.view.draw_lock(self.model.unlock_code, self.get_window(Screens.BOOT), entered_code)
-                elif not self.model.locked:
-                    self.view.draw_startup_logo(Tokens.LOGO)
-                    self.state.boot_logo_drawn = True
-                    self.view.draw_startup_progressbar(Tokens.LOGO, self.state.loading_progress)
-                    if self.state.loading_progress >= 100:
-                        self.view.clean_up_startup_animation()
+        # Project runtime state into a UI-only snapshot before rendering.
+        popup = self.state.popup
+        popup_kind = popup.kind if popup else ""
+        frame = TerminalFrame(
+            screen=self.state.screen,
+            footer=Tokens.COPYRIGHT,
+            entered_code=self.state.entered_code,
+            popup_text=popup.text if popup else "",
+            popup_color=popup.color if popup else Colors.DEFAULT,
+            popup_target=popup.target if popup else Screens.BOOT,
+            popup_kind=popup_kind,
+            locked=self.model.locked,
+            lock_code=self.model.unlock_code,
+            logo=tuple(Tokens.LOGO),
+            progress=self.state.loading_progress,
+            signin=tuple(Tokens.SIGNIN),
+        )
+        self.view.render(frame)
+        if self.state.screen == Screens.BOOT and not self.state.popup and not self.model.locked:
+            self.state.boot_logo_drawn = True

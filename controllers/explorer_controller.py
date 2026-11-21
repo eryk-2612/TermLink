@@ -1,5 +1,6 @@
 from .terminal_controller import TerminalController
 from core import Events, Tokens, Focus, Screens, Colors, Others, EntryTypes, Popups, play_audio, stop_audio, FloppyManager, JsonLoader
+from views.render_models import ExplorerFrame, EntryFrame
 import curses
 import time
 
@@ -16,22 +17,12 @@ class ExplorerController(TerminalController):
         self.state.floppy_init = False
         #self.state.screen = Screens.EXPLORER # DEBUG ONLY
 
-    def get_window(self, requested_window=None):
-        win = super().get_window(requested_window)
-        if not requested_window:
-            if self.state.focus == Focus.LOCK:
-                return self.view.passcode_window
-            if self.state.focus == Focus.CONTENT:
-                return self.view.content_window
-            if self.state.screen == Screens.EXPLORER:
-                return self.view.explorer_window
-        if requested_window:
-            match requested_window:
-                case Screens.EXPLORER:
-                    return self.view.explorer_window
-                case Focus.CONTENT:
-                    return self.view.content_window
-        return win
+    def input_target(self):
+        if self.state.focus == Focus.LOCK:
+            return "lock"
+        if self.state.focus == Focus.CONTENT:
+            return "content"
+        return "explorer"
 
     def handle_input(self):
         key = super().handle_input()
@@ -54,7 +45,7 @@ class ExplorerController(TerminalController):
         screen = self.state.screen
         open_entry = self.state.open_entry
         focus = self.state.focus
-        popup = self.state.active_popup
+        popup = self.state.popup.kind if self.state.popup else None
         entered_code = self.state.entered_code
 
         if screen == Screens.EXPLORER:
@@ -100,19 +91,19 @@ class ExplorerController(TerminalController):
             if focus == Focus.CATEGORIES:
                 if category_index > 0:
                     self.state.category_index -= 1
-                    if self.state.category_index < self.state.category_scroll_offset:
-                        self.state.category_scroll_offset = self.state.category_index
+                    self.view.keep_selection_visible(
+                        "categories", self.state.category_index, len(self.model.categories)
+                    )
             elif focus == Focus.ENTRIES:
                 if entry_index > 0:
                     self.state.entry_index -= 1
-                    if self.state.entry_index < self.state.entry_scroll_offset:
-                        self.state.entry_scroll_offset = self.state.entry_index
+                    self.view.keep_selection_visible(
+                        "entries", self.state.entry_index,
+                        len(self.state.open_category.entries)
+                    )
             elif focus == Focus.CONTENT:
-                if self.state.content_scroll_offset == 0:
+                if not self.view.scroll_content(-1):
                     self.trigger_event(Events.CLOSE_ENTRY)
-                if open_entry.type == EntryTypes.TEXT:
-                    if self.state.content_scroll_offset > 0:
-                        self.state.content_scroll_offset -= 1
             elif focus == Focus.LOCK:
                 self.trigger_event(Events.CLOSE_ENTRY)
 
@@ -125,21 +116,20 @@ class ExplorerController(TerminalController):
         if screen == Screens.EXPLORER:
             if focus == Focus.CATEGORIES:
                 total_categories = len(self.model.categories)
-                visible_categories_count = self.view.get_visible_categories_count()
                 if category_index < total_categories - 1:
                     self.state.category_index += 1
-                    if self.state.category_index >= self.state.category_scroll_offset + visible_categories_count:
-                        self.state.category_scroll_offset = self.state.category_index - visible_categories_count + 1
+                    self.view.keep_selection_visible(
+                        "categories", self.state.category_index, total_categories
+                    )
             elif focus == Focus.ENTRIES:
-                visible_entries_count = self.view.get_visible_entries_count()
                 total_entries = len(self.state.open_category.entries)
                 if entry_index < total_entries - 1:
                     self.state.entry_index += 1
-                    if self.state.entry_index >= self.state.entry_scroll_offset + visible_entries_count:
-                        self.state.entry_scroll_offset = self.state.entry_index - visible_entries_count + 1
+                    self.view.keep_selection_visible(
+                        "entries", self.state.entry_index, total_entries
+                    )
             elif focus == Focus.CONTENT:
-                max_scroll = self.view.get_content_max_scroll()
-                self.state.content_scroll_offset = min(self.state.content_scroll_offset + 1, max_scroll)
+                self.view.scroll_content(1)
 
     def arrowleft_pressed(self):
         screen = self.state.screen
@@ -184,32 +174,22 @@ class ExplorerController(TerminalController):
             if len(entered_code) < len(self.state.open_entry.unlock_code):
                 self.state.entered_code += chr(key)
 
-    def handle_events(self):
-        super().handle_events()
-        while self.state.event_queue:
-            event = self.state.event_queue[0]
-            if self._handle_single_event(event):
-                self.state.event_queue.pop(0)
-            else:
-                break
-
-    def _handle_single_event(self, event):
-        screen = self.state.screen
-
-        if screen == Screens.EXPLORER:
+    def handle_single_event(self, event):
+        # Keep navigation transitions here while sharing the base event queue loop.
+        if self.state.screen == Screens.EXPLORER:
             if event == Events.OPEN_CATEGORY:
                 self.open_category(self.model.categories[self.state.category_index])
                 return True
-            elif event == Events.CLOSE_CATEGORY:
+            if event == Events.CLOSE_CATEGORY:
                 self.close_category()
                 return True
-            elif event == Events.OPEN_ENTRY:
+            if event == Events.OPEN_ENTRY:
                 self.open_entry(self.state.open_category.entries[self.state.entry_index])
                 return True
-            elif event == Events.CLOSE_ENTRY:
+            if event == Events.CLOSE_ENTRY:
                 self.close_entry()
                 return True
-        return False
+        return super().handle_single_event(event)
 
     def quit(self):
         self.unload_categories_from_floppy()
@@ -222,18 +202,22 @@ class ExplorerController(TerminalController):
         self.state.open_category = category
 
     def open_category(self, category):
+        # Opening a category starts its entry list at the first item and viewport row.
         self.state.open_category = category
         self.state.entry_index = 0
+        self.view.reset_list_scroll("entries")
         self.switch_focus(Focus.ENTRIES)
 
     def close_category(self):
         self.state.open_category = None
         self.state.entry_index = 0
-        self.state.entry_scroll_offset = 0
+        self.view.reset_list_scroll("entries")
         self.switch_focus(Focus.CATEGORIES)
 
     def open_entry(self, entry):
+        # Reset view-owned content scrolling whenever a different entry is opened.
         self.switch_focus(Focus.CONTENT)
+        self.view.reset_content_scroll()
         self.state.open_entry = entry
 
         if entry.locked:
@@ -261,7 +245,6 @@ class ExplorerController(TerminalController):
         if self.state.open_entry.type == EntryTypes.AUDIO:
             self.stop_audio()
 
-        self.state.content_scroll_offset = 0
         self.state.switch_selected = 0
         self.state.entered_code = ""
         self.clear_popup()
@@ -292,19 +275,17 @@ class ExplorerController(TerminalController):
             self.check_floppy()
             if focus is None:
                 self.switch_focus(Focus.CATEGORIES)
-            elif self.state.focus == Focus.ENTRIES:
-                self.state.selected_entry = self.state.entry_index
             elif self.state.focus == Focus.CATEGORIES:
-                self.state.selected_category = self.state.category_index
                 if self.model.categories:
                     self.preview_category(self.model.categories[self.state.category_index])
             elif self.state.focus == Focus.LOCK:
-                if not self.state.open_entry.locked and not self.state.show_msg:
+                has_message = self.state.popup and self.state.popup.kind == Popups.MSG
+                if not self.state.open_entry.locked and not has_message:
                     self.switch_focus(Focus.CONTENT)
                     if entry.type == EntryTypes.QUIT:
                         self.trigger_event(Events.QUIT)
                 else:
-                    if not self.state.show_msg:
+                    if not has_message:
                         self.open_entry(self.state.open_category.entries[self.state.entry_index])
 
     def create_header_notification(self, text):
@@ -317,7 +298,6 @@ class ExplorerController(TerminalController):
         self.state.notification = ""
         self.state.show_notification = False
         self.state.notification_timeout = None
-        self.state.force_header = True
 
     def check_floppy(self):
         event = self.floppy.update()
@@ -372,56 +352,48 @@ class ExplorerController(TerminalController):
         self.model.remove_all_temporary_categories()
         if self.state.category_index >= len(self.model.categories):
             self.state.category_index = len(self.model.categories) - 1 if self.model.categories else 0
-            self.state.category_scroll_offset = 0
+            self.view.keep_selection_visible("categories", self.state.category_index, len(self.model.categories))
 
     def draw_view(self):
+        # Convert domain entries to display data so the view never needs model objects.
         super().draw_view()
+        if self.state.screen != Screens.EXPLORER:
+            return
 
-        screen = self.state.screen
-        focus = self.state.focus
-        open_category = self.state.open_category
-        open_entry = self.state.open_entry
-        active_popup = self.state.active_popup
-        entered_code = self.state.entered_code
-
-        match screen:
-             case Screens.EXPLORER:
-                self.view.draw_footer(Tokens.COPYRIGHT, self.get_window(Screens.EXPLORER))
-                if self.state.show_notification:
-                    self.view.draw_notification_header(self.state.notification)
-                else:
-                    self.view.draw_header(self.model.name.upper(), self.state.force_header)
-                    self.state.force_header = False
-                self.view.draw_sidebar(self.model.categories, self.state.selected_category, self.state.category_scroll_offset, True if focus == Focus.CATEGORIES else False)
-                self.view.draw_entry_list(open_category, self.state.selected_entry, self.state.entry_scroll_offset, True if focus == Focus.ENTRIES else False)
-                self.view.draw_content_window()
-                if open_entry is None:
-                    if self.state.clear_content:
-                        self.view.clear_content()
-                        self.state.clear_content = False
-                    if active_popup:
-                        self.view.undraw_messagebox()
-                        self.view.destroy_lock()
-                else:
-                    if active_popup:
-                        if active_popup == Popups.MSG:
-                            message = self.state.msg[0]
-                            color = self.state.msg[1]
-                            window = self.get_window(self.state.msg[2])
-                            self.view.draw_messagebox(message, color, window)
-                        elif active_popup == Popups.LOCK:
-                            self.view.draw_lock(open_entry.unlock_code, self.get_window(Focus.CONTENT), entered_code)
-                    elif not open_entry.locked:
-                        entry_type = open_entry.type
-                        if entry_type == EntryTypes.TEXT:
-                            self.view.display_text(open_entry.lines, self.state.content_scroll_offset, True if focus == Focus.CONTENT else False)
-                        elif entry_type == EntryTypes.SWITCH:
-                            self.view.display_switch(open_entry.state_labels, open_entry.action_verbs, self.state.switch_selected, open_entry.current_state)
-                        elif entry_type == EntryTypes.BUTTON:
-                            self.view.display_button(open_entry.state_labels, open_entry.action_verbs, open_entry.current_state)
-                        elif entry_type == EntryTypes.AUDIO:
-                            if open_entry.is_playing:
-                                elapsed_time = min((time.time() - open_entry.audio_start_time), open_entry.audio_length)
-                            else:
-                                elapsed_time = 0
-                            self.view.display_audioplayer(open_entry.is_playing, open_entry.audio_length, elapsed_time)
+        category = self.state.open_category
+        entry = self.state.open_entry
+        entry_frame = None
+        if entry:
+            entry_frame = EntryFrame(
+                kind=entry.type,
+                lines=tuple(entry.lines or ()),
+                state_labels=tuple(entry.state_labels or ()),
+                action_verbs=tuple(entry.action_verbs or ()),
+                switch_selected=self.state.switch_selected,
+                current_state=entry.current_state,
+                is_playing=entry.is_playing,
+                audio_length=entry.audio_length,
+                elapsed_time=min(time.time() - entry.audio_start_time, entry.audio_length)
+                if entry.is_playing else 0,
+            )
+        popup = self.state.popup
+        popup_kind = popup.kind if popup else ""
+        self.view.render(ExplorerFrame(
+            title=self.model.name,
+            footer=Tokens.COPYRIGHT,
+            categories=tuple(item.title for item in self.model.categories),
+            category_index=self.state.category_index,
+            entries=tuple(item.title for item in category.entries) if category else (),
+            entry_index=self.state.entry_index,
+            focus=self.state.focus or "",
+            entry=entry_frame,
+            notification=self.state.notification if self.state.show_notification else "",
+            popup_text=popup.text if popup else "",
+            popup_color=popup.color if popup else Colors.DEFAULT,
+            popup_kind=popup_kind,
+            entered_code=self.state.entered_code,
+            locked=bool(entry and entry.locked),
+            lock_code=entry.unlock_code if entry else "",
+            clear_content=self.state.clear_content,
+        ))
+        self.state.clear_content = False

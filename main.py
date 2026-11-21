@@ -4,6 +4,8 @@ from controllers import *
 from models import *
 from states.state import *
 from views import *
+from controllers.menu_controller import MenuController
+from controllers.menu_controller import MenuController
 
 def init_colors():
     curses.start_color()
@@ -11,55 +13,9 @@ def init_colors():
     curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_WHITE) # Selected
 
 def init_menu(height, width, terminals, stdscr):
-    """Show the main menu and return the selected controller or action token."""
-    current_idx = 0
-    # Keep the last rendered item so idle input polls do not redraw the menu.
-    drawn_idx = None
-    menu = terminals + [Tokens.LOAD_FROM_DISK, Tokens.LEAVE]
-
-    def draw_item(idx, selected):
-        """Render one menu item with the requested selection style."""
-        item = menu[idx]
-        if item == Tokens.LEAVE or item == Tokens.LOAD_FROM_DISK:
-            text = item.upper()
-        else:
-            text = item.model.name.upper()
-
-        x = width // 2 - len(text) // 2
-        y = height // 2 - len(menu) // 2 + idx
-        color = Colors.SELECTED if selected else Colors.DEFAULT
-        attributes = curses.color_pair(color) | (curses.A_BOLD if selected else 0)
-        try:
-            stdscr.addstr(y, x, text, attributes)
-        except curses.error:
-            pass
-
-    while True:
-        if drawn_idx is None:
-            # Draw the complete menu once, then update only changed selection rows.
-            stdscr.erase()
-            for idx in range(len(menu)):
-                draw_item(idx, idx == current_idx)
-            stdscr.refresh()
-            drawn_idx = current_idx
-        elif drawn_idx != current_idx:
-            draw_item(drawn_idx, False)
-            draw_item(current_idx, True)
-            stdscr.refresh()
-            drawn_idx = current_idx
-
-        key = stdscr.getch()
-        if key == curses.KEY_UP:
-            current_idx = (current_idx - 1) % len(menu)
-        elif key == curses.KEY_DOWN:
-            current_idx = (current_idx + 1) % len(menu)
-        elif key in [10, 13, curses.KEY_ENTER]:
-            selected = menu[current_idx]
-            stdscr.erase()
-            stdscr.refresh()
-            if selected == Tokens.LEAVE:
-                return None
-            return selected
+    """Show the main menu through its dedicated controller and view."""
+    # Keep application startup wiring separate from the menu interaction loop.
+    return MenuController(stdscr, height, width, terminals).run()
 
 def create_controller(stdscr, model, disk_loaded=False):
     """Build the matching controller and view for a terminal model."""
