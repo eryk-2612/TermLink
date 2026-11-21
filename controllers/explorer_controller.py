@@ -15,6 +15,19 @@ class ExplorerController(TerminalController):
 
     def init_state(self):
         super().init_state()
+        self.state.open_category = None
+        self.state.open_entry = None
+        self.state.category_index = 0
+        self.state.entry_index = 0
+        self.state.switch_selected = 0
+        self.state.notification = ""
+        self.state.show_notification = False
+        self.state.notification_timeout = None
+        self.state.clear_content = True
+        self.view.reset_list_scroll("categories")
+        self.view.reset_list_scroll("entries")
+        self.view.reset_content_scroll()
+        self.view.clear_entry_list()
         self.state.loading_progress = 100
         self.state.floppy_init = False
         self.floppy.update()
@@ -204,7 +217,16 @@ class ExplorerController(TerminalController):
         self.state.floppy_data_loaded = False
         self.state.floppy_init = False
         self.destroy_header_notification()
-        self.state.running = False
+        self.state.dismiss_popup()
+        self.state.entered_code = ""
+        self.state.open_entry = None
+        self.state.open_category = None
+        self.state.focus = None
+        self.state.clear_content = True
+        self.view.destroy_lock()
+        self.view.undraw_messagebox()
+        self.view.clear_content()
+        super().quit()
 
     def preview_category(self, category):
         self.state.open_category = category
@@ -234,8 +256,13 @@ class ExplorerController(TerminalController):
         else:
             if entry.type == EntryTypes.SWITCH:
                 self.state.switch_selected = entry.current_state
-            if entry.type == EntryTypes.QUIT:
-                self.trigger_event(Events.QUIT)
+            self.request_exit_for_entry(entry)
+
+    def request_exit_for_entry(self, entry):
+        if entry.type in (EntryTypes.LEAVE, EntryTypes.QUIT):
+            self.trigger_event(Events.LEAVE)
+        elif entry.type == EntryTypes.SIGN_OUT:
+            self.trigger_event(Events.SIGN_OUT)
 
     def play_audio(self, entry):
         path = Others.DATA_PATH + entry.audio
@@ -290,8 +317,7 @@ class ExplorerController(TerminalController):
                 has_message = self.state.popup and self.state.popup.kind == Popups.MSG
                 if not self.state.open_entry.locked and not has_message:
                     self.switch_focus(Focus.CONTENT)
-                    if entry.type == EntryTypes.QUIT:
-                        self.trigger_event(Events.QUIT)
+                    self.request_exit_for_entry(entry)
                 else:
                     if not has_message:
                         self.open_entry(self.state.open_category.entries[self.state.entry_index])

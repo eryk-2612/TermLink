@@ -43,6 +43,9 @@ class EntryTypes:
     SWITCH  = "switch"
     BUTTON  = "button"
     AUDIO   = "audio"
+    LEAVE   = "leave"
+    SIGN_OUT = "sign_out"
+    # Backward-compatible alias for existing terminal files.
     QUIT    = "quit"
 
 class Focus:
@@ -71,6 +74,8 @@ class Events:
     CANCEL              = "cancel"
     SIGNIN              = "signin"
     QUIT                = "quit"
+    LEAVE               = "leave"
+    SIGN_OUT            = "sign_out"
     SEND_REQUEST        = "request"
 
 import json

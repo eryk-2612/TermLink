@@ -11,6 +11,7 @@ class ExplorerView(TerminalView):
         self._header_display = None
         self._sidebar = None
         self._entry_list = None
+        self._entry_list_visible = False
         self._content = None
         self._content_visible = False
         self._content_inner = None
@@ -339,6 +340,19 @@ class ExplorerView(TerminalView):
                 self._entry_list = Window(height, width, self._header.start_y + 1, x, parent_window=self._explorer)
             self.draw_all_entries(box_height, entries, selected_entry,
                                   entry_scroll_offset, in_focus, marked_index)
+        else:
+            self.clear_entry_list()
+
+    def clear_entry_list(self):
+        """Remove stale entry rows before the next terminal view is rendered."""
+        if not self._entry_list or not self._entry_list_visible:
+            return
+        self._entry_list.win.erase()
+        self._entry_list.refresh()
+        for win in self._entries:
+            if win:
+                win._render_key = None
+        self._entry_list_visible = False
 
     def calculate_entry_list_height(self, box_height, entries, minimum_entries=Others.MINIMUM_ENTRIES, maximum_entries=Others.MAXIMUM_ENTRIES, y_offset=2):
         total_entries = len(entries)
@@ -394,6 +408,7 @@ class ExplorerView(TerminalView):
             current_y += box_height
 
         self._visible_entries_count = length
+        self._entry_list_visible = True
 
     @staticmethod
     def _calculate_visible_entry_count(available_height, total_entries, minimum, maximum, box_height):

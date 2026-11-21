@@ -10,6 +10,8 @@ class ChatController(TerminalController):
 
     def init_state(self):
         super().init_state()
+        self.state.input_text = ""
+        self.state.output_text = []
         if self.model.previous_response_id:
             self.state.ai_loaded = True
         else:
@@ -24,6 +26,7 @@ class ChatController(TerminalController):
                 self.model.previous_response_id = response[1]
                 self.state.ai_loaded = True
             else:
+                self._quit_without_restart = True
                 self.trigger_event(Events.QUIT)
                 self.state.ai_loaded = False
 

@@ -91,7 +91,9 @@ Set `skip_signin` to `true` to go directly to the normal boot sequence when this
 | `switch` | `default_state`, optional `state_labels`, `action_verbs` | Lets the user change a state with the arrow keys and confirm with **Enter**. |
 | `button` | optional `default_state`, `state_labels`, `action_verbs`, `message` | Shows a message when activated. |
 | `audio` | `audio` | Plays an audio file from the `data/` folder when the user presses **Space**. |
-| `quit` | — | Leaves the current terminal when opened. |
+| `leave` | — | Returns directly to the main menu when opened. |
+| `sign_out` | — | Restarts the terminal at its sign-in screen, even when `skip_signin` is `true`. |
+| `quit` | — | Legacy alias for `leave`. |
 
 For a switch or button, `state_labels` and `action_verbs` can be customized. If omitted, TermLink uses the default values from `locales/tokens.json`. An entry can also include an `unlock_code`.
 

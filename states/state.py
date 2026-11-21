@@ -7,7 +7,7 @@ FocusName = Literal["categories", "entries", "content", "lock", "input"]
 PopupKind = Literal["msg", "lock"]
 EventName = Literal[
     "close_entry", "open_entry", "open_category", "close_category",
-    "cancel", "signin", "quit", "request",
+    "cancel", "signin", "quit", "leave", "sign_out", "request",
 ]
 
 

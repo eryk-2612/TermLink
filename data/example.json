@@ -75,8 +75,12 @@
 				"title": "Verlassen",
 				"entries":	[
 					{
-						"title": "Verlassen",
-						"type": "quit"
+						"title": "Zum Hauptmenü",
+						"type": "leave"
+					},
+					{
+						"title": "Abmelden",
+						"type": "sign_out"
 					}
 				]
 			}

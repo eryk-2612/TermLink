@@ -10,6 +10,8 @@ class TerminalController:
         self._stdscr = stdscr
         self.view = view
         self.state = state
+        self._restart_to_signin = False
+        self._force_signin_once = False
 
     def input_target(self):
         if self.state.focus == Focus.LOCK:
@@ -40,19 +42,34 @@ class TerminalController:
 
     def init_state(self):
         self.state.running = True
-        self.state.screen = Screens.BOOT if self.model.skip_signin else Screens.SIGNIN
+        show_signin = self._force_signin_once or not self.model.skip_signin
+        self._force_signin_once = False
+        self.state.screen = Screens.SIGNIN if show_signin else Screens.BOOT
         self.state.focus = None
+        self.state.popup = None
+        self.state.entered_code = ""
+        self.state.event_queue.clear()
         self.state.boot_completed = False
         self.state.loading_progress = 0
         self.state.boot_logo_drawn = False
 
     def run(self):
-        self.init_state()
-        while self.state.running:
-            self.handle_input()
-            self.handle_events()
-            self.update_state()
-            self.draw_view()
+        while True:
+            self.init_state()
+            while self.state.running:
+                self.handle_input()
+                self.handle_events()
+                if not self.state.running:
+                    break
+                self.update_state()
+                if not self.state.running:
+                    break
+                self.draw_view()
+            if not self._restart_to_signin:
+                return
+            self._restart_to_signin = False
+            self._stdscr.erase()
+            self._stdscr.refresh()
 
     def handle_input(self):
         key = self.view.read_key(self.input_target())
@@ -105,7 +122,23 @@ class TerminalController:
                 break
 
     def handle_single_event(self, event):
+        if event == Events.LEAVE:
+            self._restart_to_signin = False
+            self._force_signin_once = False
+            self.quit()
+            return True
+        if event == Events.SIGN_OUT:
+            self._restart_to_signin = True
+            self._force_signin_once = True
+            self.quit()
+            return True
         if event == Events.QUIT:
+            self._restart_to_signin = (
+                self.state.screen != Screens.SIGNIN
+                and not self.model.skip_signin
+                and not getattr(self, "_quit_without_restart", False)
+            )
+            self._quit_without_restart = False
             self.quit()
             return True
         if event == Events.SIGNIN:

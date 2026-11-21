@@ -85,14 +85,25 @@ BUTTON Entry (FILE) Structure
 } # comma here but only if needed
 ```
 
-QUIT Entry (FILE) Structure
+LEAVE Entry Structure
 ```
 {
 	"title": "NAME OF THE ENTRY",
-	"type": "quit",
+	"type": "leave",
 	"unlock_code": "OPTIONAL PASSWORD"
 } # comma here but only if needed
 ```
+Opening this entry returns directly to the main menu.
+
+SIGN OUT Entry Structure
+```
+{
+	"title": "NAME OF THE ENTRY",
+	"type": "sign_out",
+	"unlock_code": "OPTIONAL PASSWORD"
+} # comma here but only if needed
+```
+Opening this entry returns to the sign-in screen, even when `skip_signin` is `true`.
 ---
 Simple Example
 ```
@@ -139,7 +150,11 @@ Simple Example
 				"entries":	[
 					{
 						"title": "Leave",
-						"type": "quit"
+						"type": "leave"
+					},
+					{
+						"title": "Sign out",
+						"type": "sign_out"
 					}
 				]
 			}
