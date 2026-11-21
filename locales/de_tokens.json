@@ -23,6 +23,7 @@
   "floppy_loaded": "Diskette geladen",
   "floppy_removed": "Diskette entfernt",
   "load_from_disk": "Von Diskette lesen",
+  "main_menu": "Hauptmenü",
   "insert_floppy": "Bitte Diskette einlegen",
   "floppy_reading": "Daten werden gelesen ...",
   "floppy_no_terminal": "Datensatz nicht gefunden",

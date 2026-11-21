@@ -97,6 +97,7 @@ class Tokens:
     FLOPPY_LOADED = "Floppy disk loaded"
     FLOPPY_REMOVED = "Floppy disk removed"
     LOAD_FROM_DISK = "Load from floppy disk"
+    MAIN_MENU = "Main menu"
     INSERT_FLOPPY = "Insert a floppy disk"
     FLOPPY_READING = "Reading data from floppy disk..."
     FLOPPY_NO_TERMINAL = "No data found"
