@@ -567,8 +567,12 @@ class ExplorerView(TerminalView):
         self._switch_right.clear_line(y_center + 1, 1, pad_r)
 
 
-        self._switch_left.write_simple(title_l.upper(), y_center, x_l, color_l, True)
-        self._switch_right.write_simple(title_r.upper(), y_center, x_r, color_r, True)
+        self._switch_left.write_simple(
+            title_l.upper(), y_center, x_l, color_l, not current_state
+        )
+        self._switch_right.write_simple(
+            title_r.upper(), y_center, x_r, color_r, current_state
+        )
 
     def display_button(self, state_labels, action_verbs, current_state):
         parent = self._content

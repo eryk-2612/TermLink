@@ -17,12 +17,12 @@ def init_menu(height, width, terminals, stdscr):
     # Keep application startup wiring separate from the menu interaction loop.
     return MenuController(stdscr, height, width, terminals).run()
 
-def create_controller(stdscr, model, disk_loaded=False):
+def create_controller(stdscr, model):
     """Build the matching controller and view for a terminal model."""
     if isinstance(model, ChatModel):
         return ChatController(stdscr, model, ChatView(stdscr), ChatState())
     if isinstance(model, ExplorerModel):
-        return ExplorerController(stdscr, model, ExplorerView(stdscr), ExplorerState(), disk_loaded=disk_loaded)
+        return ExplorerController(stdscr, model, ExplorerView(stdscr), ExplorerState())
     return TerminalController(stdscr, model, TerminalView(stdscr), TerminalState())
 
 def main(stdscr):
@@ -47,7 +47,7 @@ def main(stdscr):
             if loaded_model:
                 stdscr.erase()
                 stdscr.refresh()
-                create_controller(stdscr, loaded_model, disk_loaded=True).run()
+                create_controller(stdscr, loaded_model).run()
         elif selected_controller:
             stdscr.refresh()
             selected_controller.run()

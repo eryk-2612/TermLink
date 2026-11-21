@@ -5,7 +5,7 @@ import curses
 import time
 
 class ExplorerController(TerminalController):
-    def __init__(self, stdscr, model, view, state, disk_loaded=False):
+    def __init__(self, stdscr, model, view, state):
         super().__init__(stdscr, model, view, state)
         self.floppy = FloppyManager()
         # Establish the disk baseline when this terminal actually starts, rather
@@ -15,6 +15,17 @@ class ExplorerController(TerminalController):
 
     def init_state(self):
         super().init_state()
+        self.reset_session_state()
+        self.state.loading_progress = 100
+        self.state.floppy_init = False
+        self.floppy.update()
+        if self.floppy.last_scan_valid:
+            self._initial_disk_notification_pending = False
+            if self.floppy.inserted:
+                self._silent_initial_disk_load = True
+                self.state.floppy_init = True
+
+    def reset_session_state(self):
         self.state.open_category = None
         self.state.open_entry = None
         self.state.category_index = 0
@@ -28,15 +39,6 @@ class ExplorerController(TerminalController):
         self.view.reset_list_scroll("entries")
         self.view.reset_content_scroll()
         self.view.clear_entry_list()
-        self.state.loading_progress = 100
-        self.state.floppy_init = False
-        self.floppy.update()
-        if self.floppy.last_scan_valid:
-            self._initial_disk_notification_pending = False
-            if self.floppy.inserted:
-                self._silent_initial_disk_load = True
-                self.state.floppy_init = True
-        #self.state.screen = Screens.EXPLORER # DEBUG ONLY
 
     def input_target(self):
         if self.state.focus == Focus.LOCK:
@@ -219,13 +221,8 @@ class ExplorerController(TerminalController):
         self.destroy_header_notification()
         self.state.dismiss_popup()
         self.state.entered_code = ""
-        self.state.open_entry = None
-        self.state.open_category = None
-        self.state.focus = None
-        self.state.clear_content = True
         self.view.destroy_lock()
         self.view.undraw_messagebox()
-        self.view.clear_content()
         super().quit()
 
     def preview_category(self, category):
