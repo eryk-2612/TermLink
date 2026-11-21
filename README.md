@@ -1,82 +1,79 @@
 # TermLink
 
-TermLink is a customizable retro-style terminal interface built with Python, `curses`, and Pygame. Create fictional computer terminals from JSON files, browse information in Explorer terminals, or connect a Chat terminal to a compatible local AI service.
-
-## Credits and related projects
-
-TermLink was created with AI assistance. For retro visual effects in OBS, see [OBS Retro Effects](https://github.com/FiniteSingularity/obs-retro-effects).
-
+TermLink lets you create and use fictional retro computer terminals. You can browse notes and files in an Explorer terminal, or use a Chat terminal connected to a compatible AI service.
 
 ## Screenshots
-<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-32-00" src="https://github.com/user-attachments/assets/046b3567-f5ac-4b3c-8c1d-3ec7ce3e08bd" />
-<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-32-23" src="https://github.com/user-attachments/assets/e724f640-804b-4208-b5d8-b3e284bc695f" />
-<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-35-22" src="https://github.com/user-attachments/assets/d3de4929-8410-4654-84ff-7bff55f33aab" />
-<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-35-41" src="https://github.com/user-attachments/assets/ca3e97e0-885b-4a25-a023-d8dc37966a96" />
-<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-35-59" src="https://github.com/user-attachments/assets/39e11b82-77d1-420f-b741-6384b2b42339" />
-<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-36-19" src="https://github.com/user-attachments/assets/c00204e5-afda-445c-9288-05185672506f" />
 
-## Features
+<img width="1920" height="1080" alt="TermLink main menu" src="https://github.com/user-attachments/assets/046b3567-f5ac-4b3c-8c1d-3ec7ce3e08bd" />
+<img width="1920" height="1080" alt="TermLink Explorer terminal" src="https://github.com/user-attachments/assets/e724f640-804b-4208-b5d8-b3e284bc695f" />
+<img width="1920" height="1080" alt="TermLink terminal screen" src="https://github.com/user-attachments/assets/d3de4929-8410-4654-84ff-7bff55f33aab" />
+<img width="1920" height="1080" alt="TermLink terminal screen" src="https://github.com/user-attachments/assets/ca3e97e0-885b-4a25-a023-d8dc37966a96" />
+<img width="1920" height="1080" alt="TermLink terminal screen" src="https://github.com/user-attachments/assets/39e11b82-77d1-420f-b741-6384b2b42339" />
+<img width="1920" height="1080" alt="TermLink terminal screen" src="https://github.com/user-attachments/assets/c00204e5-afda-445c-9288-05185672506f" />
 
-- Create multiple terminals and launch them from the main menu.
-- Build Explorer terminals with categories, entries, optional passcodes, and interactive controls.
-- Create Chat terminals that send prompts to an LM Studio-compatible API endpoint.
-- Load a complete Explorer or Chat terminal from a removable disk using **Load from Disk**.
-- Import individual categories from a disk while using an Explorer terminal.
-- Customize interface text through `locales/tokens.json`.
+## Start here
 
-## Requirements
+### Linux: run the ready-to-use app
 
-- Python 3.10 or later
-- Pygame CE
-- Requests
-- For disk detection on Linux, `lsblk` and `udisksctl` (usually provided by `util-linux` and `udisks2`)
-
-Install the Python dependencies:
+The project includes a ready-to-use app in `dist/`. Open a terminal in the TermLink folder and run:
 
 ```bash
-python -m pip install pygame-ce requests
+./dist/main
 ```
 
-## Run TermLink
+If your computer says that you do not have permission to run it, right-click `dist/main`, open **Properties**, and enable **Allow executing file as a program**.
 
-Keep `main` in the project directory. TermLink loads optional local terminal JSON files from `data/` and reads interface strings from `locales/tokens.json` when that file is available.
+### Run from the Python source
 
-Start the application:
+You need Python 3.10 or later. Install the required packages:
 
 ```bash
-./main
+python3 -m pip install pygame-ce requests
 ```
 
-Local terminal JSON files are optional. If `data/` is missing or contains no JSON files, the main menu still opens with **Load from Disk** and **Leave**, so you can use terminals stored on removable media. The project includes `data/example.json` and `data/example_chat.json` as optional starting points. Chat instruction files and audio assets referenced by terminals must still be available in `data/`.
+Then, from the project folder, start TermLink with:
 
-## Main menu and controls
+```bash
+python3 main.py
+```
 
-- Use **Up** and **Down** to move through menu items and **Enter** to select one.
-- **Load from Disk** is shown immediately above **Leave**. Insert a disk to scan it; press **Esc** to return to the main menu.
-- If one complete terminal is found on the disk, it starts immediately. If several are found, choose one with **Up** and **Down**, then press **Enter**.
-- In an Explorer terminal, use **Up** and **Down** to navigate, **Enter** to open a category or entry, and **Esc** to close the current entry or category. **Left** returns from an entry list to its category list. **Space** starts or stops audio.
-- In a Chat terminal, type a message and press **Enter** to send it. Press **Esc** to leave the terminal.
+If `python3` is not recognized, install Python using the instructions for your operating system. Removable disk features currently work on Linux and need `lsblk` and `udisksctl`, usually included with common Linux installations.
 
-## Create an Explorer terminal
+## Using TermLink
 
-An Explorer terminal is a JSON object with a `terminal` section, a title, a type, and a list of categories. Optional `unlock_code` values lock the whole terminal or an individual entry.
+TermLink opens a menu of the terminals found in the `data` folder. Use the **Up** and **Down** arrow keys to choose an item, then press **Enter**.
+
+- **Explorer terminal:** Use **Up** and **Down** to choose a folder or item, **Enter** to open it, and **Esc** to go back. Press **Left** to return from an item's list to the folder list. Press **Space** to play or pause audio.
+- **Chat terminal:** Type a message and press **Enter** to send it. Press **Esc** to leave.
+- **Load from Disk:** On Linux, this can open a complete terminal saved on a removable USB drive. Press **Esc** to return to the menu.
+- **Leave:** Closes TermLink.
+
+You can try the included examples: `data/example.json` is an Explorer terminal and `data/example_chat.json` is a Chat terminal. The Chat example needs a compatible AI service and your own settings before it can connect.
+
+## Build a terminal JSON file
+
+Terminal definitions are JSON text files. Save a complete terminal file in `data/` with a `.json` ending, for example `my_terminal.json`. TermLink reads the files in this folder when it starts. If JSON is new to you, copy `data/example.json` and edit the copy. Keep the quotation marks, commas, and brackets in place; a typo can stop the file from loading. You can check your file with any JSON validator before opening TermLink.
+
+Every complete terminal starts with a `terminal` object. Its `type` decides which kind of terminal TermLink opens:
+
+- `explorer` displays folders and entries that you define.
+- `chat` sends messages to a compatible AI service.
+
+### Explorer terminal: complete example
 
 ```json
 {
   "terminal": {
-    "title": "Research Terminal",
+    "title": "My Terminal",
     "type": "explorer",
-    "unlock_code": "password",
-    "skip_signin": true,
     "categories": [
       {
-        "title": "Logs",
+        "title": "Notes",
         "entries": [
           {
             "title": "Welcome",
             "type": "text",
-            "lines": ["System online.", "No incidents reported."],
-            "unlock_code": "other_pwd"
+            "lines": ["Hello!", "This is my first terminal."]
           }
         ]
       }
@@ -85,93 +82,74 @@ An Explorer terminal is a JSON object with a `terminal` section, a title, a type
 }
 ```
 
-Set `skip_signin` to `true` to go directly to the normal boot sequence when this terminal is selected. The boot animation and any terminal passcode remain active. The default is `false`, so existing terminal files continue to show the sign-in screen.
+### Terminal settings
 
-### Explorer entry types
+These settings go inside the top-level `terminal` object.
 
-| Type | Fields | Behavior |
+| Setting | Required? | What it does |
 | --- | --- | --- |
-| `text` | `lines` | Displays text lines. |
-| `switch` | `default_state`, optional `state_labels`, `action_verbs` | Lets the user change a state with the arrow keys and confirm with **Enter**. |
-| `button` | optional `default_state`, `state_labels`, `action_verbs`, `message` | Shows a message when activated. |
-| `audio` | `audio` | Plays an audio file from the `data/` folder when the user presses **Space**. |
-| `leave` | — | Returns directly to the main menu when opened. |
-| `sign_out` | — | Restarts the terminal at its sign-in screen, even when `skip_signin` is `true`. |
-| `quit` | — | Legacy alias for `leave`. |
+| `title` | Recommended | Name shown for the terminal in the menu and on its screen. |
+| `type` | Yes | Use `explorer` or `chat`. |
+| `categories` | Explorer | The folders shown in an Explorer terminal. Each folder has a `title` and an `entries` list. |
+| `unlock_code` | No | Passcode required to enter the terminal. Write it as text in quotation marks, such as `"1234"`. |
+| `skip_signin` | No | Set to `true` to skip the sign-in screen; otherwise it defaults to `false`. A terminal passcode is still required if `unlock_code` is set. |
+| `model` | Chat | Name of the model accepted by your AI service. |
+| `apikey` | Chat | API key for that service. Keep it private. |
+| `url` | Chat | Full API address that TermLink should contact. |
+| `instruction_file` | Chat | Name of a text file in `data/` containing instructions for the AI. |
 
-For a switch or button, `state_labels` and `action_verbs` can be customized. If omitted, TermLink uses the default values from `locales/tokens.json`. An entry can also include an `unlock_code`.
+### Explorer folders and entries
 
-Audio paths are relative to the `data/` folder. For example, an entry with `"audio": "audio/test.mp3"` uses `data/audio/test.mp3`.
+An Explorer terminal's `categories` is a list of folders. Each folder has a `title` and an `entries` list. Each entry has a `title` and a `type`. The entry type determines which other settings it uses.
 
-## Create a Chat terminal
+| Entry type | Settings | What it does |
+| --- | --- | --- |
+| `text` | `lines` | Shows the text. `lines` is a list of strings; each item appears as a line. Use `\n` inside a string to add a line break. |
+| `switch` | `default_state`, `state_labels`, `action_verbs` | Shows a two-state control. `default_state` is `true` or `false`. Give `state_labels` two labels and `action_verbs` two action words or phrases. |
+| `button` | `default_state`, `state_labels`, `action_verbs`, `message` | Shows a button. `message` is displayed when it is activated. Supply one item in `state_labels` and one in `action_verbs`. |
+| `audio` | `audio` | Plays an audio file from `data/` when **Space** is pressed. |
+| `leave` | None | Returns to the main menu. |
+| `sign_out` | None | Restarts the terminal at its sign-in screen. |
+| `quit` | None | Older name for `leave`; use `leave` for new files. |
 
-Chat terminals use the `chat` type and specify the model, API token, endpoint URL, and an instruction file. The instruction file is read from the `data/` folder.
+Any entry can also have an `unlock_code` to require a passcode before it opens. If `state_labels`, `action_verbs`, or a button's `message` is omitted, TermLink uses its default interface text. For a switch or button, make sure the label and action lists have the number of items described above.
+
+### Chat terminal settings
+
+Here is a template for a Chat terminal. The example values are placeholders; replace them with the settings from your AI service.
 
 ```json
 {
   "terminal": {
-    "title": "Local Assistant",
+    "title": "My Chat",
     "type": "chat",
-    "unlock_code": "password",
-    "skip_signin": false,
     "model": "your-model-name",
-    "apikey": "your-api-token",
+    "apikey": "your-api-key",
     "url": "http://localhost:1234/api/v1/chat",
-    "instruction_file": "prompt.txt"
+    "instruction_file": "prompt.txt",
+    "skip_signin": false
   }
 }
 ```
 
-Place the referenced instruction file in `data/`. The configured service must accept the request and response format used by TermLink. `data/example_chat.json` and `data/prompt.txt` provide examples. Keep credentials local and do not commit real API tokens to a shared repository.
+The instruction file named by `instruction_file` must exist in `data/`. The service must accept the request format used by TermLink. The included `data/example_chat.json` and `data/prompt.txt` are examples, not a ready-to-connect service. Keep real API keys private and out of files you share or publish.
 
-## Use removable disks
+### Audio files
 
-Disk support currently targets Linux and relies on the system identifying the medium as removable USB storage. The disk must have a recognized filesystem. TermLink uses `lsblk` to detect it and `udisksctl` to mount it.
+Audio files go in `data/`. For example, if an entry uses `"audio": "audio/song.mp3"`, put the file at `data/audio/song.mp3`.
 
-### Load a complete terminal
+## Load a terminal from a removable drive
 
-Choose **Load from Disk** in the main menu and insert a disk with one or more `.json` files in its root directory. A file must contain a complete `terminal` object. Explorer and Chat terminal types are supported. A category-only JSON file does not count as a complete terminal. The interface displays a reading message while the disk is mounted and read. If no terminal is found, the screen waits for the disk to be ejected so another one can be inserted; **Esc** returns to the menu.
+This feature currently works on Linux. Put a complete Explorer or Chat terminal JSON file in the top level of a recognized removable USB drive, then choose **Load from Disk** and insert the drive. If there is more than one terminal file, choose one with the arrow keys and press **Enter**. Press **Esc** to return to the menu.
 
-When loading a Chat terminal from disk, its `instruction_file` must also be available in the application's local `data/` folder. Audio referenced by an Explorer terminal is likewise read from the local `data/` folder.
+The drive file must contain a complete `terminal` object. For a Chat terminal, its instruction file must also be in the computer's local `data/` folder. Audio used by an Explorer terminal is also read from the local `data/` folder.
 
-### Import categories into an Explorer terminal
+You can also add categories temporarily to an open Explorer terminal. Put a JSON file with a top-level `categories` list on the drive and insert it while the Explorer is open. Those categories disappear when the drive is removed. See `example_floppy.json` for an example.
 
-While an Explorer terminal is open, insert a disk containing JSON files in its root directory with a top-level `categories` array. Those categories are added temporarily to the Explorer and removed when the disk is ejected. This feature imports categories only; it does not start a terminal from those files.
+## Change interface text
 
-Example category-only disk file:
+The labels and prompts are stored in `locales/tokens.json`. You can edit the displayed text, but keep the existing key names and value types. `locales/de_tokens.json` is also included; TermLink currently reads `locales/tokens.json` when it starts.
 
-```json
-{
-  "categories": [
-    {
-      "title": "Disk Archive",
-      "entries": [
-        {
-          "title": "Recovered note",
-          "type": "text",
-          "lines": ["Data recovered from removable storage."]
-        }
-      ]
-    }
-  ]
-}
-```
+## Credits
 
-## Customize the interface language
-view
-Edit the values in `locales/tokens.json` to change menu labels, prompts, and default entry text. Preserve the JSON keys and value types. `locales/de_tokens.json` is an additional German token set; the application currently loads `locales/tokens.json` at startup.
-
-## Project layout
-
-```text
-controllers/   Input handling and application flow
-core/          Constants, JSON loading, audio, and removable disk support
-data/          Terminal definitions, prompts, and audio assets
-locales/       Interface text
-models/        Terminal, category, and entry data models
-states/        UI state objects
-views/         Curses-based screens
-```
-
-
-
+TermLink was created with AI assistance. For retro visual effects in OBS, see [OBS Retro Effects](https://github.com/FiniteSingularity/obs-retro-effects).
