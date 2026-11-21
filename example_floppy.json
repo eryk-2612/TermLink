@@ -1,16 +1,16 @@
 {
-  "categories": [
-    {
-      "title": "Diskette",
-      "entries": [
-        {
-          "title": "20/03/2126",
-          "type": "text",
-          "lines": [
-            "[LOG 042 – Wartungsprotokoll]\n\nSystemzeit: 23:47:12\nStatus: Aktiv\nZugriffsebene: Intern\n\nDie heutige Inspektion des Hauptterminals verlief ohne kritische Zwischenfälle.\nMehrere kleinere Anomalien im Speicherzugriff wurden festgestellt, konnten jedoch\ndurch einen Neustart der betroffenen Module behoben werden.\n\nWährend der Überprüfung des Kommunikationsbusses kam es kurzfristig zu einer\nUnterbrechung der Verbindung zu Knotenpunkt B-17. Die Ursache konnte auf eine\ninstabile Spannungsversorgung zurückgeführt werden. Das Problem wurde durch\nUmleitung über eine redundante Leitung kompensiert.\n\nAuffällig war außerdem eine erhöhte Latenz im Zugriff auf archivierte Logdaten.\nEine Fragmentierung der Speichersegmente wird vermutet. Eine Defragmentierung\nwird für den nächsten Wartungszyklus empfohlen.\n\nHinweis: Die Zugriffsbeschränkungen für gesperrte Einträge wurden verschärft.\nMehrfache Fehlversuche führen nun zu einer temporären Sperre des Systems.\n\nAbschließende Bewertung:\nSystem stabil, jedoch mit Optimierungsbedarf im Speicher- und Netzwerkbereich."
-          ]
-        }
-      ]
-    }
-  ]
+	"categories": [
+		{
+			"title": "External://",
+			"entries": [
+				{
+					"title": "20/03/2126",
+					"type": "text",
+					"lines": [
+						"[LOG 042 – Maintenance Report]\n\nSystem time: 23:47:12\nStatus: Active\nAccess level: Internal\n\nToday's inspection of the main terminal concluded without critical incidents.\nSeveral minor memory access anomalies were detected, but\nresolved by restarting the affected modules.\n\nDuring inspection of the communications bus, the connection\nto node B-17 was briefly interrupted. The cause was traced to an\nunstable power supply. The issue was mitigated by\nrerouting traffic through a redundant line.\n\nIncreased latency was also observed when accessing archived log data.\nFragmentation of the storage segments is suspected. Defragmentation\nis recommended for the next maintenance cycle.\n\nNotice: Access restrictions for locked entries have been tightened.\nMultiple failed attempts will now result in a temporary system lockout.\n\nFinal assessment:\nSystem stable, with optimization needed in the storage and network areas."
+					]
+				}
+			]
+		}
+	]
 }

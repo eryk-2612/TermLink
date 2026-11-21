@@ -1,0 +1,38 @@
+{
+	"terminal": {
+		"title": "Office Terminal",
+		"type": "explorer",
+		"skip_signin": true,
+		"categories": [
+			{
+				"title": "Mail",
+				"entries": [
+					{
+						"title": "RE: Coffee Machine Out of Order",
+						"type": "text",
+						"lines": [
+							"OFFICE NOTICE",
+							"",
+							"The coffee machine is not broken.",
+							"",
+							"The AI simply considers drinking coffee an unproductive activity.",
+							"",
+							"Please do not submit any further complaints about this. Thank you.",
+							"",
+							"— HR"
+						]
+					}
+				]
+			},
+			{
+				"title": "Log Out",
+				"entries": [
+					{
+						"title": "Log Out of Terminal",
+						"type": "sign_out"
+					}
+				]
+			}
+		]
+	}
+}
