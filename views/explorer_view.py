@@ -118,6 +118,15 @@ class ExplorerView(TerminalView):
     def reset_content_scroll(self):
         self._content_scroll_offset = 0
 
+    @staticmethod
+    def _center_in_content(parent, width, height):
+        """Center a child box within the usable area inside the content border."""
+        inner_width = max(0, parent.width - 2)
+        inner_height = max(0, parent.height - 2)
+        x = 1 + (inner_width - width) // 2
+        y = 1 + (inner_height - height) // 2
+        return y, x
+
     def get_visible_categories_count(self):
         return self._visible_categories_count
 
@@ -414,8 +423,7 @@ class ExplorerView(TerminalView):
         available_width = parent.width - Others.BORDER_PADDING
         box_width = max(min_box_width, min(max_box_width, (available_width // 2)))
 
-        y = (available_height // 2) - (box_height // 2)
-        left_x = (available_width // 2) - box_width
+        y, left_x = self._center_in_content(parent, box_width * 2, box_height)
         right_x = left_x + box_width
 
         if not self._switch_left:
@@ -487,8 +495,7 @@ class ExplorerView(TerminalView):
 
         box_width = max(min_box_width, min(max_box_width, available_width))
 
-        y = (available_height // 2) - (box_height // 2)
-        x = (available_width // 2) - (box_width // 2)
+        y, x = self._center_in_content(parent, box_width, box_height)
 
         if not self._button:
             self._button = Window(box_height, box_width, y, x, parent_window=parent)
@@ -523,14 +530,12 @@ class ExplorerView(TerminalView):
         box_height = 5
         spacing = 2
 
-        available_height = parent.height - Others.BORDER_PADDING
         available_width = parent.width - Others.BORDER_PADDING
 
         box_width = available_width // 3
         bar_width = box_width - Others.BORDER_PADDING - spacing
 
-        y_box = (available_height // 2) - (box_height // 2)
-        x_box = (available_width // 2) - (box_width // 2)
+        y_box, x_box = self._center_in_content(parent, box_width, box_height)
 
         if not self._audioplayer:
             self._audioplayer = Window(box_height, box_width, y_box, x_box, parent_window=parent)
