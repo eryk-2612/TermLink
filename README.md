@@ -4,6 +4,14 @@ TermLink is a customizable retro-style terminal interface built with Python, `cu
 
 **Created with AI assistance.**
 
+## Screenshots
+<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-32-00" src="https://github.com/user-attachments/assets/046b3567-f5ac-4b3c-8c1d-3ec7ce3e08bd" />
+<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-32-23" src="https://github.com/user-attachments/assets/e724f640-804b-4208-b5d8-b3e284bc695f" />
+<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-35-22" src="https://github.com/user-attachments/assets/d3de4929-8410-4654-84ff-7bff55f33aab" />
+<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-35-41" src="https://github.com/user-attachments/assets/ca3e97e0-885b-4a25-a023-d8dc37966a96" />
+<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-35-59" src="https://github.com/user-attachments/assets/39e11b82-77d1-420f-b741-6384b2b42339" />
+<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-36-19" src="https://github.com/user-attachments/assets/c00204e5-afda-445c-9288-05185672506f" />
+
 ## Features
 
 - Create multiple terminals and launch them from the main menu.
@@ -18,7 +26,6 @@ TermLink is a customizable retro-style terminal interface built with Python, `cu
 - Python 3.10 or later
 - Pygame CE
 - Requests
-- On Windows, `windows-curses`
 - For disk detection on Linux, `lsblk` and `udisksctl` (usually provided by `util-linux` and `udisks2`)
 
 Install the Python dependencies:
@@ -27,20 +34,14 @@ Install the Python dependencies:
 python -m pip install pygame-ce requests
 ```
 
-On Windows, also install curses support:
-
-```bash
-python -m pip install windows-curses
-```
-
 ## Run TermLink
 
-Keep `main.py` in the project directory. TermLink loads optional local terminal JSON files from `data/` and reads interface strings from `locales/tokens.json` when that file is available.
+Keep `main` in the project directory. TermLink loads optional local terminal JSON files from `data/` and reads interface strings from `locales/tokens.json` when that file is available.
 
-Start the application from the project directory:
+Start the application:
 
 ```bash
-python main.py
+./main
 ```
 
 Local terminal JSON files are optional. If `data/` is missing or contains no JSON files, the main menu still opens with **Load from Disk** and **Leave**, so you can use terminals stored on removable media. The project includes `data/example.json` and `data/example_chat.json` as optional starting points. Chat instruction files and audio assets referenced by terminals must still be available in `data/`.
@@ -154,7 +155,7 @@ Example category-only disk file:
 ```
 
 ## Customize the interface language
-
+view
 Edit the values in `locales/tokens.json` to change menu labels, prompts, and default entry text. Preserve the JSON keys and value types. `locales/de_tokens.json` is an additional German token set; the application currently loads `locales/tokens.json` at startup.
 
 ## Project layout
@@ -173,10 +174,6 @@ views/         Curses-based screens
 
 TermLink was created with AI assistance. For retro visual effects in OBS, see [OBS Retro Effects](https://github.com/FiniteSingularity/obs-retro-effects).
 
-## Screenshots
 
-<img width="1115" alt="TermLink interface" src="https://github.com/user-attachments/assets/2ca1ae0b-c5c5-43bd-86d9-a6da0d63f985" />
 
-## Video
 
-[Watch the TermLink video](https://github.com/user-attachments/assets/2f0e48ea-7b95-4f3d-9fcb-09f97fcf8e0c)
