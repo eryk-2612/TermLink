@@ -37,6 +37,17 @@ class PasscodeBox(Popup):
         self.box_height = 4
         self.box_width = max((code_length * 2 + 3), len(self.title) + 2)
 
+        # Center the visible slots, not the nominal ``2 * length`` stride.
+        # Matching the box width parity to the slot width gives equal margins.
+        display_width = max(1, code_length * 2 - 1)
+        max_width = max(1, self.parent_window.width - 2)
+        self.box_width = min(self.box_width, max_width)
+        if (self.box_width - display_width) % 2:
+            if self.box_width < max_width:
+                self.box_width += 1
+            elif self.box_width > display_width + 2:
+                self.box_width -= 1
+
         self.y, self.x = self.centered_position(
             self.parent_window, self.box_height, self.box_width
         )
@@ -49,10 +60,14 @@ class PasscodeBox(Popup):
 
     def draw(self, entered_code):
         title = self.title.upper()
-        title_x = (self.box_width - len(title)) // 2
-        self.title_win.addstr(
-            0, title_x, title, Window.text_attributes(Colors.DEFAULT, bold=True)
-        )
+        title = title[:max(0, self.box_width - 2)]
+        title_x = max(0, (self.box_width - len(title)) // 2)
+        try:
+            self.title_win.addstr(
+                0, title_x, title, Window.text_attributes(Colors.DEFAULT, bold=True)
+            )
+        except curses.error:
+            pass
         self.type(entered_code)
         self.input_win.refresh()
         self.input_win.box()
@@ -73,8 +88,11 @@ class PasscodeBox(Popup):
         self.input_win.refresh()
 
     def type(self, entered_code):
-        start_x = 1 + (self.box_width - self.code_length * 2) // 2
-        for i in range(self.code_length):
+        display_slots = min(self.code_length, max(0, (self.box_width - 1) // 2))
+        display_width = max(0, display_slots * 2 - 1)
+        inner_width = max(0, self.box_width - 2)
+        start_x = 1 + max(0, (inner_width - display_width) // 2)
+        for i in range(display_slots):
             x_pos = start_x + i * 2
             char = entered_code[i] if i < len(entered_code) else Others.CODE_PLACEHOLDER
             self.write(char, y=1, x=x_pos, color=Colors.DEFAULT)

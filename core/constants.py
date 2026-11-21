@@ -90,7 +90,7 @@ class Tokens:
     STATES = ["On", "Off"]
     VERBS = ["Turn on", "Turn off"]
     MESSAGE = "Activated"
-    PASSCODE = "Passcode"
+    PASSCODE = "Enter Passcode"
     PLAYING = "Playing"
     PAUSED = "Paused"
     FLOPPY_INSERTED = "Loading floppy disk..."
