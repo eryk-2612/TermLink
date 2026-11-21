@@ -112,7 +112,7 @@ class ChatController(TerminalController):
         if self.state.screen == Screens.CHAT:
             self.view.render(ChatFrame(
                 title=self.model.name,
-                footer=Tokens.COPYRIGHT,
+                footer=Tokens.CHAT_HINT,
                 input_text=self.state.input_text,
                 output_lines=tuple(self.state.output_text) if isinstance(self.state.output_text, list)
                 else tuple(str(self.state.output_text).splitlines()),

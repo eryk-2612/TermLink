@@ -380,7 +380,7 @@ class ExplorerController(TerminalController):
         popup_kind = popup.kind if popup else ""
         self.view.render(ExplorerFrame(
             title=self.model.name,
-            footer=Tokens.COPYRIGHT,
+            footer=Tokens.EXPLORER_HINT,
             categories=tuple(item.title for item in self.model.categories),
             category_index=self.state.category_index,
             entries=tuple(item.title for item in category.entries) if category else (),

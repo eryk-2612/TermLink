@@ -1,6 +1,7 @@
 from .window import Window
 from .popups import Messagebox, PasscodeBox
 from core import Colors
+import curses
 import time
 
 class TerminalView:
@@ -109,8 +110,12 @@ class TerminalView:
 
             self._footer = Window(1, width, height, 0, parent_window=parent)
             self._footer.background = Colors.DEFAULT
-            x = self._footer.width // 2 - len(text) // 2  # x-Position so, dass der Text mittig ist
-            self._footer.write_simple(text, y=0, x=x, color=Colors.DEFAULT)
+            text = text[:max(0, self._footer.width - 2)]
+            x = max(0, self._footer.width // 2 - len(text) // 2)
+            try:
+                self._footer.write_simple(text, y=0, x=x, color=Colors.DEFAULT)
+            except curses.error:
+                pass
             self._footer.refresh()
 
     def draw_lock(self, code, parent_window, entered_code):
