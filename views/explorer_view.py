@@ -12,6 +12,7 @@ class ExplorerView(TerminalView):
         self._sidebar = None
         self._entry_list = None
         self._content = None
+        self._content_visible = False
         self._content_inner = None
         self._content_scrollbar = None
         self._sidebar_scrollbar = None
@@ -60,14 +61,23 @@ class ExplorerView(TerminalView):
         if frame.notification:
             self.draw_notification_header(frame.notification)
         else:
-            self.draw_header(frame.title)
+            self.draw_header(frame.title, frame.category_title, frame.entry_title)
         self.draw_sidebar(frame.categories, frame.category_index,
-                          self._category_scroll_offset, frame.focus == "categories")
+                          self._category_scroll_offset,
+                          frame.focus == "categories",
+                          frame.category_index if frame.category_title else None)
         self.draw_entry_list(frame.entries, frame.entry_index,
-                             self._entry_scroll_offset, frame.focus == "entries")
-        self.draw_content_window()
-        if frame.clear_content:
+                             self._entry_scroll_offset,
+                             frame.focus == "entries",
+                             frame.entry_index if frame.entry_title else None)
+        if self._passcodebox and frame.popup_kind != "lock" and not frame.locked:
+            self.destroy_lock()
+        if frame.entry is not None:
+            self.draw_content_window()
+        elif frame.clear_content:
             self.clear_content()
+        else:
+            self.hide_content_window()
         if frame.popup_kind == "msg":
             self.draw_messagebox(frame.popup_text, frame.popup_color, self.content_window)
             return
@@ -138,8 +148,59 @@ class ExplorerView(TerminalView):
             return 0
         return self._content_inner.get_max_scroll_offset()
 
-    def draw_header(self, title="", force=False):
-        self._render_header(title, Colors.SELECTED, centered=False, force=force)
+    def draw_header(self, title="", category="", entry="", force=False):
+        parts = [(title, True)]
+        if category:
+            parts.append((category, True))
+        if entry:
+            parts.append((entry, True))
+        display = tuple(parts)
+        cache_key = (display, Colors.SELECTED, False)
+        if self._header is None:
+            self._header = Window(1, self._explorer.width, 0, 0, parent_window=self._explorer)
+        if cache_key == self._header_display and not force:
+            return
+
+        self._header.background = Colors.SELECTED
+        self._header.empty()
+        x = 1
+        max_x = self._header.width - 1
+        available = max(0, max_x - x)
+        separator_width = 3 * max(0, len(parts) - 1)
+        text_budget = max(0, available - separator_width)
+        widths = [0] * len(parts)
+        if len(parts) == 1:
+            widths[0] = text_budget
+        elif parts:
+            root_share = max(3, text_budget // (4 if len(parts) > 2 else 3))
+            widths[0] = min(len(parts[0][0]), root_share)
+            remaining = max(0, text_budget - widths[0])
+            for index in range(1, len(parts) - 1):
+                share = max(3, text_budget // 3)
+                widths[index] = min(len(parts[index][0]), share, remaining)
+                remaining -= widths[index]
+            widths[-1] = min(len(parts[-1][0]), remaining)
+
+        for index, (text, bold) in enumerate(parts):
+            if x >= max_x:
+                break
+            if index:
+                separator = " / "
+                separator = separator[:max_x - x]
+                if separator:
+                    self._header.write_simple(separator, y=0, x=x, color=Colors.SELECTED)
+                    x += len(separator)
+            if x >= max_x:
+                break
+            value = text.upper()
+            allowed = min(widths[index], max_x - x)
+            if len(value) > allowed:
+                value = value[:max(0, allowed - 1)] + ("…" if allowed > 0 else "")
+            if value:
+                self._header.write_simple(value, y=0, x=x, color=Colors.SELECTED, bold=bold)
+                x += len(value)
+        self._header.refresh()
+        self._header_display = cache_key
 
     def draw_notification_header(self, notification):
         self._render_header(notification, Colors.DEFAULT, centered=True)
@@ -159,14 +220,17 @@ class ExplorerView(TerminalView):
         self._header.refresh()
         self._header_display = display
 
-    def draw_sidebar(self, categories, selected_category, category_scroll_offset, in_focus):
+    def draw_sidebar(self, categories, selected_category, category_scroll_offset,
+                     in_focus, marked_index=None):
         if not self._sidebar:
             height = (self._explorer.height - self._header.height - self._footer.height - Others.SCREEN_PADDING)
             width = self._explorer.width // 4 + Others.SCROLLBAR_PADDING
             self._sidebar = Window(height, width, self._header.start_y + 2, 1, parent_window=self._explorer)
-        self.draw_all_categories(categories, selected_category, category_scroll_offset, in_focus)
+        self.draw_all_categories(categories, selected_category, category_scroll_offset,
+                                 in_focus, marked_index)
 
-    def draw_all_categories(self, categories, selected_category, category_scroll_offset, in_focus):
+    def draw_all_categories(self, categories, selected_category, category_scroll_offset,
+                            in_focus, marked_index=None):
         max_box_height = 8
         min_box_height = 5
         minimum_categories = Others.MINIMUM_CATEGORIES
@@ -201,7 +265,8 @@ class ExplorerView(TerminalView):
                 bgcolor = Colors.SELECTED if selected_category == actual_index and in_focus else Colors.DEFAULT
                 txtcolor = bgcolor
 
-            self.draw_category(title, y, box_height, box_width, i, bgcolor, txtcolor)
+            marked = actual_index == marked_index
+            self.draw_category(title, y, box_height, box_width, i, bgcolor, txtcolor, marked)
             y += box_height
 
         self._visible_categories_count = length
@@ -238,7 +303,8 @@ class ExplorerView(TerminalView):
         box_height = max(min_box_height, min(box_height, max_box_height))
         return length, box_height
 
-    def draw_category(self, title,y, box_height, box_width, wid, bgcolor, txtcolor):
+    def draw_category(self, title,y, box_height, box_width, wid, bgcolor, txtcolor,
+                      marked=False):
         while len(self._categories) <= wid:
             self._categories.append(None)
 
@@ -248,13 +314,21 @@ class ExplorerView(TerminalView):
         else:
             win = self._categories[wid]
 
+        bold = marked or bgcolor == Colors.SELECTED
+        render_key = (title, box_height, box_width, bgcolor, txtcolor, marked, bold)
+        if getattr(win, "_render_key", None) == render_key:
+            return
+
         win.background = bgcolor
         win.draw_box()
-        win.empty(len(title))
-        win.write_animate(title.upper(), 1, 2, 0, txtcolor, True)
+        win.clear_line(1, 1, max(0, win.width - 2))
+        visible_title = title.upper()[:max(0, win.width - 3)]
+        win.write_simple(visible_title, y=1, x=2, color=txtcolor, bold=bold)
         win.refresh()
+        win._render_key = render_key
 
-    def draw_entry_list(self, entries, selected_entry, entry_scroll_offset, in_focus):
+    def draw_entry_list(self, entries, selected_entry, entry_scroll_offset,
+                        in_focus, marked_index=None):
         box_height = 3
         if entries:
             if not self._entry_list:
@@ -263,7 +337,8 @@ class ExplorerView(TerminalView):
                 width = ((self._explorer.width - Others.SCREEN_PADDING) - self._sidebar.width - sidebar_spacing) //  3 * 2
                 x = self._sidebar.width + sidebar_spacing
                 self._entry_list = Window(height, width, self._header.start_y + 1, x, parent_window=self._explorer)
-            self.draw_all_entries(box_height, entries, selected_entry, entry_scroll_offset, in_focus)
+            self.draw_all_entries(box_height, entries, selected_entry,
+                                  entry_scroll_offset, in_focus, marked_index)
 
     def calculate_entry_list_height(self, box_height, entries, minimum_entries=Others.MINIMUM_ENTRIES, maximum_entries=Others.MAXIMUM_ENTRIES, y_offset=2):
         total_entries = len(entries)
@@ -276,7 +351,8 @@ class ExplorerView(TerminalView):
         required_height = visible_entries * box_height + y_offset
         return required_height
 
-    def draw_all_entries(self, box_height, entries, selected_entry, entry_scroll_offset, in_focus):
+    def draw_all_entries(self, box_height, entries, selected_entry,
+                         entry_scroll_offset, in_focus, marked_index=None):
         y = 2
 
         box_width = self._entry_list.width - Others.SCROLLBAR_PADDING
@@ -312,7 +388,9 @@ class ExplorerView(TerminalView):
                 bgcolor = Colors.SELECTED if selected_entry == actual_index and in_focus else Colors.DEFAULT
                 txtcolor = bgcolor
 
-            self.draw_entry(title, current_y, box_height, box_width, i, bgcolor, txtcolor)
+            marked = actual_index == marked_index
+            self.draw_entry(title, current_y, box_height, box_width, i,
+                            bgcolor, txtcolor, marked)
             current_y += box_height
 
         self._visible_entries_count = length
@@ -347,7 +425,8 @@ class ExplorerView(TerminalView):
             in_focus,
         )
 
-    def draw_entry(self, title, y, box_height, box_width, wid, bgcolor, txtcolor):
+    def draw_entry(self, title, y, box_height, box_width, wid, bgcolor, txtcolor,
+                   marked=False):
         while len(self._entries) <= wid:
             self._entries.append(None)
 
@@ -357,11 +436,18 @@ class ExplorerView(TerminalView):
         else:
             win = self._entries[wid]
 
+        bold = marked or bgcolor == Colors.SELECTED
+        render_key = (title, box_height, box_width, bgcolor, txtcolor, marked, bold)
+        if getattr(win, "_render_key", None) == render_key:
+            return
+
         win.background = bgcolor
         win.draw_box()
-        win.empty(len(title))
-        win.write_animate(title.upper(), 1, 2, 0, txtcolor, True)
+        win.clear_line(1, 1, max(0, win.width - 2))
+        visible_title = title.upper()[:max(0, win.width - 3)]
+        win.write_simple(visible_title, y=1, x=2, color=txtcolor, bold=bold)
         win.refresh()
+        win._render_key = render_key
 
     def draw_content_window(self):
         if not self._content and self._entry_list:
@@ -371,8 +457,10 @@ class ExplorerView(TerminalView):
             y = self._entry_list.start_y + self._entry_list.height
             x = self._sidebar.width + sidebar_spacing
             self._content = Window(height, width, y, x, parent_window=self._explorer)
+        if self._content and not self._content_visible:
             self._content.draw_box()
             self._content.refresh()
+            self._content_visible = True
 
     def display_text(self, lines, scroll_offset, in_focus):
         if not self._content:
@@ -391,20 +479,18 @@ class ExplorerView(TerminalView):
     def clear_content(self):
         if not self._content:
             return
-        else:
-            self._content.empty()
+        self._content.win.erase()
+        self._content.refresh()
+        self._content_visible = False
+        if self._content_inner:
+            self._content_inner.dump_log()
 
-        if not self._content_inner:
-            return
-        else:
-            self._content_inner.empty()
-
-        if not self._content_scrollbar:
-            return
-        else:
-            self._content_scrollbar.empty()
-
-        self._content.reload()
+    def hide_content_window(self):
+        """Erase the content area when no entry is open, including stale borders."""
+        if self._content and self._content_visible:
+            self._content.win.erase()
+            self._content.refresh()
+            self._content_visible = False
 
     def display_switch(self, state_labels, action_verbs, switch_selected, current_state):
         parent = self._content
@@ -484,7 +570,7 @@ class ExplorerView(TerminalView):
         min_box_height = 3
         max_box_height = 5
         text_spacing = 2
-        min_box_width = len(label)
+        label = label.upper()
 
         available_height = parent.height - Others.BORDER_PADDING
         available_width = parent.width - Others.BORDER_PADDING
@@ -493,22 +579,27 @@ class ExplorerView(TerminalView):
 
         max_box_width = len(label) + Others.BORDER_PADDING + text_spacing
 
-        box_width = max(min_box_width, min(max_box_width, available_width))
+        box_width = max(1, min(max_box_width, available_width))
 
         y, x = self._center_in_content(parent, box_width, box_height)
 
-        if not self._button:
+        button_position = (
+            self._button.start_y - parent.start_y,
+            self._button.start_x - parent.start_x,
+        ) if self._button else None
+        if (not self._button or self._button.height != box_height
+                or self._button.width != box_width or button_position != (y, x)):
+            if self._button:
+                self._button.background = Colors.DEFAULT
+                self._button.win.erase()
+                self._button.refresh()
             self._button = Window(box_height, box_width, y, x, parent_window=parent)
-        if self._button.height != box_height or self._button.width != box_width:
-            self._button.background = Colors.DEFAULT
-            self._button.clear()
-            self._button.refresh()
-            self._button.resize(box_height, box_width)
 
         self._button.background = color
         self._button.draw_box()
 
-        x_l = max(1, (box_width - len(label)) // 2)
+        visible_label = label[:max(0, box_width - 2)]
+        x_l = max(1, 1 + (box_width - 2 - len(visible_label)) // 2)
         y_center = box_height // 2
 
         pad_l = box_width - 2
@@ -517,7 +608,7 @@ class ExplorerView(TerminalView):
         self._button.clear_line(y_center, 1, pad_l)
         self._button.clear_line(y_center + 1, 1, pad_l)
 
-        self._button.write_simple(label.upper(), y_center, x_l, color, True)
+        self._button.write_simple(visible_label, y_center, x_l, color, True)
 
     def display_audioplayer(self, is_playing, audio_length=0, elapsed_time=0):
         if not audio_length > 0:

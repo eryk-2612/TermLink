@@ -79,6 +79,8 @@ class TerminalView:
         if frame.popup_kind == "lock":
             self.draw_lock(frame.lock_code, popup_parent, frame.entered_code)
         elif frame.popup_kind == "msg":
+            if self._passcodebox and not frame.locked:
+                self.destroy_lock()
             self.draw_messagebox(frame.popup_text, frame.popup_color, popup_parent)
         elif not frame.locked:
             if not self._startup_logo_drawn:
@@ -119,7 +121,8 @@ class TerminalView:
             self._footer.refresh()
 
     def draw_lock(self, code, parent_window, entered_code):
-        self._passcodebox = PasscodeBox(parent_window, len(code))
+        if self._passcodebox is None:
+            self._passcodebox = PasscodeBox(parent_window, len(code))
         self._passcodebox.draw(entered_code)
 
     def destroy_lock(self):

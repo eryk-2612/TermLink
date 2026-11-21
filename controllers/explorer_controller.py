@@ -395,5 +395,11 @@ class ExplorerController(TerminalController):
             locked=bool(entry and entry.locked),
             lock_code=entry.unlock_code if entry else "",
             clear_content=self.state.clear_content,
+            category_title=(
+                category.title
+                if category and self.state.focus != Focus.CATEGORIES
+                else ""
+            ),
+            entry_title=entry.title if entry else "",
         ))
         self.state.clear_content = False

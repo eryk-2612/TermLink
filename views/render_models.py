@@ -73,3 +73,5 @@ class ExplorerFrame:
     locked: bool = False
     lock_code: str = ""
     clear_content: bool = False
+    category_title: str = ""
+    entry_title: str = ""
