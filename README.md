@@ -2,7 +2,10 @@
 
 TermLink is a customizable retro-style terminal interface built with Python, `curses`, and Pygame. Create fictional computer terminals from JSON files, browse information in Explorer terminals, or connect a Chat terminal to a compatible local AI service.
 
-**Created with AI assistance.**
+## Credits and related projects
+
+TermLink was created with AI assistance. For retro visual effects in OBS, see [OBS Retro Effects](https://github.com/FiniteSingularity/obs-retro-effects).
+
 
 ## Screenshots
 <img width="1920" height="1080" alt="Bildschirmfoto vom 2026-11-21 16-32-00" src="https://github.com/user-attachments/assets/046b3567-f5ac-4b3c-8c1d-3ec7ce3e08bd" />
@@ -169,11 +172,6 @@ models/        Terminal, category, and entry data models
 states/        UI state objects
 views/         Curses-based screens
 ```
-
-## Credits and related projects
-
-TermLink was created with AI assistance. For retro visual effects in OBS, see [OBS Retro Effects](https://github.com/FiniteSingularity/obs-retro-effects).
-
 
 
 
