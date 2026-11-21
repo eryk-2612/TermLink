@@ -25,6 +25,7 @@
   "load_from_disk": "Von Diskette lesen",
   "main_menu": "Hauptmenü",
   "menu_hint": "↑/↓ NAVIGIEREN  ENTER AUSWÄHLEN",
+  "disk_menu_hint": "↑/↓ NAVIGIEREN  ENTER AUSWÄHLEN  ESC ZURÜCK",
   "explorer_hint": "↑/↓ NAVIGIEREN  ENTER ÖFFNEN  ESC ZURÜCK",
   "chat_hint": "ENTER SENDEN  ↑/↓ SCROLLEN  ESC BEENDEN",
   "insert_floppy": "Bitte Diskette einlegen",

@@ -8,13 +8,21 @@ class ExplorerController(TerminalController):
     def __init__(self, stdscr, model, view, state, disk_loaded=False):
         super().__init__(stdscr, model, view, state)
         self.floppy = FloppyManager()
-        self._initial_disk_notification_pending = disk_loaded
+        # Establish the disk baseline when this terminal actually starts, rather
+        # than when its controller is created for the menu.
+        self._initial_disk_notification_pending = True
         self._silent_initial_disk_load = False
 
     def init_state(self):
         super().init_state()
         self.state.loading_progress = 100
         self.state.floppy_init = False
+        self.floppy.update()
+        if self.floppy.last_scan_valid:
+            self._initial_disk_notification_pending = False
+            if self.floppy.inserted:
+                self._silent_initial_disk_load = True
+                self.state.floppy_init = True
         #self.state.screen = Screens.EXPLORER # DEBUG ONLY
 
     def input_target(self):
@@ -307,7 +315,12 @@ class ExplorerController(TerminalController):
                 self._initial_disk_notification_pending = False
                 self._silent_initial_disk_load = True
                 self.state.floppy_init = True
-            elif event in ("unchanged", "removed"):
+            elif event == "unchanged" and self.floppy.last_scan_valid:
+                self._initial_disk_notification_pending = False
+                if self.floppy.inserted:
+                    self._silent_initial_disk_load = True
+                    self.state.floppy_init = True
+            elif event == "removed":
                 self._initial_disk_notification_pending = False
 
         if event == "inserted":

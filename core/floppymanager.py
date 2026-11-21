@@ -9,6 +9,12 @@ class FloppyManager:
         self._mountpoint = None
         self._missed_scans = 0
         self._removal_scan_threshold = 3
+        self._last_scan_valid = False
+
+    @property
+    def last_scan_valid(self):
+        """Whether the most recent device scan returned usable lsblk data."""
+        return self._last_scan_valid
 
     @property
     def inserted(self):
@@ -26,8 +32,11 @@ class FloppyManager:
         data = self._run_lsblk()
 
         if data is None:
+            self._last_scan_valid = False
             # A transient command failure is not evidence that the disk was removed.
             return None
+
+        self._last_scan_valid = True
 
         floppy = self._find_floppy(data)
 
