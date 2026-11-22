@@ -1,5 +1,6 @@
 import curses
 from core import *
+from core.color_config import load_color_pairs
 from controllers import *
 from models import *
 from states.state import *
@@ -9,8 +10,9 @@ from controllers.menu_controller import MenuController
 
 def init_colors():
     curses.start_color()
-    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK) # Default
-    curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_WHITE) # Selected
+    pairs = load_color_pairs()
+    curses.init_pair(Colors.DEFAULT, *pairs["default"])
+    curses.init_pair(Colors.SELECTED, *pairs["selected"])
 
 def init_menu(height, width, terminals, stdscr):
     """Show the main menu through its dedicated controller and view."""
@@ -32,6 +34,9 @@ def main(stdscr):
     stdscr.keypad(True)
     stdscr.timeout(300)
     init_colors()
+    stdscr.bkgd(" ", curses.color_pair(Colors.DEFAULT))
+    stdscr.erase()
+    stdscr.refresh()
 
     loader = JsonLoader(Others.DATA_PATH)
     terminals = loader.load_all_terminals()

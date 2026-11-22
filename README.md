@@ -48,6 +48,19 @@ TermLink opens a menu of the terminals found in the `data` folder. Use the **Up*
 - **Load from Disk:** On Linux, this can open a complete terminal saved on a removable USB drive. Press **Esc** to return to the menu.
 - **Leave:** Closes TermLink.
 
+## Configure terminal colors
+
+Color settings are optional. Create a `config.json` next to the app (or in the project folder when running from source) to choose the foreground and background colors. Selected elements automatically reverse those colors, including their tile frames. If the file or a color value is missing or invalid, TermLink uses its existing white-on-black colors for that value.
+
+```json
+{
+  "foreground": "green",
+  "background": "black"
+}
+```
+
+Supported color names are case-insensitive curses names: `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, and `white`.
+
 You can try the included examples: `data/example.json` is an Explorer terminal and `data/example_chat.json` is a Chat terminal. The Chat example needs a compatible AI service and your own settings before it can connect.
 
 ## Build a terminal JSON file

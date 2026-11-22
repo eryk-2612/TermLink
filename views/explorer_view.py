@@ -189,7 +189,9 @@ class ExplorerView(TerminalView):
                 separator = " / "
                 separator = separator[:max_x - x]
                 if separator:
-                    self._header.write_simple(separator, y=0, x=x, color=Colors.SELECTED)
+                    self._header.write_simple(
+                        separator, y=0, x=x, color=Colors.SELECTED, bold=True
+                    )
                     x += len(separator)
             if x >= max_x:
                 break
@@ -321,7 +323,7 @@ class ExplorerView(TerminalView):
             return
 
         win.background = bgcolor
-        win.draw_box()
+        win.draw_box(bgcolor)
         win.clear_line(1, 1, max(0, win.width - 2))
         visible_title = title.upper()[:max(0, win.width - 3)]
         win.write_simple(visible_title, y=1, x=2, color=txtcolor, bold=bold)
@@ -457,7 +459,7 @@ class ExplorerView(TerminalView):
             return
 
         win.background = bgcolor
-        win.draw_box()
+        win.draw_box(bgcolor)
         win.clear_line(1, 1, max(0, win.width - 2))
         visible_title = title.upper()[:max(0, win.width - 3)]
         win.write_simple(visible_title, y=1, x=2, color=txtcolor, bold=bold)
@@ -548,8 +550,8 @@ class ExplorerView(TerminalView):
 
         self._switch_left.background = color_l
         self._switch_right.background = color_r
-        self._switch_left.draw_box()
-        self._switch_right.draw_box()
+        self._switch_left.draw_box(color_l)
+        self._switch_right.draw_box(color_r)
 
         x_l = max(1, (box_width - len(title_l)) // 2)
         x_r = max(1, (box_width - len(title_r)) // 2)
@@ -615,7 +617,7 @@ class ExplorerView(TerminalView):
             self._button = Window(box_height, box_width, y, x, parent_window=parent)
 
         self._button.background = color
-        self._button.draw_box()
+        self._button.draw_box(color)
 
         visible_label = label[:max(0, box_width - 2)]
         x_l = max(1, 1 + (box_width - 2 - len(visible_label)) // 2)

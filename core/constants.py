@@ -20,6 +20,7 @@ _APP_ROOT = next(
 
 class Others:
     DATA_PATH = str(_APP_ROOT / "data") + "/"
+    CONFIG_PATH = _APP_ROOT / "config.json"
     TIMEOUT = 300
     SCREEN_PADDING = 1
     SCROLLBAR_PADDING = 2
@@ -33,6 +34,11 @@ class Others:
 class Colors:
     DEFAULT     = 1
     SELECTED    = 2
+    # curses color constants used when no optional config.json is present.
+    DEFAULT_FOREGROUND = "white"
+    DEFAULT_BACKGROUND = "black"
+    SELECTED_FOREGROUND = "black"
+    SELECTED_BACKGROUND = "white"
 
 class TermTypes:
     EXPLORER    = "explorer"

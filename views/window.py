@@ -21,6 +21,9 @@ class Window:
         self.win.timeout(timeout)
         self.win.keypad(True)
         self._win_height, self._win_width = self.win.getmaxyx()
+        # Every window, including full-screen parents and child windows, must
+        # paint its blank cells with the configured terminal background.
+        self.background = Colors.DEFAULT
 
     @property
     def log(self):
@@ -62,8 +65,10 @@ class Window:
     def start_y(self, value):
         self._start_y = value
 
-    def draw_box(self):
+    def draw_box(self, color=Colors.DEFAULT):
+        self.win.attron(curses.color_pair(color))
         self.win.box()
+        self.win.attroff(curses.color_pair(color))
         self.boxed = True
 
     @property
